@@ -1,0 +1,32 @@
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executable files.
+*.exe
+*.out
+*.app
+Natural GM
+
+# The makefile; qmake should generate it
+Makefile
+makefile
+
+# Dropbox files.
+.dropbox
+
+# The user files (which are user specific)
+*.pro.user
+*.pro.user.*
+
+# The build directory
+build*

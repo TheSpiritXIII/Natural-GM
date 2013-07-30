@@ -28,5 +28,5 @@ makefile
 *.pro.user
 *.pro.user.*
 
-# The build directory
+# The build directories
 build*

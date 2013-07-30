@@ -21,18 +21,22 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
+#pragma once
 #ifndef _NGM_RESOURCE__HPP
 #define _NGM_RESOURCE__HPP
 #include "Global.hpp"
 #include <QString>
 #include <string>
 #include <vector>
+#include <QByteArray>
+#include "Type.hpp"
 
 namespace NGM
 {
 	namespace Resource
 	{
-		namespace Type
+		//class Type;
+		namespace Types
 		{
 			using std::string;
 
@@ -86,21 +90,30 @@ namespace NGM
 				IsLoading	=	0b00001000,
 				HasError	=	0b00010000,
 				Reserved	=	0b00100000,
-				Bit1		=	0b01000000,
+				IsFilename	=	0b01000000,
 				Bit2		=	0b10000000
 			};
 
 			/*! Contains the status of the resource (eg. loaded or edited). */
-			unsigned char status;
+			uint8_t status;
 
 			/*! Contains the type identifier of the resource. */
-			const std::string type;
+			Type *type;
 
 			/*! Stores all of the cached resource data. */
-			std::vector<uint8_t> data;
+			QByteArray data;
+
+			/*! Stores the file location of the resource, if there is one. */
+			QString location;
+
+			/*! Returns an icon for this resource. */
+			virtual QIcon getIcon() { return type->icon; }
 
 			/*! You must set type identifier to a resource. */
-			Base(const std::string type, std::vector<uint8_t> data) : status(0), type(type), data(data) {}
+			Resource(Type *type, QByteArray data, QString location, uint8_t status = 0) :
+				status(status), type(type), data(data), location(location) {}
+
+			~Resource() {}
 		};
 	}
 }

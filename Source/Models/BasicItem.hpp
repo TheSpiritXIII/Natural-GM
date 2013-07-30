@@ -34,7 +34,6 @@ namespace NGM
 {
 	namespace Model
 	{
-		class ResourceItem;
 		class BasicModel;
 
 		class BasicItem
@@ -86,8 +85,8 @@ namespace NGM
 			/*! Inserts multiple children to the indicated row. */
 			void insert(std::vector<BasicItem*> items, int row);
 
-			/*! @return A safe cast to a resource item. */
-			virtual ResourceItem *toResourceItem();
+			/*! Sets the model. Only works if the item is not already in one. */
+			void setModel(BasicModel *model);
 
 		private:
 
@@ -102,8 +101,6 @@ namespace NGM
 
 			/*! Stores the string name of this item. */
 			QVariant _data;
-
-			friend class NGM::Model::BasicModel;
 		};
 	}
 }

@@ -29,7 +29,10 @@ namespace NGM
 	namespace Model
 	{
 		BasicModel::BasicModel(const QString &data, QObject *parent) :
-			QAbstractItemModel(parent) {_root = new BasicItem(data); _root->_model = this; _root->_parent = NULL;}
+			QAbstractItemModel(parent), _root(new BasicItem(data))
+		{
+			_root->setModel(this);
+		}
 
 		BasicModel::~BasicModel()
 		{
@@ -202,6 +205,16 @@ namespace NGM
 		void BasicModel::insert(BasicItem *item, int row)
 		{
 			_root->insert(item, row);
+		}
+
+		void BasicModel::insert(std::vector<BasicItem *> &items, int row)
+		{
+			_root->insert(items, row);
+		}
+
+		void BasicModel::remove(int row, int count)
+		{
+			_root->remove(row, count);
 		}
 
 		void BasicModel::beginInsert(QModelIndex parent, int first, int last)

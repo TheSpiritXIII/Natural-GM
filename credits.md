@@ -4,7 +4,6 @@ Natural GM Credits
 Main Team
 ---------
  * Daniel Hrabovcak
- * Robert B. Colton
  
 Libraries
 ---------

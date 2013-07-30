@@ -30,12 +30,15 @@
 
 #include <QTreeView>
 #include <QPushButton>
-#include "BasicItem.hpp"
-#include "BasicModel.hpp"
+#include "ResourceBaseItem.hpp"
+#include "ResourceItemModel.hpp"
 #include <QVBoxLayout>
-#include <QDebug>
 #include <QStandardItem>
 #include <QStandardItemModel>
+
+#include "Resources/Project.hpp"
+#include "Resources/Resource.hpp"
+#include "ResourceSplitter.hpp"
 
 namespace NGM
 {
@@ -48,6 +51,8 @@ namespace NGM
 
 	class MainWindow : public QMainWindow
 	{
+		Q_OBJECT
+
 	public:
 
 		/*! Creates the main window. */
@@ -62,7 +67,7 @@ namespace NGM
 		/*! A list of default dock types. */
 		enum Docks
 		{
-			DockHierarchy,
+			DockHeirarchy,
 			DockProperties,
 			DockMessages,
 			DockOutput,
@@ -72,6 +77,8 @@ namespace NGM
 
 		/*! Updates the window title. */
 		void updateTitle();
+
+		void heirarchyOpenProject(Model::ResourceProjectItem *item);
 
 	protected:
 
@@ -86,8 +93,17 @@ namespace NGM
 
 		friend class WindowManager;
 
-		Model::BasicItem *item;
+		Model::ResourceBaseItem *item;
 		QStandardItem *item2;
+
+		Widget::ResourceSplitter *resourceSplitter;
+		QTreeView *heirarchyView;
+
+	private slots:
+
+		void heirarchyOpenItem(const QModelIndex & index);
+
+		void heirarchyVisibilityChanged(bool visible);
 	};
 }
 

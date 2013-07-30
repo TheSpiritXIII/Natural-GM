@@ -1,50 +1,178 @@
-/*#pragma once
+/**
+ *  @file ProjectDialog.hpp
+ *  @section License
+ *
+ *      Copyright (C) 2013 Daniel Hrabovcak
+ *
+ *      This file is a part of the Natural GM IDE.
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+#pragma once
 #ifndef _NGM_PROJECTDIALOG__HPP
 #define _NGM_PROJECTDIALOG__HPP
-#include "Project.h"
 #include <QLabel>
 #include <QDialog>
-#include <QLayout>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QListWidget>
 #include <QTreeWidget>
-#include <QPushButton>
 #include <QTreeWidgetItem>
-#include "Settings.h"
-#include "BasicModel.h"
+#include "ProjectManager.hpp"
+#include "Project.hpp"
 #include <vector>
+#include <map>
 
 namespace NGM
 {
-	namespace Dialogs
+	namespace Manager
 	{
+		class WindowManager;
+		class ProjectManager;
+	}
+	namespace Dialog
+	{
+		/**************************************************//*!
+		*	@brief	A dialog that shows a list of registered
+		*			project types and that lets the user pick
+		*			one of those types.
+		******************************************************/
 		class ProjectDialog : public QDialog
 		{
 			Q_OBJECT
 
 		public:
 
-			ProjectDialog(std::vector<Projects*> &projects, unsigned int amount, Settings *settings, Model::BasicModel *model, QWidget *parent = 0);
+			/**************************************************//*!
+			*	@brief	Creates the dialog.
+			******************************************************/
+			ProjectDialog(Manager::ProjectManager *projectManager,
+				Manager::WindowManager *windowManager, QWidget *parent = 0);
+
+			/**************************************************//*!
+			*	@brief	Removes all associated widget.
+			******************************************************/
 			~ProjectDialog();
 
 		private slots:
-			void cancel();
-			void browse();
-			void choose();
-			void updateList(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-			void updateDescription(int row);
+
+			/**************************************************//*!
+			*	@brief	Closes the dialog without any further actions.
+			******************************************************/
+			void cancelRequest();
+
+			/**************************************************//*!
+			*	@brief	Open a browse dialog for finding directories.
+			******************************************************/
+			void browseRequest();
+
+			/**************************************************//*!
+			*	@brief	Exits and creates the chosen project type.
+			******************************************************/
+			void chooseRequest();
+
+			/**************************************************//*!
+			*	@brief	Updates the projects list based on the
+			*			current category item.
+			******************************************************/
+			void updateList(QTreeWidgetItem *current, QTreeWidgetItem *);
+
+			/**************************************************//*!
+			*	@brief	Updates the description to the project on
+			*			the indicated item row.
+			******************************************************/
+			void updateDescription(QString text);
 
 		private:
-			Settings *settings;
-			unsigned char amount, current;
-			QLabel *description;
+
+			/**************************************************//*!
+			*	@brief	Shows projects in a list.
+			******************************************************/
 			QListWidget *projectList;
+
+			/**************************************************//*!
+			*	@brief	Shows a project category tree.
+			******************************************************/
 			QTreeWidget *projectTree;
-			QLineEdit *directoryEdit, *projectEdit;
-			NGM::Resource::Project projects[64];
-			QCheckBox *dirUseCheck, *dirAddCheck, *dirDefaultCheck;
-			Model::BasicModel *model;
+
+			/**************************************************//*!
+			*	@brief	Contains all projects in the current
+			*			selected category.
+			******************************************************/
+			std::vector<Resource::Project*> projects;
+
+			/**************************************************//*!
+			*	@brief	Contains the main user settings.
+			******************************************************/
+			Manager::WindowManager *windowManager;
+
+			/**************************************************//*!
+			*	@brief	Contains all registered projects types.
+			******************************************************/
+			Manager::ProjectManager *projectManager;
+
+			/**************************************************//*!
+			*	@brief	Shows the description of the currently
+			*			selected project type.
+			******************************************************/
+			QLabel *description;
+
+			/**************************************************//*!
+			*	@brief	Shows the location of the currently
+			*			selected directory.
+			******************************************************/
+			QLineEdit *directoryEdit;
+
+			/**************************************************//*!
+			*	@brief	An editable widget for naming projects.
+			******************************************************/
+			QLineEdit *projectEdit;
+
+			/**************************************************//*!
+			*	@brief	Decides whether or not to add a seperate
+			*			directory for the project type.
+			******************************************************/
+			QCheckBox *dirAddCheck;
+
+			/**************************************************//*!
+			*	@brief	Decides whether the currently selected
+			*			project type is default.
+			******************************************************/
+			QCheckBox *dirDefaultCheck;
+
+			/**************************************************//*!
+			*	@brief	Decides whether the currently selected
+			*			directory is used as the default.
+			******************************************************/
+			QCheckBox *dirUseCheck;
+
+			/**************************************************//*!
+			*	@brief	Decides whether to create a temporary
+			*			project or not.
+			******************************************************/
+			QCheckBox *dirTempCheck;
+
+			/**************************************************//*!
+			*	@brief	A button for browsing directories.
+			******************************************************/
+			QPushButton *browseButton;
+
+			/**************************************************//*!
+			*	@brief	A cache for storing the project types in
+			*			the currently selected category.
+			******************************************************/
+			std::map<QString, Resource::Project*> cache;
 		};
 	}
 }

@@ -1,6 +1,5 @@
 /**
  *  @file BasicModel.hpp
- *  @brief Declares a basic model class that only stores basic items.
  *
  *  @section License
  *
@@ -25,90 +24,135 @@
 #ifndef _NGM_BASICMODEL__HPP
 #define _NGM_BASICMODEL__HPP
 #include <QAbstractItemModel>
-#include <vector>
+#include "BasicItem.hpp"
 
 namespace NGM
 {
 	namespace Model
 	{
-		class BasicItem;
-
 		class BasicModel : public QAbstractItemModel
 		{
 			Q_OBJECT
 
 		public:
 
-			/*! The constructor is required to set the name of the root object. */
+			/**************************************************//*!
+			 *	@brief Initializers the model with a root item.
+			******************************************************/
 			explicit BasicModel(const QString &data = 0, QObject *parent = 0);
 
-			/*! You must delete the root object (which deletes everything else). */
+			/**************************************************//*!
+			 *	@brief Destroys the root item and its children.
+			******************************************************/
 			virtual ~BasicModel();
 
-			/*! Required to access data. The role is ignored, however. */
-			QVariant data(const QModelIndex &index, int role) const;
+			/**************************************************//*!
+			 *	@return The item data. (Required)
+			******************************************************/
+			virtual QVariant data(const QModelIndex &index, int role) const;
 
-			/*! Required to edit and other stuff on tree view items. */
-			Qt::ItemFlags flags(const QModelIndex &index) const;
+			/**************************************************//*!
+			 *	@return The item flags. (Required)
+			******************************************************/
+			virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-			/*! Required to get the name of a section. This is always the same (no sections). */
-			QVariant headerData(Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+			/**************************************************//*!
+			 *	@return The header data. (Required)
+			******************************************************/
+			virtual QVariant headerData(Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-			/*! Required to get the index of an item. Columns are not used. */
-			QModelIndex index(int row,int column, const QModelIndex &parent = QModelIndex()) const;
+			/**************************************************//*!
+			 *	@return The item index of the indicated row and
+			 *		column. (Required)
+			******************************************************/
+			virtual QModelIndex index(int row,int column, const QModelIndex &parent = QModelIndex()) const;
 
-			/*! Required. Get the parent of an item in the tree view. */
-			QModelIndex parent(const QModelIndex &index) const;
+			/**************************************************//*!
+			 *	@return The parent of the indicated index. (Required)
+			******************************************************/
+			virtual QModelIndex parent(const QModelIndex &index) const;
 
-			/*! Required to view items in the tree view. */
-			int rowCount(const QModelIndex &parent = QModelIndex()) const;
+			/**************************************************//*!
+			 *	@return The row count of the indicated index.
+			******************************************************/
+			virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-			/*! Required to view the main column. The count is always 1. */
-			int columnCount(const QModelIndex &parent = QModelIndex()) const;
+			/**************************************************//*!
+			 *	@return Always 1. (Required)
+			******************************************************/
+			virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-			/*! A QAbstractItemModel inherited function to support moving items.*/
-			bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild);
+			/**************************************************//*!
+			 *	@brief Moves the indicated rows.
+			******************************************************/
+			virtual bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild);
 
-			/*! A QAbstractItemModel inherited function to support removing items. */
-			bool removeRows( int row, int count, const QModelIndex & parent = QModelIndex());
+			/**************************************************//*!
+			 *	@brief Removes the indicated rows.
+			******************************************************/
+			virtual bool removeRows( int row, int count, const QModelIndex & parent = QModelIndex());
 
-			/*! A QAbstractItemModel inherited function to support inserting items. */
-			bool insertRows(int row, int count, const QModelIndex &parent);
+			/**************************************************//*!
+			 *	@brief Inserts into the indicated rows.
+			******************************************************/
+			virtual bool insertRows(int row, int count, const QModelIndex &parent);
 
-			/*! Appends an item to the root as a child. This is fast. */
-			void append(BasicItem *item);
+			/**************************************************//*!
+			 *	@brief Appends an item into the root.
+			******************************************************/
+			virtual void append(BasicItem *item);
 
-			/*! Appends multiple children at once to the root. This is fast. */
-			void append(std::vector<BasicItem*> &items);
+			/**************************************************//*!
+			 *	@brief Appends multiple items into the root.
+			******************************************************/
+			virtual void append(std::vector<BasicItem*> &items);
 
-			/*! Removes the indicated number of children from the back of the root. */
-			void pop(int count  = 1);
+			/**************************************************//*!
+			 *	@brief Removes the indicated count of items from
+			 *		the back of the root.
+			******************************************************/
+			virtual void pop(int count  = 1);
 
-			/*! Removes the children at the indicated rows from the root. */
-			void remove(int row, int count = 1);
+			/**************************************************//*!
+			 *	@brief Removes the indicated rows from the root.
+			******************************************************/
+			virtual void remove(int row, int count = 1);
 
-			/*! Inserts a children at the indicated row of the root. */
-			void insert(BasicItem *item, int row);
+			/**************************************************//*!
+			 *	@brief Inserts an item into the indicated row.
+			******************************************************/
+			virtual void insert(BasicItem *item, int row);
 
-			/*! Inserts multiple children to the indicated row of the root. */
-			void insert(std::vector<BasicItem*> &items, int row);
+			/**************************************************//*!
+			 *	@brief Inserts multiple items into the indicated row.
+			******************************************************/
+			virtual void insert(std::vector<BasicItem*> &items, int row);
 
-			/*! Items need to call this before inserting to update the view. */
+			/**************************************************//*!
+			 *	@brief Updates the view. Items must use this when inserting.
+			******************************************************/
 			void beginInsert(QModelIndex parent, int first, int last);
 
-			/*! Items need to call this after inserting to update the view. */
+			/**************************************************//*!
+			 *	@brief Updates the view. Items must use this when inserting.
+			******************************************************/
 			void endInsert();
 
-			/*! Items need to call this before removing to update the view. */
+			/**************************************************//*!
+			 *	@brief Updates the view. Items must use this when removing.
+			******************************************************/
 			void beginRemove(QModelIndex parent, int first, int last);
 
-			/*! Items need to call this after removing to update the view. */
+			/**************************************************//*!
+			 *	@brief Updates the view. Items must use this when removing.
+			******************************************************/
 			void endRemove();
-
 
 		private:
 
-			/*! The internal root item. */
+			/**************************************************//*!
+			 *	@brief The internal root item.
+			******************************************************/
 			BasicItem *_root;
 
 		};

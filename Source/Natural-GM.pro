@@ -13,36 +13,54 @@ CONFIG		+=	c++11
 #----------------------------------------------
 DEPENDPATH	+=	Windows \
 	Classes/ErrorLogger \
-	Managers/WindowManager \
-	Managers/ResourceManager \
-	Managers/ActionManager \
-	Models
+	Managers \
+	Models \
+	Dialogs \
+	Widgets \
+	Resources \
+	Models/ResourceItemModel \
+	Resources/Serializers
 INCLUDEPATH	+=	Windows \
 	Classes/ErrorLogger \
-	Managers/WindowManager \
-	Managers/ActionManager \
-	Models
+	Managers \
+	Models \
+	Dialogs \
+	Widgets \
+	Resources \
+	Models/ResourceItemModel \
+	Resources\Serializers
 #----------------------------------------------
 #   Header files.
 #----------------------------------------------
 HEADERS		+=	Windows/MainWindow.hpp \
 	Classes/ErrorLogger/ErrorLogger.hpp \
-	Managers/WindowManager/WindowManager.hpp \
-	Managers/ResourceManager/ResourceManager.hpp \
-	Managers/IconManager/IconManager.hpp \
-	Managers/ActionManager/ActionManager.hpp \
+	Managers/WindowManager.hpp \
+	Managers/ResourceManager.hpp \
+	Managers/IconManager.hpp \
+	Managers/ActionManager.hpp \
 	Models/BasicItem.hpp \
 	Models/ColumnItem.hpp \
 	Models/BasicModel.hpp \
 	Models/ColumnModel.hpp \
-	Classes/TinyXML-2/TinyXML-2.hpp \
-	Models/ResourceItem.hpp \
-	Models/ResourceModel.hpp \
 	Resources/Resource.hpp \
 	Dialogs/ProjectDialog.hpp \
-    Global.hpp \
-    Managers/ProjectManager/ProjectManager.hpp \
-    Resources/Project.hpp
+	Global.hpp \
+	Managers/ProjectManager.hpp \
+	Resources/Project.hpp \
+	Resources/Serializer.hpp \
+	Resources/Serializers/TextSerializer.hpp \
+	Resources/Widget.hpp \
+	Resources/Type.hpp \
+	Widgets/ResourceTab.hpp \
+	Widgets/ResourceSplitter.hpp \
+	Resources/Widgets/TextWidget.hpp \
+	Resources/Types/TextType.hpp \
+	Models/ResourceItemModel/ResourceBaseItem.hpp \
+	Models/ResourceItemModel/ResourceContentItem.hpp \
+	Models/ResourceItemModel/ResourceGroupItem.hpp \
+	Models/ResourceItemModel/ResourceProjectItem.hpp \
+	Models/ResourceItemModel/ResourceItemModel.hpp \
+	Classes/RapidXML/RapidXML.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -50,18 +68,26 @@ SOURCES		+= \
 	Main.cpp \
 	Classes/ErrorLogger/ErrorLogger.cpp \
 	Windows/MainWindow.cpp \
-	Managers/WindowManager/WindowManager.cpp \
-	Managers/IconManager/IconManager.cpp \
+	Managers/WindowManager.cpp \
+	Managers/IconManager.cpp \
 	Models/BasicItem.cpp \
-	Classes/TinyXML-2/TinyXML-2.cpp \
-	Models/ResourceItem.cpp \
 	Models/BasicModel.cpp \
-	Dialogs/ProjectDialog.cpp
+	Dialogs/ProjectDialog.cpp \
+	Managers/ActionManager.cpp \
+	Managers/ProjectManager.cpp \
+	Widgets/ResourceSplitter.cpp \
+	Widgets/ResourceTab.cpp \
+	Resources/Serializers/TextSerializer.cpp \
+	Resources/Widgets/TextWidget.cpp \
+	Models/ResourceItemModel/ResourceBaseItem.cpp \
+	Models/ResourceItemModel/ResourceGroupItem.cpp \
+	Models/ResourceItemModel/ResourceItemModel.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------
 #win32:RC_FILE = resource.rc
+TRANSLATIONS	=	untranslated.ts
 #----------------------------------------------
 #   Static building.
 #----------------------------------------------
-CONFIG += static
+#CONFIG += static

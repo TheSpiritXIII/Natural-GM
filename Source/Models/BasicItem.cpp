@@ -23,13 +23,14 @@
 **/
 #include "BasicItem.hpp"
 #include "BasicModel.hpp"
-#include "ResourceItem.hpp"
+#include "Global.hpp"
+#include <QDebug>
 
 namespace NGM
 {
 	namespace Model
 	{
-		BasicItem::BasicItem(const QString &data) :  _parent(NULL), _data(data) {}
+		BasicItem::BasicItem(const QString &data) :  _parent(nullptr), _data(data), _model(nullptr) {}
 
 		BasicItem::~BasicItem()
 		{
@@ -86,6 +87,8 @@ namespace NGM
 
 		void BasicItem::append(BasicItem *item)
 		{
+			qDebug() << _children.size();
+			qDebug() << _model;
 			_model->beginInsert(index(), _children.size(), _children.size());
 			item->_parent = this;
 			item->_model = _model;
@@ -156,9 +159,18 @@ namespace NGM
 			_model->endInsert();
 		}
 
-		ResourceItem *BasicItem::toResourceItem()
+		void BasicItem::setModel(BasicModel *model)
 		{
-			return 0;
+			if (_model == nullptr)
+			{
+				_model = model;
+			}
+#ifdef NGM_DEBUG
+			else
+			{
+				qDebug() << "Error: BasicItem model is already set.";
+			}
+#endif
 		}
 	}
 }

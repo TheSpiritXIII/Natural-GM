@@ -1,8 +1,6 @@
 /**
  *  @file ErrorLogger.hpp
- *  @brief Declares a Qt based error logging function.
- *
- *  @section License
+ *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
@@ -25,14 +23,17 @@
 #ifndef _NGM_ERRORLOGGER__HPP
 #define _NGM_ERRORLOGGER__HPP
 #include <QString>
-//#include <QMessageLogContext>
 
 namespace NGM
 {
 	namespace Debug
 	{
+		/**************************************************//*!
+		*	@brief	Handles a message handler function that
+		*			logs to a text file for Qt's error stream.
+		******************************************************/
 		void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 	}
 }
 
-#endif // ERRORLOGGER_HPP
+#endif // _NGM_ERRORLOGGER__HPP

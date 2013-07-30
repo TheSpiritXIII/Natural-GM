@@ -47,6 +47,10 @@ namespace NGM
 	#else
 		#define NGM_THREADS
 	#endif
-#endifJ
+#endif
+
+// Ensure localization.
+//#define QT_NO_CAST_TO_ASCII
+//#define QT_NO_CAST_FROM_ASCII
 
 #endif // _NGM_GLOBAL__HPP

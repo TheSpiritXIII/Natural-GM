@@ -23,6 +23,15 @@
 **/
 #include "MainWindow.hpp"
 #include "WindowManager.hpp"
+#include "ResourceSplitter.hpp"
+#include <QMenuBar>
+#include <QDebug>
+#include <QStandardItem>
+#include <QStandardItemModel>
+#include "Models/BasicModel.hpp"
+#include "Models/BasicItem.hpp"
+#include "ResourceProjectItem.hpp"
+#include "ResourceItemModel.hpp"
 
 const auto DockMovable = QDockWidget::DockWidgetMovable;
 const auto DockClosable = QDockWidget::DockWidgetClosable;
@@ -32,14 +41,15 @@ namespace NGM
 	MainWindow::MainWindow(Manager::WindowManager *data, QWidget *parent) :
 		QMainWindow(parent), data(data), active(false)
 	{
-		/*docks[DockHierarchy] = new QDockWidget(tr("Heirarchy"), this);
-		docks[DockHierarchy]->setFeatures(DockFeatures);
-		addDockWidget(Qt::LeftDockWidgetArea, docks[DockHierarchy]);
+		setMinimumSize(640, 480);
+		docks[DockHeirarchy] = new QDockWidget(tr("Heirarchy"), this);
+		docks[DockHeirarchy]->setFeatures(DockFeatures);
+		addDockWidget(Qt::LeftDockWidgetArea, docks[DockHeirarchy]);
 
 		docks[DockProperties] = new QDockWidget(tr("Properties"), this);
 		docks[DockProperties]->setFeatures(DockFeatures);
-		tabifyDockWidget(docks[DockHierarchy], docks[DockProperties]);
-		docks[DockHierarchy]->raise();
+		tabifyDockWidget(docks[DockHeirarchy], docks[DockProperties]);
+		docks[DockHeirarchy]->raise();
 
 		docks[DockActions] = new QDockWidget(tr("Actions"), this);
 		addDockWidget(Qt::RightDockWidgetArea, docks[DockActions]);
@@ -58,48 +68,19 @@ namespace NGM
 		tabifyDockWidget(docks[DockOutput], docks[DockMessages]);
 		docks[DockOutput]->raise();
 
-		docks[DockHierarchy]->close();
-		docks[DockProperties]->close();
-		docks[DockActions]->close();
-		docks[DockSearch]->close();
-		docks[DockOutput]->close();
-		docks[DockMessages]->close();*/
-
 		updateTitle();
 
-		QWidget *widget = new QWidget();
-		QVBoxLayout *layout = new QVBoxLayout(widget);
-		setCentralWidget(widget);
-		QTreeView *view = new QTreeView(this);
-		layout->addWidget(view);
-
-		QPushButton *button = new QPushButton("Yolo");
-		layout->addWidget(button);
-
-		data->hierarchy = new Model::BasicModel("name");
-		item = new Model::BasicItem("Test");
-		data->hierarchy->append(item);
-		Model::BasicItem *item3 = new Model::BasicItem("Test24");
-		data->hierarchy->append(item3);
-		item3->append(new Model::BasicItem("Test43"));
-
-		view->setModel(data->hierarchy);
-		view->setHeaderHidden(true);
-		view->setSelectionBehavior(QAbstractItemView::SelectItems);
-
-		QStandardItemModel *mod = new QStandardItemModel();
-		item2 = new QStandardItem("Hello");
-		mod->appendRow(item2);
-		//view->setModel(mod);
-
-		connect(button, &QPushButton::pressed, [this] ()
-		{
-			//this->item->append(new Model::BasicItem("Other!"));
-			this->item->append(new Model::BasicItem("Other!"));
-			this->item2->appendRow(new QStandardItem("Othero!"));
-		});
-
 		active = true;
+
+		resourceSplitter = new Widget::ResourceSplitter(this);
+		setCentralWidget(resourceSplitter);
+
+		connect(docks[DockHeirarchy], &QDockWidget::visibilityChanged, this, &MainWindow::heirarchyVisibilityChanged);
+
+		QMenuBar *menuBar = new QMenuBar(this);
+		QMenu *menu = new QMenu("Help", this);
+		menuBar->addMenu(menu);
+		setMenuBar(menuBar);
 	}
 
 	void MainWindow::updateTitle()
@@ -113,5 +94,40 @@ namespace NGM
 		{
 			setWindowTitle("Natural GM");
 		}
+	}
+
+	void MainWindow::heirarchyOpenItem(const QModelIndex &index)
+	{
+		Model::ResourceBaseItem *item = reinterpret_cast<Model::ResourceBaseItem*>(index.internalPointer());
+		resourceSplitter->resourceOpen(item);
+	}
+
+	void MainWindow::heirarchyVisibilityChanged(bool visible)
+	{
+		if (visible)
+		{
+			qDebug() << "Visible.";
+			heirarchyView = new QTreeView(this);
+			docks[DockHeirarchy]->setWidget(heirarchyView);
+			heirarchyView->setModel(data->hierarchy);
+			heirarchyView->setHeaderHidden(true);
+			heirarchyView->setSelectionBehavior(QAbstractItemView::SelectItems);
+			heirarchyView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+			heirarchyView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+			connect(heirarchyView, &QTreeView::doubleClicked, this, &MainWindow::heirarchyOpenItem);
+		}
+		else
+		{
+			if (heirarchyView)
+			{
+				heirarchyView->deleteLater();
+				heirarchyView = NULL;
+			}
+		}
+	}
+
+	void MainWindow::heirarchyOpenProject(Model::ResourceProjectItem *item)
+	{
+		resourceSplitter->resourceOpen(item);
 	}
 }

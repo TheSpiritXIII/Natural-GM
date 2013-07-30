@@ -1,7 +1,5 @@
 /**
  *  @file ErrorLogger.cpp
- *  @brief Defines a Qt based error logging function.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -36,32 +34,32 @@ namespace NGM
 			switch (type)
 			{
 			case QtDebugMsg:
-				txt = "Debug: " + msg + QIODevice::Text +
-				"At File: " + context.file + QIODevice::Text +
-				"In Function: " + context.function + QIODevice::Text +
-				"At Line Number: " + context.line + QIODevice::Text;
+				txt += "Debug: " + msg +
+				"\n\tAt File: " + context.file +
+				"\n\tIn Function: " + context.function +
+				"\n\tAt Line Number: " + context.line + "\n";
 				break;
 			case QtWarningMsg:
-				txt = "Warning: " + msg + QIODevice::Text +
-				"At File: " + context.file + QIODevice::Text +
-				"In Function: " + context.function + QIODevice::Text +
-				"At Line Number: " + context.line + QIODevice::Text;
+				txt += "Warning: " + msg +
+				"\n\tAt File: " + context.file +
+				"\n\tIn Function: " + context.function +
+				"\n\tAt Line Number: " + context.line + "\n";
 				break;
 			case QtCriticalMsg:
-				txt = "Critical: " + msg + QIODevice::Text +
-				"At File: " + context.file + QIODevice::Text +
-				"In Function: " + context.function + QIODevice::Text +
-				"At Line Number: " + context.line + QIODevice::Text;
+				txt += "Critical: " + msg +
+				"\n\tAt File: " + context.file +
+				"\n\tIn Function: " + context.function +
+				"\n\tAt Line Number: " + context.line + "\n";
 				break;
 			case QtFatalMsg:
-				txt = "Fatal: " + msg + QIODevice::Text +
-				"At File: " + context.file + QIODevice::Text +
-				"In Function: " + context.function + QIODevice::Text +
-				"At Line Number: " + context.line + QIODevice::Text;
+				txt += "Fatal: " + msg +
+				"\n\tAt File: " + context.file +
+				"\n\tIn Function: " + context.function +
+				"\n\tAt Line Number: " + context.line + "\n";
 				abort();
 			}
 			QFile outFile("log.txt");
-			outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+			outFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 			QTextStream ts(&outFile);
 			ts << txt << endl;
 		}

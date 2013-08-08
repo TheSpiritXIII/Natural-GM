@@ -46,7 +46,7 @@ namespace NGM
 			Type *type;
 
 			/*! The name of the project type. */
-			QString name;
+			//QString name;
 
 			/*! The category of which the project belongs to. */
 			QString category;
@@ -58,9 +58,9 @@ namespace NGM
 			QStringList extensions;
 
 			/*! Creates the project. */
-			Project(Serializer *serializer, Type *type, QString name,
+			Project(Serializer *serializer, Type *type,
 					QString category, QString description, QStringList extensions) :
-				serializer(serializer), type(type), name(name), category(category),
+				serializer(serializer), type(type), category(category),
 				description(description), extensions(extensions) {}
 		};
 

@@ -24,7 +24,6 @@
 #include "MainWindow.hpp"
 #include "WindowManager.hpp"
 #include "ResourceSplitter.hpp"
-#include <QMenuBar>
 #include <QDebug>
 #include <QStandardItem>
 #include <QStandardItemModel>
@@ -68,6 +67,12 @@ namespace NGM
 		tabifyDockWidget(docks[DockOutput], docks[DockMessages]);
 		docks[DockOutput]->raise();
 
+		docks[DockActions]->hide();
+		docks[DockProperties]->hide();
+		docks[DockSearch]->hide();
+		docks[DockOutput]->hide();
+		docks[DockMessages]->hide();
+
 		updateTitle();
 
 		active = true;
@@ -76,11 +81,6 @@ namespace NGM
 		setCentralWidget(resourceSplitter);
 
 		connect(docks[DockHeirarchy], &QDockWidget::visibilityChanged, this, &MainWindow::heirarchyVisibilityChanged);
-
-		QMenuBar *menuBar = new QMenuBar(this);
-		QMenu *menu = new QMenu("Help", this);
-		menuBar->addMenu(menu);
-		setMenuBar(menuBar);
 	}
 
 	void MainWindow::updateTitle()

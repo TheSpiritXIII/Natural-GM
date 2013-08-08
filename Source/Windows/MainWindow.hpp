@@ -99,6 +99,8 @@ namespace NGM
 		Widget::ResourceSplitter *resourceSplitter;
 		QTreeView *heirarchyView;
 
+		friend class Manager::WindowManager;
+
 	private slots:
 
 		void heirarchyOpenItem(const QModelIndex & index);

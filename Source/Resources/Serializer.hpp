@@ -63,6 +63,7 @@ namespace NGM
 			/*! Reads a resource and inputs the data onto a widget. */
 			virtual void read(Widget *widget, Resource *resource) = 0;
 
+			virtual void structure(Model::ResourceItem *item) {}
 			/*! Writes a resource based on widget data. */
 			//void write(Widget *widget, Resource *resource);
 

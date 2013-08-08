@@ -1,7 +1,5 @@
 /**
- *  @file Main.cpp
- *  @brief Declares the main entry point.
- *
+ *  @file AboutDialog.hpp
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -21,32 +19,28 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#include "Global.hpp"
-#ifdef NGM_LOGGER
-#include "ErrorLogger.hpp"
-#endif
-#include "WindowManager.hpp"
+#pragma once
+#ifndef _NGM_ABOUTDIALOG__HPP
+#define _NGM_ABOUTDIALOG__HPP
+#include <QDialog>
 
-int main(int argc, char *argv[])
+namespace NGM
 {
-
-#ifdef NGM_LOGGER
-	qInstallMessageHandler(NGM::Debug::messageHandler);
-#endif
-
-	NGM::Manager::WindowManager app(argc, argv);
-	app.setApplicationName("Natural GM");
-
-#ifdef NGM_LOGGER
-	int r = app.exec();
-	if (QFile("log.txt").exists())
+	namespace Dialog
 	{
-		QMessageBox::critical(0, "Critical Errors Found!",
-		"Errors were found when running this program. Please report and send the log file "
-		"(log.txt) to the author. Delete the log file after you report it to remove this warning.");
+		/**************************************************//*!
+		*	@brief	Displays Natural GM's copyrights.
+		******************************************************/
+		class AboutDialog : public QDialog
+		{
+		public:
+
+			/**************************************************//*!
+			*	@brief	Creates the dialog with text.
+			******************************************************/
+			AboutDialog(QWidget *parent);
+		};
 	}
-	return r;
-#else
-	return app.exec();
-#endif
 }
+
+#endif // _NGM_ABOUTDIALOG__HPP

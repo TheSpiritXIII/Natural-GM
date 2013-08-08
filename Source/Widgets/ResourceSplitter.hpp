@@ -1,6 +1,5 @@
 /**
  *  @file ResourceSplitter.hpp
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -26,6 +25,7 @@
 #include <QSplitter>
 #include "ResourceTab.hpp"
 #include "ResourceContentItem.hpp"
+#include <list>
 
 namespace NGM
 {
@@ -33,46 +33,71 @@ namespace NGM
 	{
 		class ResourceSplitter : public QSplitter
 		{
+
 			Q_OBJECT
 
 		public:
 
+
+			enum Settings
+			{
+				Move		=	0x00000000,
+				Clone		=	0x00000001,
+				Next		=	0x00000000,
+				Prev		=	0x00000010
+			};
+
 			/**************************************************//*!
-			 *	@brief Creates an empty splitter.
+			 *	@brief	Creates an empty splitter.
 			******************************************************/
 			ResourceSplitter(QWidget *parent = NULL);
 
 			/**************************************************//*!
-			 *	@brief Opens the indicated resource.
-			 *	@param resource The resource to add.
-			 *	@param active True to add to the current tab, or
+			 *	@brief	Opens the indicated resource.
+			 *	@param	resource The resource to add.
+			 *	@param	active True to add to the current tab, or
 			 *	false to add as a new tab.
 			******************************************************/
 			void resourceOpen(Model::ResourceBaseItem *resource, bool active = true);
 
 			/**************************************************//*!
-			 *	@brief Returns the tab index to the indicated
-			 *	resource, if open, otherwise -1.
+			 *	@brief	Returns the tab index to the indicated
+			 *			resource, if open, otherwise -1.
 			******************************************************/
 			int resourceIsOpen(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief Closes the resource if it is open.
+			 *	@brief	Closes the resource if it is open.
 			******************************************************/
 			void resourceClose(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief Set the tab index to the indicated index.
-			 *	@see resourceIsOpen
+			 *	@brief	Set the tab index to the indicated index.
+			 *	@see	resourceIsOpen
 			******************************************************/
 			void resourceSwitchTo(int index);
+
+			/**************************************************//*!
+			 *	@brief	Adds a widget to the currently open tab.
+			******************************************************/
+			void movePage(ResourceSplitter *move, uint8_t settings);
+
+			/**************************************************//*!
+			 *	@brief	Requests the current widget to cut.
+			******************************************************/
+			void cut();
 
 		private:
 
 			/**************************************************//*!
-			 *	@brief Stores the current active resource tab.
+			 *	@brief	Stores the current active resource tab.
 			******************************************************/
 			ResourceTab *current;
+
+			/**************************************************//*!
+			 *	@brief	Stores all tab widgets for quick access.
+			******************************************************/
+			std::list<ResourceTab*> tabs;
 		};
 	}
 }

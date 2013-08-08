@@ -1,7 +1,4 @@
 /**
- *  @file ResourceManager.hpp
- *  @brief Declare a resource manager class.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -22,7 +19,26 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _NGM_RESOURCEMANAGER__HPP
-#define _NGM_RESOURCEMANAGER__HPP
+#ifndef _NGM_GMXSERIALIZER__HPP
+#define _NGM_GMXSERIALIZER__HPP
+#include "Resources/Serializer.hpp"
 
-#endif // _NGM_RESOURCEMANAGER__HPP
+namespace NGM
+{
+	namespace Resource
+	{
+		struct GMXSerializer : public Serializer
+		{
+		public:
+
+			//void read(Widget *widget, Resource *resource);
+
+			//void write(Widget *widget, Resource *resource);
+
+			void structure(Model::ResourceItem *item);
+
+		};
+	}
+}
+
+#endif // _NGM_GMXSERIALIZER__HPP

@@ -45,40 +45,54 @@ namespace NGM
 			******************************************************/
 			enum Actions
 			{
-				ActionNew,
-				ActionOpen,
-				ActionSave,
-				ActionSaveAs,
-				ActionSaveAll,
-				ActionClose,
-				ActionCloseAll,
-				ActionPrint,
-				ActionExit,
-				ActionUndo,
-				ActionRedo,
-				ActionCut,
-				ActionCopy,
-				ActionPaste,
-				ActionSelectAll,
-				ActionFindReplace,
-				ActionBuild,
-				ActionBuildAll,
-				ActionRebuild,
-				ActionRebuildAll,
-				ActionClean,
-				ActionCleanAll,
-				ActionRun,
-				ActionDebug,
-				ActionPause,
-				ActionStop,
-				ActionContinue,
-				ActionStepOver,
-				ActionStepInto,
-				ActionLayout,
-				ActionPreferences,
-				ActionHelp,
-				ActionManual,
-				ActionAbout
+				ActionNewProject	=	0,
+				ActionOpenProject	=	1,
+				ActionNewFile		=	2,
+				ActionOpenFile		=	3,
+				ActionSave			=	4,
+				ActionSaveAs		=	5,
+				ActionSaveAll		=	6,
+				ActionClose			=	7,
+				ActionCloseAll		=	8,
+				ActionPageSetup		=	9,
+				ActionPrint			=	10,
+				ActionExit			=	11,
+				ActionImport		=	12,
+				ActionExport		=	13,
+				ActionUndo			=	14,
+				ActionRedo			=	15,
+				ActionCut			=	16,
+				ActionCopy			=	17,
+				ActionPaste			=	18,
+				ActionSelectAll		=	19,
+				ActionFindReplace	=	20,
+				ActionBuild			=	21,
+				ActionBuildAll		=	22,
+				ActionRebuild		=	23,
+				ActionRebuildAll	=	24,
+				ActionClean			=	25,
+				ActionCleanAll		=	26,
+				ActionRun			=	27,
+				ActionDebug			=	28,
+				ActionPause			=	29,
+				ActionStop			=	30,
+				ActionContinue		=	31,
+				ActionStepOver		=	32,
+				ActionStepInto		=	33,
+				ActionLayout		=	34,
+				ActionPreferences	=	35,
+				ActionHelp			=	36,
+				ActionManual		=	37,
+				ActionAbout			=	38,
+				ActionUnused0		=	39,
+				ActionUnused1		=	40,
+				ActionUnused2		=	41,
+				ActionUnused3		=	42,
+				ActionUnused4		=	43,
+				ActionUnused5		=	44,
+				ActionUnused6		=	45,
+				ActionUnused7		=	46,
+				ActionUnused8		=	47
 			};
 
 			/**************************************************//*!
@@ -86,34 +100,54 @@ namespace NGM
 			******************************************************/
 			enum DragNDrop
 			{
-				DragIf,
-				DragElse,
-				DragStartBlock,
-				DragEndBlock
+				DNDIf,
+				DNDElse,
+				DNDStartBlock,
+				DNDEndBlock,
+				DNDSetMotion,
+				DNDMovePoint,
+				DNDSetHspeed,
+				DNDSetVspeed,
+				DNDSetGravity,
+				DNDReverseXdir,
+				DNDReverseYdir,
+				DNDSetFriction,
+				DNDMoveTo,
+				DNDMoveStart,
+				DNDMoveRandom,
+				DNDSnap,
+				DNDWrap,
+				DNDMoveContact,
+				DNDBounce,
+				DNDPath,
+				DNDPathEnd,
+				DNDPathPosition,
+				DNDPathSpeed,
+				DNDLinearStep,
+				DNDPotentialStep
 			};
 
 			/**************************************************//*!
-			*	@brief	Contains a list of default generic
-			*			resource types (for icons).
+			*	@brief	Contains a list of default generic icons.
 			******************************************************/
-			enum GenericResources
+			enum GenericIcon
 			{
-				ResourceAnimation,
-				ResourceImage,
-				ResourceText,
-				ResourceBlob,
-				ResourceSound,
-				ResourceMusic,
-				ResourcePath,
-				ResourceFont,
-				ResourceTimeline,
-				ResourceObject,
-				ResourceScene,
-				ResourceInformation,
-				ResourceSettings,
-				ResourceExtensions,
-				ResourceGMLScript,
-				ResourceGLSLScript
+				IconOkay		=	0,
+				IconCancel		=	1,
+				IconZoomIn		=	2,
+				IconZoomOut		=	3,
+				IconZoom		=	4,
+				IconModify		=	5,
+				IconAdd			=	6,
+				IconDelete		=	7,
+				IconPencil		=	8,
+				IconPaintBrush	=	9,
+				IconPaintCan	=	10,
+				IconPalette		=	11,
+				IconUnused0		=	12,
+				IconUnused1		=	13,
+				IconUnused2		=	14,
+				IconUnused3		=	15
 			};
 
 			/**************************************************//*!
@@ -129,7 +163,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Contains all actions.
 			******************************************************/
-			QAction *actions[64];
+			QAction *actions[48];
 
 			/**************************************************//*!
 			*	@brief	Contains all drag & drop icons.
@@ -139,22 +173,27 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Contains generic resource icons.
 			******************************************************/
-			QIcon *resources[16];
+			QIcon *icons[16];
 
 			/**************************************************//*!
 			*	@brief	Gets an icon based on the current theme.
 			******************************************************/
-			QIcon *getIconFromTheme(QString location);
+			QIcon *getIconFromTheme(const QString &location) const;
 
 			/**************************************************//*!
 			*	@brief	Gets an icon from the indicated filename.
 			******************************************************/
-			QIcon *getIconFromFile(QString location);
+			QIcon *getIconFromFile(const QString &location) const;
 
 			/**************************************************//*!
 			*	@brief	Forces a reload of resource icons.
 			******************************************************/
 			void reload();
+
+			/**************************************************//*!
+			*	@brief	Unloads resource icons. Call before reload.
+			******************************************************/
+			void unload();
 
 			/**************************************************//*!
 			*	@brief	Forces a reload of drag n drop icons.
@@ -174,29 +213,24 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Sets a new theme. Forces a reload.
 			******************************************************/
-			void setTheme(QString theme);
+			void setTheme(const QString &_theme);
 
 			/**************************************************//*!
 			*	@return	The current theme name.
 			******************************************************/
-			QString getTheme();
-
-			/**************************************************//*!
-			*	@return	The theme appended with the icon name.
-			******************************************************/
-			QString getFullThemeDirectory(QString name = "");
+			const QString getTheme() const;
 
 		private:
 
 			/**************************************************//*!
 			*	@brief	Contains icons mapped to their filenames.
 			******************************************************/
-			std::map<QString, QIcon*> iconByFile;
+			std::map<const QString, QIcon*> iconByFile;
 
 			/**************************************************//*!
 			*	@brief	Contains themed icons mapped to their filenames
 			******************************************************/
-			std::map<QString, QIcon*> iconByTheme;
+			std::map<const QString, QIcon*> iconByTheme;
 
 			/**************************************************//*!
 			*	@brief	Holds the current theme name.

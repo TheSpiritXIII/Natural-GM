@@ -4,7 +4,7 @@
 #   Qt specific options.
 #----------------------------------------------
 greaterThan(QT_MAJOR_VERSION, 5)
-QT			+=	widgets network
+QT			+=	widgets
 TEMPLATE	=	app
 TARGET		=	"Natural-GM"
 CONFIG		+=	c++11
@@ -35,8 +35,6 @@ INCLUDEPATH	+=	Windows \
 HEADERS		+=	Windows/MainWindow.hpp \
 	Classes/ErrorLogger/ErrorLogger.hpp \
 	Managers/WindowManager.hpp \
-	Managers/ResourceManager.hpp \
-	Managers/IconManager.hpp \
 	Managers/ActionManager.hpp \
 	Models/BasicItem.hpp \
 	Models/ColumnItem.hpp \
@@ -60,7 +58,11 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Models/ResourceItemModel/ResourceGroupItem.hpp \
 	Models/ResourceItemModel/ResourceProjectItem.hpp \
 	Models/ResourceItemModel/ResourceItemModel.hpp \
-	Classes/RapidXML/RapidXML.hpp
+	Classes/RapidXML/RapidXML.hpp \
+	Dialogs/AboutDialog.hpp \
+	Widgets/ResourceDialog.hpp \
+    Resources/Serializers/GMXSerializer.hpp \
+    Managers/SettingManager.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -69,7 +71,6 @@ SOURCES		+= \
 	Classes/ErrorLogger/ErrorLogger.cpp \
 	Windows/MainWindow.cpp \
 	Managers/WindowManager.cpp \
-	Managers/IconManager.cpp \
 	Models/BasicItem.cpp \
 	Models/BasicModel.cpp \
 	Dialogs/ProjectDialog.cpp \
@@ -81,7 +82,9 @@ SOURCES		+= \
 	Resources/Widgets/TextWidget.cpp \
 	Models/ResourceItemModel/ResourceBaseItem.cpp \
 	Models/ResourceItemModel/ResourceGroupItem.cpp \
-	Models/ResourceItemModel/ResourceItemModel.cpp
+	Models/ResourceItemModel/ResourceItemModel.cpp \
+	Dialogs/AboutDialog.cpp \
+	Widgets/ResourceDialog.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------

@@ -1,7 +1,5 @@
 /**
  *  @file WindowManager.cpp
- *  @brief Defines a class that manages basic settings with windows.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -31,25 +29,59 @@
 #include <QDir>
 #include <QDebug>
 #include "ResourceProjectItem.hpp"
+#include <QToolBar>
+#include "AboutDialog.hpp"
+#include <QDebug>
+#include <QKeyEvent>
+#include <QMenuBar>
 
 namespace NGM
 {
 	namespace Manager
 	{
-		WindowManager::WindowManager() : actionManager(this, &projectManager), directory(QDir::homePath()+"/Documents/GameMaker/Projects")
+		WindowManager::WindowManager(int argc, char *argv[]) :
+			QApplication(argc, argv), actionManager(this, &projectManager),
+			directory(QDir::homePath()+"/Documents/GameMaker/Projects")
 		{
-			actionManager.actions[ActionManager::ActionPreferences] = new QAction(tr("Preferences"), this);
-			actionManager.actions[ActionManager::ActionPreferences]->setShortcut(QKeySequence::New);
-			actionManager.actions[ActionManager::ActionOpen] = new QAction(tr("Open"), this);
-			actionManager.actions[ActionManager::ActionOpen]->setShortcut(QKeySequence::Open);
-			connect(actionManager.actions[ActionManager::ActionPreferences], &QAction::triggered, [this]()
+			installEventFilter(this);
+
+			actionManager.actions[ActionManager::ActionNewProject] = new QAction(tr("New Project"), this);
+			connect(actionManager.actions[ActionManager::ActionNewProject], &QAction::triggered, [this]()
 			{
 				this->createProjectDialog();
 			});
-			connect(actionManager.actions[ActionManager::ActionOpen], &QAction::triggered, [this]()
+			actionManager.actions[ActionManager::ActionOpenProject] = new QAction(tr("Open Project"), this);
+			connect(actionManager.actions[ActionManager::ActionOpenProject], &QAction::triggered, [this]()
 			{
 				this->openProjectDialog();
 			});
+			actionManager.actions[ActionManager::ActionSave] = new QAction(tr("Save"), this);
+			actionManager.actions[ActionManager::ActionSave]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionSaveAs] = new QAction(tr("Save As..."), this);
+			actionManager.actions[ActionManager::ActionSaveAs]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionSaveAll] = new QAction(tr("Save All"), this);
+			actionManager.actions[ActionManager::ActionSaveAll]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionCut] = new QAction(tr("Cut"), this);
+			actionManager.actions[ActionManager::ActionCut]->setEnabled(false);
+			connect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, [this]()
+			{
+				this->currentWindow->resourceSplitter->cut();
+			});
+			actionManager.actions[ActionManager::ActionCopy] = new QAction(tr("Copy"), this);
+			actionManager.actions[ActionManager::ActionCopy]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionPaste] = new QAction(tr("Paste"), this);
+			actionManager.actions[ActionManager::ActionPaste]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionRedo] = new QAction(tr("Redo"), this);
+			actionManager.actions[ActionManager::ActionRedo]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionUndo] = new QAction(tr("Undo"), this);
+			actionManager.actions[ActionManager::ActionUndo]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionAbout] = new QAction(tr("About"), this);
+			connect(actionManager.actions[ActionManager::ActionAbout], &QAction::triggered, [this]()
+			{
+				Dialog::AboutDialog *d = new Dialog::AboutDialog(0);
+				d->exec();
+			});
+
 			actionManager.reload();
 			hierarchy = new Model::ResourceItemModel();
 			addWindow();
@@ -68,8 +100,46 @@ namespace NGM
 			MainWindow *add = new MainWindow(this);
 			windows.push_back(add);
 			add->show();
-			add->addAction(actionManager.actions[ActionManager::ActionPreferences]);
-			add->addAction(actionManager.actions[ActionManager::ActionOpen]);
+
+			QToolBar *toolbar = new QToolBar(tr("Main"), add);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionNewProject]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionOpenProject]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionSave]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionSaveAll]);
+			toolbar->setIconSize(QSize(16, 16));
+			add->addToolBar(toolbar);
+
+			toolbar = new QToolBar(tr("Clipboard"), add);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionCut]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionCopy]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionPaste]);
+			toolbar->addSeparator();
+			toolbar->addAction(actionManager.actions[ActionManager::ActionUndo]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionRedo]);
+			toolbar->setIconSize(QSize(16, 16));
+			add->addToolBar(toolbar);
+
+			QMenuBar *menuBar = new QMenuBar(add);
+			QMenu *menu = new QMenu(tr("File"), add);
+			menu->addAction(actionManager.actions[ActionManager::ActionNewProject]);
+			menu->addAction(actionManager.actions[ActionManager::ActionOpenProject]);
+			menu->addAction(actionManager.actions[ActionManager::ActionSave]);
+			menu->addAction(actionManager.actions[ActionManager::ActionSaveAll]);
+			menuBar->addMenu(menu);
+			menu = new QMenu(tr("Edit"), add);
+			menu->addAction(actionManager.actions[ActionManager::ActionCut]);
+			menu->addAction(actionManager.actions[ActionManager::ActionCopy]);
+			menu->addAction(actionManager.actions[ActionManager::ActionPaste]);
+			menu->addSeparator();
+			menu->addAction(actionManager.actions[ActionManager::ActionUndo]);
+			menu->addAction(actionManager.actions[ActionManager::ActionRedo]);
+			menuBar->addMenu(menu);
+			menu = new QMenu(tr("Help"), add);
+			menu->addAction(actionManager.actions[ActionManager::ActionAbout]);
+			menuBar->addMenu(menu);
+			add->setMenuBar(menuBar);
+
+			currentWindow = add;
 			return add;
 		}
 
@@ -88,8 +158,8 @@ namespace NGM
 
 		void WindowManager::createProjectDialog()
 		{
-			Dialog::ProjectDialog d(&projectManager, this);
-			d.exec();
+			Dialog::ProjectDialog *d = new Dialog::ProjectDialog(&projectManager, this);
+			d->show();
 		}
 
 		void WindowManager::addProject(Model::ResourceProjectItem *project)
@@ -102,7 +172,7 @@ namespace NGM
 			QFileDialog d(0, tr("Open an Existing Project"));
 
 			QString formats = tr("All Files")+"  (*.*);;";
-			for(auto& i : projectManager.projects_)
+			for(auto& i : projectManager.projects)
 			{
 				formats += i.first + "( ";
 				for(QString j : i.second->extensions)
@@ -122,12 +192,37 @@ namespace NGM
 			QString type = d.selectedNameFilter();
 			type.truncate(type.lastIndexOf('('));
 
-			Resource::Project *project = projectManager.projects_.find(type)->second;
+			Resource::Project *project = projectManager.projects.find(type)->second;
 
 			Resource::Resource *r = new Resource::Resource(project->type, NULL, filename, Resource::Resource::IsFilename);
-			hierarchy->append(new Model::ResourceProjectItem(r, project, "Loaded file."));
+			hierarchy->append(new Model::ResourceProjectItem(r, project, filename.right(filename.size()-filename.lastIndexOf('/')-1)));
 			//windows.front()->resourceSplitter->resourceOpen()
 			//project->widget()
+		}
+
+		bool WindowManager::eventFilter(QObject*, QEvent *event)
+		{
+			if (event->type() == QEvent::KeyPress)
+			{
+				QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+				if (keyEvent->matches(QKeySequence::New))
+				{
+					actionManager.actions[ActionManager::ActionNewProject]->trigger();
+					return true;
+				}
+				if (keyEvent->matches(QKeySequence::Open))
+				{
+					actionManager.actions[ActionManager::ActionOpenProject]->trigger();
+					return true;
+				}
+				if (keyEvent->matches(QKeySequence::Cut))
+				{
+					actionManager.actions[ActionManager::ActionCut]->trigger();
+					return true;
+				}
+				return false;
+			}
+			return false;
 		}
 	}
 }

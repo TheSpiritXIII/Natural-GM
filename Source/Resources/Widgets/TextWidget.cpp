@@ -50,14 +50,13 @@ namespace NGM
 
 		uint8_t TextWidget::getSettings()
 		{
-			return CanClipboard;
+			return 0;//settings	& (textEdit->canPaste() ? 0 : Settings::CanPaste);
 		}
 
 		void TextWidget::searchRequest(uint8_t settings, QByteArray *data)
 		{
 
 		}
-
 
 		void TextWidget::statusRequest(QLabel *label, QProgressBar *progress)
 		{

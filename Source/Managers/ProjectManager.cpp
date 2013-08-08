@@ -26,6 +26,10 @@
 #include <QMessageBox>
 #include "Resources/Types/TextType.hpp"
 #include <QDebug>
+using std::map;
+using std::pair;
+using std::string;
+using std::multimap;
 
 namespace NGM
 {
@@ -33,82 +37,91 @@ namespace NGM
 	namespace Manager
 	{
 		ProjectManager::ProjectManager() :
-			/*types
-			{
-				new Resource::TextType(QObject::tr("Plain Text"), QObject::tr("Plain Text"))
-			},
-			projects
-			{
-				new Resource::Project(&textSerializer, types[0], GMLScript, GMOther, GMLScriptDesc, QStringList(".gml")),
-				new Resource::Project(&textSerializer, types[0], PlainText, General, PlainTextDesc, QStringList(".txt"))
-			},*/
-			types_
+			types
 			{
 				pair<const char*, Resource::Type*>("Plain Text", new Resource::TextType(QObject::tr("ngm_PlainText"), QObject::tr("Plain Text")))
 			},
-			projects_
+			projects
 			{
-				pair<QString, Resource::Project*>(GMLScript, new Resource::Project(&textSerializer, types_.find("Plain Text")->second, GMLScript, GMOther, GMLScriptDesc, QStringList(".gml"))),
-				pair<QString, Resource::Project*>(PlainText, new Resource::Project(&textSerializer, types_.find("Plain Text")->second, PlainText, General, PlainTextDesc, QStringList(".txt")))
+				pair<QString, Resource::Project*>(GMLScript, new Resource::Project(&textSerializer, nullptr, GMOther, GMLScriptDesc, QStringList(".gml"))),
+				pair<QString, Resource::Project*>(PlainText, new Resource::Project(&textSerializer, nullptr, General, PlainTextDesc, QStringList(".txt")))
 			}
 		{
+			auto i = projects.begin();
+			i->second->type = types.begin()->second; ++i;
+			i->second->type = types.begin()->second;
 		}
 
 		ProjectManager::~ProjectManager()
 		{
-			for (auto& i : projects_)
+			for (auto& i : projects)
 			{
 				delete i.second;
 			}
-			for (auto& i : types_)
+			for (auto& i : types)
 			{
 				delete i.second;
 			}
 		}
 
-		void ProjectManager::registerProject(QString name, QString category, QString description, QStringList extensions, Type *type)
+		void ProjectManager::registerProject(Resource::Serializer *serializer,
+			const QString &name, const QString &category, const QString &description,
+			const QStringList extensions, Resource::Type *type)
 		{
-			//projects.push_back(new Resource::Project(NULL, NULL, name, type, description, extensions));
+			projects.insert(pair<QString, Resource::Project*>(name, new Resource::Project(serializer, type, category, description, extensions)));
 		}
 
-		const multimap<QString, Resource::Project*> ProjectManager::getProjectList()
+		void ProjectManager::registerFileProject(Resource::Serializer *serializer,
+			const QString &name, const QString &category, const QString &description,
+			const QStringList extensions, Resource::Type *type)
 		{
-			return projects_;
+			files.insert(pair<QString, Resource::Project*>(name, new Resource::Project(serializer, type, category, description, extensions)));
 		}
 
-		/*void ProjectManager::registerResource(QString name, QString plural)
+		void ProjectManager::registerType(const string &name, Type *type)
 		{
-			for (Resource::Type *i : types)
+			types.insert(pair<string, Resource::Type*>(name, type));
+		}
+
+		const Resource::Type *ProjectManager::getType(const std::string &name) const
+		{
+			return types.find(name)->second;
+		}
+
+		const multimap<const QString, Project*> &ProjectManager::getProjectList() const
+		{
+			return projects;
+		}
+
+		const multimap<const QString, Project*> &ProjectManager::getFileProjectList() const
+		{
+			return files;
+		}
+
+		map<const QString, Project*> ProjectManager::getProjectCategory(QString category, bool root) const
+		{
+			map<const QString, Resource::Project*> p;
+			for (auto& i : projects)
 			{
-				if (i->name == name)
+				if (root)
 				{
-#ifdef NGM_DEBUG
-					qDebug() << "ProjectManager - Error - Cannot register, type already exists:" << name;
-#else
-					QMessageBox::critical(0, "Error", "Cannot register resource type.");
-#endif
-					return;
+					if (i.second->category.left(i.second->category.indexOf('-')) == category)
+					{
+						p.insert(i);
+					}
+				}
+				else if (i.second->category == category)
+				{
+					p.insert(i);
 				}
 			}
-			types.push_back(new Resource::Type(name, plural));
-		}*/
+			return p;
+		}
 
-		/*Resource::Project *ProjectManager::getProject(QString name, QString category)
+		map<const QString, Project*> ProjectManager::getFileProjectCategory(const QString category, bool root) const
 		{
-			for (Resource::Project *i : projects)
-			{
-				if (i->name == name && i->category == category)
-				{
-					return i;
-				}
-			}
-			return NULL;
-		}*/
-
-		map<QString, Resource::Project*> ProjectManager::getProjectCategory(QString category, bool root) const
-		{
-			map<QString, Resource::Project*> p;
-			for (auto& i : projects_)
+			map<const QString, Resource::Project*> p;
+			for (auto& i : projects)
 			{
 				if (root)
 				{

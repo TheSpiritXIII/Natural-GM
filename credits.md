@@ -1,16 +1,9 @@
-Natural GM Credits
-=================
+Natural GM
+==========
 
-Main Team
----------
- * Daniel Hrabovcak
- 
-Libraries
----------
- * DatZach - Gmk
- * Lee Thomason - TinyXML-2
- 
-Icons
------
- * JayL - psDark Skin
- * Josh Ventura - Vector Icon
+Contributors
+------------
+ * __Daniel Hrabovcak__ - Lead Programmer
+ * __Josh Ventura__ - Design Advice
+ * __Zach Reedy__ - GMK API
+ * __JayL__ - psDark Skin Design

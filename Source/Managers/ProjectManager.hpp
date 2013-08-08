@@ -23,7 +23,7 @@
 #ifndef _NGM_PROJECTMANAGER__HPP
 #define _NGM_PROJECTMANAGER__HPP
 #include <map>
-#include <vector>
+#include <string>
 #include <QIcon>
 #include <QString>
 #include "Type.hpp"
@@ -41,9 +41,6 @@ namespace NGM
 	{
 		class WindowManager;
 		class ActionManager;
-		using std::map;
-		using std::pair;
-		using std::multimap;
 
 		/**************************************************//*!
 		*	@brief	Registers project types.
@@ -63,18 +60,9 @@ namespace NGM
 			~ProjectManager();
 
 			/**************************************************//*!
-			*	@brief	Registers a serializer.
-			******************************************************/
-			void registerSerializer(Resource::Serializer *serializer);
-
-			/**************************************************//*!
-			*	@brief	Gets the serializer at the specified index.
-			******************************************************/
-			Resource::Serializer *getSerializer(int index);
-
-			/**************************************************//*!
 			*	@brief	Registers a project type with the
 			*			specified metadata.
+			*	@param	serializer The way the file is loaded.
 			*	@param	name The name of the project type.
 			*	@param	category The category of the project. You
 			*			can use "|" to add a subcategory.
@@ -82,32 +70,45 @@ namespace NGM
 			*			project type.
 			*	@param	extensions	A list of supported extensions.
 			******************************************************/
-			void registerProject(QString name,
-								 QString category,
-								 QString description,
-								 QStringList extensions,
-								 Resource::Type *type);
+			void registerProject(Resource::Serializer *serializer,
+				const QString &name, const QString &category, const QString &description,
+				const QStringList extensions, Resource::Type *type);
+
+			/**************************************************//*!
+			*	@brief	Registers a file project type with the
+			*			specified metadata.
+			*	@param	serializer The way the file is loaded.
+			*	@param	name The name of the project type.
+			*	@param	category The category of the project. You
+			*			can use "|" to add a subcategory.
+			*	@param	description A detailed description of the
+			*			project type.
+			*	@param	extensions	A list of supported extensions.
+			******************************************************/
+			void registerFileProject(Resource::Serializer *serializer,
+				const QString &name, const QString &category, const QString &description,
+				const QStringList extensions, Resource::Type *type);
+
 
 			/**************************************************//*!
 			*	@brief	Stores and adds a resource type.
 			******************************************************/
-			void registerType(QString name, Resource::Type *type);
+			void registerType(const std::string &name, Resource::Type *type);
 
 			/**************************************************//*!
-			*	@brief	Returns the type at the specified index.
+			*	@brief	Returns the type with the specified name.
 			******************************************************/
-			Resource::Type *getType(QString name);
-
-			/**************************************************//*!
-			*	@brief	Reloads all icons.
-			*	@param	location The directory to search for icons.
-			******************************************************/
-			void reloadIcons(QString location);
+			const Resource::Type *getType(const std::string &name) const;
 
 			/**************************************************//*!
 			*	@brief	Returns a list of all registered projects.
 			******************************************************/
-			const multimap<QString, Resource::Project*> getProjectList();
+			const std::multimap<const QString, Resource::Project*>& getProjectList() const;
+
+			/**************************************************//*!
+			*	@brief	Returns a list of all registered file projects.
+			******************************************************/
+			const std::multimap<const QString, Resource::Project*>& getFileProjectList() const;
 
 			/**************************************************//*!
 			*	@return A map containing all projects in the
@@ -116,34 +117,38 @@ namespace NGM
 			*	@param	root True if you wish to include
 			*			subcategories, false otherwise
 			******************************************************/
-			map<QString, Resource::Project*> getProjectCategory(QString category, bool root) const;
+			std::map<const QString, Resource::Project*> getProjectCategory(QString category, bool root) const;
+
+			/**************************************************//*!
+			*	@return A map containing all projects in the
+			*			indicated category.
+			*	@param	category The category you are looking for.
+			*	@param	root True if you wish to include
+			*			subcategories, false otherwise
+			******************************************************/
+			std::map<const QString, Resource::Project*> getFileProjectCategory(QString category, bool root) const;
 
 		private:
 
 			/**************************************************//*!
-			*	@brief	A basic serializer for opening text files. (CHANGE)
+			*	@brief	A basic serializer for opening text files.
 			******************************************************/
 			Resource::TextSerializer textSerializer;
 
 			/**************************************************//*!
-			*	@brief	Contains all resource types. (REMOVE)
-			******************************************************/
-			//std::vector<Resource::Type*> types;
-
-			/**************************************************//*!
-			*	@brief	Contains all project types.
-			******************************************************/
-			//std::vector<Resource::Project*> projects;
-
-			/**************************************************//*!
 			*	@brief	Stores all registered types.
 			******************************************************/
-			std::multimap<const char*, Resource::Type*> types_;
+			std::map<const std::string, Resource::Type*> types;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered projects.
 			******************************************************/
-			std::multimap<QString, Resource::Project*> projects_;
+			std::multimap<const QString, Resource::Project*> projects;
+
+			/**************************************************//*!
+			*	@brief	Stores all registered file types.
+			******************************************************/
+			std::multimap<const QString, Resource::Project*> files;
 
 			friend class NGM::Manager::WindowManager;
 			friend class NGM::Manager::ActionManager;

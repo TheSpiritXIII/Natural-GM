@@ -4,7 +4,7 @@
 License
 -------
 
-Copyright (C) 2013 Daniel Hrabovcak and Robert B. Colton
+Copyright (C) 2013 Daniel Hrabovcak
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,84 +20,67 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-Skins
------
+Themes & Skins
+--------------
 
-To add a skin, you must create a directory named "skins". Inside,
-you must add another directory that is named after your skin.
-Natural GM will use that name as the name of skin when the user is
-looking through their installed skin. Then, your skin *must* have a
-file named "settings.ngsk" (without the quotes). This file is a
-binary file which decides whether the skin has a stylesheet and/or
-icons.
+__NOTE:__ THEMING IS NOT CURRENTLY FUNCTIONAL.
 
-### Settings
+### Themes
 
-The skin settings file should only be 1 byte long. You may use a
-binary to ascii converter to generate your settings file. It is
-structured by the following bits:
+Themes are code color preferences. To add a new theme, create a .ngth 
+file inside the _themes_ directory.
 
-### Stylesheets
+### Skins
 
-Stylesheets are written using QSS (Qt's CSS-like Stylesheet
-language). For stylesheet documentation, please visit:
+To add a new skin, simply place a .qss file inside the _skins_ folder.
+A .qss file is a Qt Stylesheet file. For stylesheet documentation,
+please visit the following website:
 http://qt-project.org/doc/qt-5.0/qtwidgets/stylesheet.html
 
 ### Icons
 
-You may optionally place icons. If you do not supply any icons,your
-users will only see text unless they choose to opt out. Icons may
-be .png, .bmp or .svg. The only requirement is that they must have
-the correct filename (eg. new.png is for the "New Project" button).
+Natural GM supports custom icons. To create an icon theme, create a
+directory containing all of your icons and place them inside the
+_icons_ directory. If you do not supply certain icons, your users will
+only see text instead. Icons must be in .png format. Please see the
+default icon packages for examples of naming.
 
 
 Plugins
 -------
 
-Plugins are essentially libraries compiled in C++. If you would like
-it to interact with Qt, you must include the Qt library.
+__NOTE:__ PLUGINS ARE NOT CURRENTLY FUNCTIONAL.
 
-While plugins are not readily available yet, you can experiment with
-creating classes. A plugin must have the following functions defined
-or else it will not be loaded (even if they are empty):
+Plugins are essentially libraries compiled in C++. If you would like
+it to interact with Qt, you must include the Qt library. A plugin must
+have at least one _getPluginInfo_ implemented or else it will not be
+laoded. Plugins are provided access with classes in NGM, to be able to
+add custom resource types, widgets, etc. The following are available
+functions that the plugin loader searches for:
 
 ```c++
-enum class NGM_PLUGIN
+namespace NGM
 {
-	NAME = 0,
-	AUTHOR = 1,
-	DESCRIPTION = 2
-};
-bool load(NGMMainWindow *window);
-bool startup(NGMMainWindow *window);
-bool cleanup(NGMMainWindow *window);
-const char* getPluginInfo(NGM_PLUGIN type);
+	enum class Plugin
+	{
+		NAME			=	0,
+		AUTHOR			=	1,
+		DESCRIPTION		=	2
+	};
+}
+bool actionManager(NGM::Manager::ActionManager *manager);
+bool windowManager(NGM::Manager::WindowManager *manager);
+bool resourceManager(NGM::Manager::ResourceManager *manager);
+bool windowCreated(QMainWindow *window);
+const char* getPluginInfo(NGM::Plugin type);
 ```
 
-The function startup() and cleanup() are requested on the program's
-start and close respectively. The function load() occurs directly
-after the startup() function is called. Any extensions should be
-loaded in the load() function while others such as resources should
-be loaded in the startup() function. If you want to add items to the
-menus and such, you can simply include the headers found in Natural
-GM's github (http://www.github.com/enigma-dev/NaturalGM).
-
-If you use the plugin mechanism to create a new resource type, you
-can create an icon named after the generic name of the resource and
-Natural GM will load it from the plugin folder (if the user has not
-already created an image for it in their skin or icon folders).
-
-
-Compiling
----------
-
-In order to compile, you must have Qt 5.0.1 and QScintilla 2.7.1
-installed. This project is best edited under Qt Creator 2.7 and
-compiled using GCC compiler, version 4.7 or higher. Your compiler
-must have C++11.
+If you create a new resource or project type, icons will automatically
+be loaded based on the respective identifier names.
 
 
 Translations
 ------------
 
-Translations will be available in the future via Qt Linguist.
+Translations will be available in the future via Qt Linguist. A
+basic translation file is provided in 

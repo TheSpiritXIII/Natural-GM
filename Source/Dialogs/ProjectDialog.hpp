@@ -31,7 +31,7 @@
 #include <QTreeWidgetItem>
 #include "ProjectManager.hpp"
 #include "Project.hpp"
-#include <vector>
+#include <list>
 #include <map>
 
 namespace NGM
@@ -94,6 +94,13 @@ namespace NGM
 			******************************************************/
 			void updateDescription(QString text);
 
+		protected:
+
+			/**************************************************//*!
+			*	@brief	Makes the dialog partially transparent.
+			******************************************************/
+			void changeEvent(QEvent *event);
+
 		private:
 
 			/**************************************************//*!
@@ -110,7 +117,7 @@ namespace NGM
 			*	@brief	Contains all projects in the current
 			*			selected category.
 			******************************************************/
-			std::vector<Resource::Project*> projects;
+			std::list<Resource::Project*> projects;
 
 			/**************************************************//*!
 			*	@brief	Contains the main user settings.
@@ -172,7 +179,12 @@ namespace NGM
 			*	@brief	A cache for storing the project types in
 			*			the currently selected category.
 			******************************************************/
-			std::map<QString, Resource::Project*> cache;
+			std::map<const QString, Resource::Project*> cache;
+
+			/**************************************************//*!
+			*	@brief	Makes sure the dialog does not fade.
+			******************************************************/
+			bool wait;
 		};
 	}
 }

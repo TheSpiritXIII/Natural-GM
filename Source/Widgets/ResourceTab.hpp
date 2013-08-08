@@ -1,6 +1,5 @@
 /**
  *  @file ResourceTab.hpp
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -31,12 +30,15 @@ namespace NGM
 {
 	namespace Resource
 	{
+		class Widget;
 		class Resource;
 	}
 	namespace Widget
 	{
+		class ResourceSplitter;
+
 		/**************************************************//*!
-		 *	A tab widget that stores resource items.
+		 *	@brief	A tab widget that stores resource items.
 		******************************************************/
 		class ResourceTab : public QTabWidget
 		{
@@ -45,42 +47,64 @@ namespace NGM
 		public:
 
 			/**************************************************//*!
-			 *	@brief Creates an empty tab with a parent.
+			 *	@brief	Creates an empty tab with a parent.
 			******************************************************/
-			ResourceTab(QWidget *parent = 0);
+			ResourceTab(ResourceSplitter *parent = 0);
 
 			/**************************************************//*!
-			 *	@brief Opens the indicated resource.
-			 *	@param resource The resource to add.
-			 *	@param active True to add to the current tab, or
-			 *	false to add as a new tab.
+			 *	@brief	Opens the indicated resource.
+			 *	@param	resource The resource to add.
+			 *	@param	active True to add to the current tab, or
+			 *			false to add as a new tab.
 			******************************************************/
 			void resourceOpen(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief Returns the tab index to the indicated
-			 *	resource, if open, otherwise -1.
+			 *	@brief	Returns the tab index to the indicated
+			 *			resource, if open, otherwise -1.
 			******************************************************/
 			int resourceIsOpen(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief Closes the resource if it is open.
+			 *	@brief	Closes the resource if it is open.
 			******************************************************/
 			void resourceClose(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief Set the tab index to the indicated index.
-			 *	@see resourceIsOpen
+			 *	@brief	Set the tab index to the indicated index.
+			 *	@see	resourceIsOpen
 			******************************************************/
 			void resourceSwitchTo(int index);
+
+			/**************************************************//*!
+			 *	@return	Whether the indicated ResourceBaseItem is
+			 *			open as a page on this tab.
+			******************************************************/
+			bool contains(Model::ResourceBaseItem *item);
+
+		protected:
+
+			/**************************************************//*!
+			*	@brief	Updates the parent on focus.
+			******************************************************/
+			void changeEvent(QEvent *event);
 
 		private:
 
 			/**************************************************//*!
-			 *	@brief Maps a resource item to its open widget.
+			 *	@brief	Maps a resource item to its open widget.
 			******************************************************/
-			std::map<Model::ResourceBaseItem*, QWidget*> widgets;
+			std::map<Model::ResourceBaseItem*, Resource::Widget*> widgets;
 
+			/**************************************************//*!
+			 *	@brief	The parent of this widget.
+			******************************************************/
+			ResourceSplitter *splitter;
+
+			/**************************************************//*!
+			 *	@brief	Holds the widget of the last clicked page.
+			******************************************************/
+			QWidget *rightClicked;
 		};
 	}
 }

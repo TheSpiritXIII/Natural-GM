@@ -21,12 +21,18 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ResourceSplitter.hpp"
+#include <QDebug>
+#include <QLabel>
+#include "Widget.hpp"
 
 namespace NGM
 {
 	namespace Widget
 	{
-		ResourceSplitter::ResourceSplitter(QWidget *parent) : QSplitter(parent) {}
+		ResourceSplitter::ResourceSplitter(QWidget *parent) : QSplitter(parent)
+		{
+			setChildrenCollapsible(false);
+		}
 
 		void ResourceSplitter::resourceOpen(Model::ResourceBaseItem *resource, bool active)
 		{
@@ -36,11 +42,84 @@ namespace NGM
 				tab->resourceOpen(resource);
 				addWidget(tab);
 				current	= tab;
+				tabs.push_back(current);
 			}
 			else
 			{
+				for (ResourceTab *i : tabs)
+				{
+					if (i->contains(resource))
+					{
+						return;
+					}
+				}
 				current->resourceOpen(resource);
 			}
+		}
+
+		void ResourceSplitter::movePage(ResourceSplitter *move, uint8_t settings)
+		{
+			if (move == this)
+			{
+				if (!(settings & Prev))
+				{
+					std::list<ResourceTab*>::iterator i;
+					for (i = tabs.begin(); i != tabs.end(); ++i)
+					{
+						if ((*i) == current)
+						{
+							++i;
+							break;
+						}
+					}
+					if (i == tabs.end())
+					{
+						ResourceTab *tab = new ResourceTab(this);
+						addWidget(tab);
+
+						QWidget *widget = current->currentWidget();
+						QString text = current->tabText(current->currentIndex());
+						current->removeTab(current->currentIndex());
+						tab->addTab(widget, text);
+
+						if (current->count() == 0)
+						{
+							tabs.remove((*i));
+							current->deleteLater();
+						}
+
+						current	= tab;
+						tabs.push_back(current);
+					}
+					else
+					{
+						QWidget *widget = current->currentWidget();
+						QString text = current->tabText(current->currentIndex());
+						current->removeTab(current->currentIndex());
+
+						if (current->count() == 0)
+						{
+							tabs.remove((*i));
+							current->deleteLater();
+						}
+
+						(*i)->addTab(widget, text);
+						current = (*i);
+					}
+				}
+				else
+				{
+
+				}
+			}
+			//if (count() == 0)
+			//move->current->currentWidget()
+		}
+
+		void ResourceSplitter::cut()
+		{
+			Resource::Widget *widget = static_cast<Resource::Widget*>(current->currentWidget());
+			widget->cutRequest();
 		}
 	}
 }

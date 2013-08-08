@@ -35,6 +35,7 @@
 #include <QRadioButton>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QDebug>
 using std::pair;
 
 namespace NGM
@@ -43,7 +44,7 @@ namespace NGM
 	{
 		ProjectDialog::ProjectDialog(Manager::ProjectManager *projectManager,
 			Manager::WindowManager *windowManager, QWidget *parent) :
-			QDialog(parent, Qt::WindowCloseButtonHint),
+			QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint),
 			windowManager(windowManager), projectManager(projectManager)
 		{
 			// Set the dialog properties.
@@ -119,7 +120,7 @@ namespace NGM
 					{
 						item->addChild(new QTreeWidgetItem(QStringList(sublevel)));
 					}
-					QString location;// = windowManager->actionManager.getFullThemeDirectory("/project/"+item->text(0));
+					QString location = windowManager->actionManager.getTheme()+"/project/"+item->text(0);
 					if (location.size() != 0)
 					{
 						item->setIcon(0, QIcon(location));
@@ -258,7 +259,6 @@ namespace NGM
 
 		void ProjectDialog::updateDescription(QString text)
 		{
-			// Update the text of description label.
 			description->setText("<b>"+tr("Description")+": </b>"+cache.find(text)->second->description);
 		}
 
@@ -287,7 +287,8 @@ namespace NGM
 			QDir dir(proj);
 			if (dir.exists(proj))
 			{
-				QMessageBox message;
+				wait = true;
+				QMessageBox message(this);
 				message.setText(tr("The selected project directory already exists. "
 				"Contents may be overwritten. Would you like to continue?"));
 				message.addButton(QMessageBox::Yes);
@@ -296,13 +297,15 @@ namespace NGM
 				message.setDefaultButton(QMessageBox::Ok);
 				if (message.exec() == QMessageBox::Cancel)
 				{
+					wait = false;
 					return;
 				}
 			}
 			bool made = dir.mkpath(proj);
 			if (!made)
 			{
-				QMessageBox message;
+				wait = true;
+				QMessageBox message(this);
 				message.setText(tr("Error creating directory. Directory is invalid."));
 				message.addButton(QMessageBox::Ok);
 				message.exec();
@@ -320,6 +323,22 @@ namespace NGM
 			{
 				window->heirarchyOpenProject(item);
 			}
+		}
+
+		void ProjectDialog::changeEvent(QEvent *event)
+		{
+			if (event->type() == QEvent::ActivationChange)
+			{
+				if (isActiveWindow() || wait)
+				{
+					setWindowOpacity(1.0);
+				}
+				else
+				{
+					setWindowOpacity(0.5);
+				}
+			}
+			QDialog::changeEvent(event);
 		}
 	}
 }

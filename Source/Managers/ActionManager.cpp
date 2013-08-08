@@ -1,7 +1,5 @@
 /**
  *  @file ActionManager.cpp
- *  @brief Defines a class that stores icons and actions.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -33,37 +31,138 @@ namespace NGM
 	namespace Manager
 	{
 		ActionManager::ActionManager(WindowManager *manager, ProjectManager *project) :
-			theme("Natural Native"), project(project), manager(manager) {}
+			dragdrop
+			{
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+			},
+			theme("icons/Silk Icons"), project(project), manager(manager)
+		{
+			// None. Load only when requested.
+		}
 
 		ActionManager::~ActionManager()
 		{
-			// Inherited behavior.
+			unloadDragDrop();
 		}
 
-		QIcon *ActionManager::getIconFromTheme(QString location)
+		QIcon *ActionManager::getIconFromTheme(const QString &location) const
 		{
 			return iconByTheme.find(location)->second;
 		}
 
-		QIcon *ActionManager::getIconFromFile(QString location)
+		QIcon *ActionManager::getIconFromFile(const QString &location) const
 		{
 			return iconByTheme.find(location)->second;
-		}
-
-		QString ActionManager::getFullThemeDirectory(QString name)
-		{
-			return "icons/"+theme+"/"+name;
 		}
 
 		void ActionManager::reload()
 		{
-			//actions[ActionNew]->setIcon(QIcon("icons/"+theme+"/main/new"));
-			//actions[ActionOpen]->setIcon(QIcon("icons/"+theme+"/main/open"));
-			//actions[ActionSave]->setIcon(QIcon("icons/"+theme+"/main/save"));
-			/*for(Resource::Type* i : project->types_)
+			if (QFile::exists(theme+"/main/newproject.png"))
 			{
-				i->icon = QIcon("icons/"+theme+"/project/"+i->name);
-			}*/
+				actions[ActionNewProject]->setIcon(QIcon(theme+"/main/newproject.png"));
+			}
+			if (QFile::exists(theme+"/main/openproject.png"))
+			{
+				actions[ActionOpenProject]->setIcon(QIcon(theme+"/main/openproject.png"));
+			}
+			if (QFile::exists(theme+"/main/save.png"))
+			{
+				actions[ActionSave]->setIcon(QIcon(theme+"/main/save.png"));
+			}
+			if (QFile::exists(theme+"/main/cut.png"))
+			{
+				actions[ActionCut]->setIcon(QIcon(theme+"/main/cut.png"));
+			}
+			if (QFile::exists(theme+"/main/copy.png"))
+			{
+				actions[ActionCopy]->setIcon(QIcon(theme+"/main/copy.png"));
+			}
+			if (QFile::exists(theme+"/main/paste.png"))
+			{
+				actions[ActionPaste]->setIcon(QIcon(theme+"/main/paste.png"));
+			}
+			if (QFile::exists(theme+"/main/redo.png"))
+			{
+				actions[ActionRedo]->setIcon(QIcon(theme+"/main/redo.png"));
+			}
+			if (QFile::exists(theme+"/main/undo.png"))
+			{
+				actions[ActionUndo]->setIcon(QIcon(theme+"/main/undo.png"));
+			}
+			for(auto& i : project->types)
+			{
+				//i.second->icon = QIcon(theme+"/project/"+i.first);
+			}
+		}
+
+		void ActionManager::unload()
+		{
+			actions[ActionNewProject]->setIcon(QIcon());
+			actions[ActionOpenProject]->setIcon(QIcon());
+			actions[ActionSave]->setIcon(QIcon());
+			actions[ActionCut]->setIcon(QIcon());
+			actions[ActionCopy]->setIcon(QIcon());
+			actions[ActionPaste]->setIcon(QIcon());
+			actions[ActionUndo]->setIcon(QIcon());
+			actions[ActionRedo]->setIcon(QIcon());
+		}
+
+		void ActionManager::reloadDragDrop()
+		{
+			unloadDragDrop();
+			if (QFile::exists(theme+"/dragdrop/actionif.png"))
+			{
+				icons[DNDIf] = new QIcon(theme+"/dragdrop/actionif.png");
+			}
+		}
+
+		void ActionManager::unloadDragDrop()
+		{
+			for (size_t i = 0; i < 192; ++i)
+			{
+				delete dragdrop[i];
+			}
+		}
+
+		void ActionManager::reloadAll()
+		{
+			unload();
+			reload();
+			unloadDragDrop();
+			reloadDragDrop();
+		}
+
+		void ActionManager::setTheme(const QString &_theme)
+		{
+			theme = _theme;
+		}
+
+		const QString ActionManager::getTheme() const
+		{
+			return theme;
 		}
 	}
 }

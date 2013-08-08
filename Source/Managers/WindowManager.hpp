@@ -1,7 +1,5 @@
 /**
  *  @file WindowManager.hpp
- *  @brief Declares a class that manages basic settings within windows.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -24,11 +22,13 @@
 #pragma once
 #ifndef _NGM_WINDOWMANAGER_HPP
 #define _NGM_WINDOWMANAGER__HPP
+#include <QApplication>
 #include "ActionManager.hpp"
 #include "ProjectManager.hpp"
 #include "Global.hpp"
+#include <QShortcut>
 #include <QAction>
-#include <vector>
+#include <list>
 
 namespace NGM
 {
@@ -46,8 +46,11 @@ namespace NGM
 		class ProjectManager;
 		class ActionManager;
 
-		/*! Contains actions, icons and other properties. */
-		class WindowManager : public QObject
+		/**************************************************//*!
+		*	@brief	Creates Windows and manages all other
+		*			resources and managers.
+		******************************************************/
+		class WindowManager : public QApplication
 		{
 			Q_OBJECT
 		public:
@@ -72,10 +75,14 @@ namespace NGM
 				UniqueIcons			=	0b0001000000000000
 			};
 
-			/*! Creates a window. */
-			WindowManager();
+			/**************************************************//*!
+			*	@brief	Creates a single window.
+			******************************************************/
+			WindowManager(int argc, char *argv[]);
 
-			/*! Destroys all windows. */
+			/**************************************************//*!
+			*	@brief	Destroys all windows.
+			******************************************************/
 			~WindowManager();
 
 			/*! Contains all project metadata and icons. */
@@ -114,10 +121,23 @@ namespace NGM
 			friend class NGM::MainWindow;
 			friend class Manager::ActionManager;
 
+			bool eventFilter(QObject*, QEvent *event);
+
+			void canCopy(const bool &i);
+			void canPaste(const bool &i);
+			void isModified(const bool &i);
+
 		private:
 
 			/*! Holds all created windows. */
-			std::vector<MainWindow*> windows;
+			std::list<MainWindow*> windows;
+
+			/**************************************************//*!
+			*	@brief	Stores the current focused window.
+			******************************************************/
+			MainWindow *currentWindow;
+
+			bool windowType;
 		};
 	}
 }

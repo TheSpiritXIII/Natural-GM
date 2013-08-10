@@ -21,9 +21,9 @@
 #pragma once
 #ifndef _NGM_TEXTWIDGET__HPP
 #define _NGM_TEXTWIDGET__HPP
-#include "Resources/Widget.hpp"
+#include "../Resources/Widget.hpp"
 #include <QTextEdit>
-#include "Global.hpp"
+#include "../Global.hpp"
 
 namespace NGM
 {

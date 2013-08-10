@@ -40,6 +40,7 @@ namespace NGM
 	{
 		class WindowManager;
 		class ProjectManager;
+		class SettingManager;
 	}
 	namespace Dialog
 	{
@@ -58,7 +59,9 @@ namespace NGM
 			*	@brief	Creates the dialog.
 			******************************************************/
 			ProjectDialog(Manager::ProjectManager *projectManager,
-				Manager::WindowManager *windowManager, QWidget *parent = 0);
+						  Manager::SettingManager *settingManager,
+						  Manager::WindowManager *windowManager,
+						  QWidget *parent = 0);
 
 			/**************************************************//*!
 			*	@brief	Removes all associated widget.
@@ -128,6 +131,11 @@ namespace NGM
 			*	@brief	Contains all registered projects types.
 			******************************************************/
 			Manager::ProjectManager *projectManager;
+
+			/**************************************************//*!
+			*	@brief	Contains all settings.
+			******************************************************/
+			Manager::SettingManager *settingManager;
 
 			/**************************************************//*!
 			*	@brief	Shows the description of the currently

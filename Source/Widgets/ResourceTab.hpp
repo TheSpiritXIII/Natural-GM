@@ -57,7 +57,7 @@ namespace NGM
 			 *	@param	active True to add to the current tab, or
 			 *			false to add as a new tab.
 			******************************************************/
-			void resourceOpen(Model::ResourceBaseItem *resource);
+			Resource::Widget *resourceOpen(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
 			 *	@brief	Returns the tab index to the indicated

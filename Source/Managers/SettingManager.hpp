@@ -21,14 +21,15 @@
 **/
 #ifndef _NGM_SETTINGSMANAGER__HPP
 #define _NGM_SETTINGSMANAGER__HPP
-#include "Global.hpp"
+#include "../Global.hpp"
 #include <QColor>
+#include <QDir>
 #include <string>
 #include <map>
 
 namespace NGM
 {
-	namespace Managers
+	namespace Manager
 	{
 		/**************************************************//*!
 		*	@brief	Holds global application settings.
@@ -36,6 +37,30 @@ namespace NGM
 		class SettingManager
 		{
 		public:
+
+			SettingManager() : directory(QDir::homePath()+"/Documents/GameMaker/Projects") {}
+
+			/**************************************************//*!
+			*	@brief	Basic setting bits.
+			******************************************************/
+			enum Preferences
+			{
+				ShowWelcome         =   0x0001,//0b0000000000000001,
+				NoResourceTabs      =   0x0002,//0b0000000000000010,
+				HideResourceTabs    =   0x0004,//0b0000000000000100,
+				ExternalResources   =   0x0008,//0b0000000000001000,
+				CodeUseTabs         =   0x0010,//0b0000000000010000,
+				CodeWarpNone        =   0x0000,//0b0000000000000000,
+				CodeWarpChar        =   0x0020,//0b0000000000100000,
+				CodeWarpWord        =   0x0060,//0b0000000001100000,
+				CodeEdgeNone        =   0x0000,//0b0000000000000000,
+				CodeEdgeLine        =   0x0080,//0b0000000010000000,
+				CodeEdgeBack        =   0x0180,//0b0000000110000000,
+				UseDirectory		=	0x0200,//0b0000001000000000,
+				AddDirectory		=	0x0400,//0b0000010000000000,
+				PreloadData			=	0x0800,//0b0000100000000000,
+				UniqueIcons			=	0x1000//b0001000000000000
+			};
 
 			/**************************************************//*!
 			*	@brief	The code colors.
@@ -102,6 +127,11 @@ namespace NGM
 			*	@brief	Contains basic color settings
 			******************************************************/
 			QColor colors[48];
+
+			/**************************************************//*!
+			*	@brief	Stores the default directory search location.
+			******************************************************/
+			QString directory;
 		};
 	}
 }

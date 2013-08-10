@@ -21,9 +21,10 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ResourceTab.hpp"
-#include "Resources/Widget.hpp"
+#include "../Resources/Widget.hpp"
 #include "ResourceProjectItem.hpp"
 #include "ResourceSplitter.hpp"
+#include "WindowManager.hpp"
 #include <QMenu>
 #include <QDebug>
 using std::list;
@@ -83,17 +84,19 @@ namespace NGM
 			});
 		}
 
-		void ResourceTab::resourceOpen(Model::ResourceBaseItem *resource)
+		Resource::Widget *ResourceTab::resourceOpen(Model::ResourceBaseItem *resource)
 		{
 			using NGM::Resource::Widget;
 			Resource::Resource *r = resource->toResourceProjectItem()->resource;
 			Widget *widget = r->type->widget();
-			if (widget != NULL)
+			if (widget != nullptr)
 			{
 				resource->root()->project->serializer->read(widget, r);
 				setCurrentIndex(addTab(widget, resource->data().toString()));
 				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Widget*>(resource, widget));
+				return widget;
 			}
+			return nullptr;
 		}
 
 		bool ResourceTab::contains(Model::ResourceBaseItem *item)

@@ -1,7 +1,5 @@
 /**
  *  @file Serializer.hpp
- *  @brief Declares a virtual serializer class which handles the loading of data.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -24,8 +22,8 @@
 #pragma once
 #ifndef _NGM_SERIALIZER__HPP
 #define _NGM_SERIALIZER__HPP
+#include "ResourceProjectItem.hpp"
 #include <QString>
-#include "ResourceContentItem.hpp"
 
 namespace NGM
 {
@@ -37,51 +35,61 @@ namespace NGM
 	namespace Resource
 	{
 		class Widget;
+
+		/**************************************************//*!
+		*	@brief	Loads and creates project structures.
+		******************************************************/
 		struct Serializer
 		{
-			/*! Bits that determine how a file was changed. */
+			/**************************************************//*!
+			*	@brief	Determines how a file was changed.
+			******************************************************/
 			enum Changed : unsigned char
 			{
-				Renamed			=	0b00000001,
-				Moved			=	0b00000010,
-				Deleted			=	0b00000100
+				Renamed			=	0x01,//0b00000001,
+				Moved			=	0x02,//0b00000010,
+				Deleted			=	0x04//0b00000100
 			};
 
-			/*! Setting bits that aid project loading and saving. */
+			/**************************************************//*!
+			*	@brief	Settings bits.
+			******************************************************/
 			enum Settings : unsigned char
 			{
-				ResaveAll		=	0b00000001,
-				CanPreload		=	0b00000010,
-				ForcePreload	=	0b00000100,
-				CanRearrange	=	0b00001000,
-				CanMoveRoots	=	0b00010000,
-				CanRenameRoots	=	0b00100000,
-				PathResources	=	0b01000000,
-				CanBeTemporary	=	0b10000000
+				ResaveAll		=	0x01,//0b00000001,
+				CanPreload		=	0x02,//0b00000010,
+				ForcePreload	=	0x04,//0b00000100,
+				CanRearrange	=	0x08,//0b00001000,
+				CanMoveRoots	=	0x10,//0b00010000,
+				CanRenameRoots	=	0x20,//0b00100000,
+				PathResources	=	0x40,//0b01000000,
+				CanBeTemporary	=	0x80//0b10000000
 			};
 
-			/*! Reads a resource and inputs the data onto a widget. */
+			/**************************************************//*!
+			*	@brief	Reads a resource and inputs data into a widget.
+			******************************************************/
 			virtual void read(Widget *widget, Resource *resource) = 0;
 
-			virtual void structure(Model::ResourceItem *item) {}
-			/*! Writes a resource based on widget data. */
-			//void write(Widget *widget, Resource *resource);
+			/**************************************************//*!
+			*	@brief	Writes a resource based on widget data.
+			******************************************************/
+			virtual void write(Widget *widget, Resource *resource) = 0;
 
-			/*! Loads a file and stores it into a tree item. */
-			//virtual Model::ResourceItem* loadFile(Model::ResourceItem *item, QString location, Manager::ProjectManager *manager, bool preload) = 0;
+			/**************************************************//*!
+			*	@brief	Creates the project tree structure.
+			******************************************************/
+			virtual void structure(Model::ResourceProjectItem *item) = 0;
 
-			/*! Saves a file from a tree item. */
-			//virtual void saveFile(QString location, Model::ResourceItem) {}
+			/**************************************************//*!
+			*	@brief	Restructures changed files.
+			******************************************************/
+			virtual void restructure(const QString &file, Changed changed) = 0;
 
-			/*! Requests the serializer to updates the given file. */
-			//virtual void update(Changed changed, QString previous, QString current = "") {}
-
-			virtual char settings() { return _settings; }
-
-		private:
-
-			/*! Contains settings bits. */
-			const char _settings = 0;
+			/**************************************************//*!
+			*	@brief	Determines how the project is structured.
+			******************************************************/
+			virtual char settings() { return 0; }
 		};
 	}
 }

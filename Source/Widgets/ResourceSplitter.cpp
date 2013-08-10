@@ -21,15 +21,18 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ResourceSplitter.hpp"
+#include "WindowManager.hpp"
 #include <QDebug>
 #include <QLabel>
 #include "Widget.hpp"
+#include <QDebug>
 
 namespace NGM
 {
 	namespace Widget
 	{
-		ResourceSplitter::ResourceSplitter(QWidget *parent) : QSplitter(parent)
+		ResourceSplitter::ResourceSplitter(Manager::WindowManager *windowManager, QWidget *parent) :
+			QSplitter(parent), windowManager(windowManager)
 		{
 			setChildrenCollapsible(false);
 		}
@@ -39,7 +42,16 @@ namespace NGM
 			if (count() == 0 || active == false)
 			{
 				ResourceTab *tab = new ResourceTab(this);
-				tab->resourceOpen(resource);
+				Resource::Widget *widget = tab->resourceOpen(resource);
+				widget->connect(widget, &Resource::Widget::canCopy, [this](const bool &value)
+				{
+					this->windowManager->canCopy(value);
+				});
+				widget->connect(widget, &Resource::Widget::canPaste, [this](const bool &value)
+				{
+					qDebug() << "PASTING.";
+					this->windowManager->canPaste(value);
+				});
 				addWidget(tab);
 				current	= tab;
 				tabs.push_back(current);
@@ -120,6 +132,12 @@ namespace NGM
 		{
 			Resource::Widget *widget = static_cast<Resource::Widget*>(current->currentWidget());
 			widget->cutRequest();
+		}
+
+		void ResourceSplitter::paste()
+		{
+			Resource::Widget *widget = static_cast<Resource::Widget*>(current->currentWidget());
+			widget->pasteRequest();
 		}
 	}
 }

@@ -25,8 +25,8 @@
 #include <QApplication>
 #include "ActionManager.hpp"
 #include "ProjectManager.hpp"
-#include "Global.hpp"
-#include <QShortcut>
+#include "SettingManager.hpp"
+#include "../Global.hpp"
 #include <QAction>
 #include <list>
 
@@ -38,6 +38,11 @@ namespace NGM
 	{
 		class ResourceItemModel;
 		class ResourceProjectItem;
+	}
+
+	namespace Widget
+	{
+		class ResourceSplitter;
 	}
 
 	namespace Manager
@@ -53,27 +58,8 @@ namespace NGM
 		class WindowManager : public QApplication
 		{
 			Q_OBJECT
-		public:
 
-			/*! Contains bit flags for the settings variable. */
-			enum Preferences
-			{
-				ShowWelcome         =   0b0000000000000001,
-				NoResourceTabs      =   0b0000000000000010,
-				HideResourceTabs    =   0b0000000000000100,
-				ExternalResources   =   0b0000000000001000,
-				CodeUseTabs         =   0b0000000000010000,
-				CodeWarpNone        =   0b0000000000000000,
-				CodeWarpChar        =   0b0000000000100000,
-				CodeWarpWord        =   0b0000000001100000,
-				CodeEdgeNone        =   0b0000000000000000,
-				CodeEdgeLine        =   0b0000000010000000,
-				CodeEdgeBack        =   0b0000000110000000,
-				UseDirectory		=	0b0000001000000000,
-				AddDirectory		=	0b0000010000000000,
-				PreloadData			=	0b0000100000000000,
-				UniqueIcons			=	0b0001000000000000
-			};
+		public:
 
 			/**************************************************//*!
 			*	@brief	Creates a single window.
@@ -85,59 +71,96 @@ namespace NGM
 			******************************************************/
 			~WindowManager();
 
-			/*! Contains all project metadata and icons. */
+			/**************************************************//*!
+			*	@brief	Contains all project metadata.
+			******************************************************/
 			Manager::ProjectManager projectManager;
 
-			/*! Contains all actions and icons. */
+			/**************************************************//*!
+			*	@brief	Contains all actions and icons.
+			******************************************************/
 			Manager::ActionManager actionManager;
 
-			/*! Holds all registered resource types. */
-			std::vector<QAction*> resources;
+			/**************************************************//*!
+			*	@brief	Contains all settings.
+			******************************************************/
+			Manager::SettingManager settingManager;
 
-			/*! Adds and returns a new and empty window. */
-			NGM::MainWindow *addWindow();
+			/**************************************************//*!
+			*	@brief	Adds and returns a new and empty window.
+			******************************************************/
+			MainWindow *addWindow();
 
-			/*! Permanantly removes the indicated window. */
+			/**************************************************//*!
+			*	@brief	Permanantely destroys the indicated window.
+			******************************************************/
 			void removeWindow(MainWindow *window);
 
-			/*! Add new project to the heirarchy model. */
+			/**************************************************//*!
+			*	@brief	Adds a new project to the heirachy model.
+			******************************************************/
 			void addProject(NGM::Model::ResourceProjectItem *project);
-
-			/*! Contains the default directory location. */
-			QString directory;
-
-			/*! Contains settings bits used by dialogs and windows. */
-			uint16_t settings;
 
 		protected:
 
-			Model::ResourceItemModel *hierarchy;
-			// ColumnModel *messages;
+			/**************************************************//*!
+			*	@brief	Contains all loaded projects and resources.
+			******************************************************/
+			Model::ResourceItemModel *heirarchy;
 
+			/**************************************************//*!
+			*	@brief	Creates a new project with user input.
+			******************************************************/
 			void createProjectDialog();
 
+			/**************************************************//*!
+			*	@brief	Opens an existing project with user input.
+			******************************************************/
 			void openProjectDialog();
+
+			/**************************************************//*!
+			*	@brief	Filters keyboard shortcuts.
+			******************************************************/
+			bool eventFilter(QObject*object, QEvent *event);
 
 			friend class NGM::MainWindow;
 			friend class Manager::ActionManager;
 
-			bool eventFilter(QObject*, QEvent *event);
+		protected:
 
-			void canCopy(const bool &i);
-			void canPaste(const bool &i);
-			void isModified(const bool &i);
+			/**************************************************//*!
+			*	@brief	Activates cut/copy actions.
+			******************************************************/
+			void canCopy(const bool &value);
+
+			/**************************************************//*!
+			*	@brief	Activates the paste action.
+			******************************************************/
+			void canPaste(const bool &value);
+
+			/**************************************************//*!
+			*	@brief	Activates the select action.
+			******************************************************/
+			void canSelect(const bool &value);
+
+			/**************************************************//*!
+			*	@brief	Activates the save actions.
+			******************************************************/
+			void isModified(const bool &value);
+
+			friend class Widget::ResourceSplitter;
 
 		private:
 
-			/*! Holds all created windows. */
+			/**************************************************//*!
+			*	@brief	Stores all created windows.
+			******************************************************/
 			std::list<MainWindow*> windows;
 
 			/**************************************************//*!
 			*	@brief	Stores the current focused window.
 			******************************************************/
 			MainWindow *currentWindow;
-
-			bool windowType;
 		};
 	}
 }

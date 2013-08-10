@@ -23,7 +23,7 @@
 **/
 #include "BasicItem.hpp"
 #include "BasicModel.hpp"
-#include "Global.hpp"
+#include "../Global.hpp"
 #include <QDebug>
 
 namespace NGM

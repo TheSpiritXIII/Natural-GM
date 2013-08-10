@@ -27,7 +27,7 @@
 #include <QIcon>
 #include <QString>
 #include "Type.hpp"
-#include "Global.hpp"
+#include "../Global.hpp"
 #include "Project.hpp"
 #include "TextSerializer.hpp"
 

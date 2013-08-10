@@ -1,7 +1,28 @@
+/**
+ *  @file Widget.hpp
+ *  @section License
+ *
+ *      Copyright (C) 2013 Daniel Hrabovcak
+ *
+ *      This file is a part of the Natural GM IDE.
+ *
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      (at your option) any later version.
+ *
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 #pragma once
 #ifndef _NGM_RESOURCE_WIDGET__HPP
 #define _NGM_RESOURCE_WIDGET__HPP
-#include "Global.hpp"
+#include "../Global.hpp"
 #include <string>
 #include <QString>
 #include <QAction>
@@ -9,15 +30,15 @@
 #include <QMessageBox>
 #include <QProgressBar>
 #include "ResourceContentItem.hpp"
-#include "Resources/Project.hpp"
-#include "Resources/Serializer.hpp"
+#include "../Resources/Project.hpp"
+#include "../Resources/Serializer.hpp"
 
 namespace NGM
 {
 	namespace Resource
 	{
 		/**************************************************//*!
-		 *	An editable widget for a specific resource.
+		*	@brief	An editable widget for a specific resource.
 		******************************************************/
 		class Widget : public QWidget
 		{
@@ -26,66 +47,52 @@ namespace NGM
 		public:
 
 			/**************************************************//*!
-			 *	@brief Settings for de/activating toolbar contrals.
-			******************************************************/
-			enum Settings
-			{
-				CanCut			=	0b00000001,
-				CanCopy			=	0b00000010,
-				CanPaste		=	0b00000100,
-				CanSearch		=	0b00001000,
-				CanClipboard	=	0b00000111,
-				IsModified		=	0b00010000
-			};
-
-			/**************************************************//*!
-			 *	@brief Creates a widget with the indicated parent.
+			*	@brief	Creates a widget with the indicated parent.
 			******************************************************/
 			Widget(QWidget *parent = 0) : QWidget(parent) {}
 
 			/**************************************************//*!
-			 *	@brief Destroys the widget and all of its children.
+			*	@brief	Destroys the widget and all of its children.
 			******************************************************/
 			~Widget() {}
 
 			/**************************************************//*!
-			 *	@brief Requests the widget to cut its data.
+			*	@brief	Requests the widget to cut.
 			******************************************************/
 			virtual void cutRequest() = 0;
 
 			/**************************************************//*!
-			 *	@brief Requests the widget to copy its data->
+			*	@brief	Requests the widget to copy.
 			******************************************************/
 			virtual void copyRequest() = 0;
 
 			/**************************************************//*!
-			 *	@brief Requests the widget to paste its data.
+			*	@brief	Requests the widget to paste.
 			******************************************************/
 			virtual void pasteRequest() = 0;
 
 			/**************************************************//*!
-			 *	@brief Requests the widget to undo its data.
+			*	@brief	Requests the widget to undo.
 			******************************************************/
 			virtual void undoRequest() = 0;
 
 			/**************************************************//*!
-			 *	@brief Requests the widget to redo its data.
+			*	@brief	Requests the widget to redo its data.
 			******************************************************/
 			virtual void redoRequest() = 0;
 
 			/**************************************************//*!
-			 *	@brief Searches the widget for the indicated data.
+			*	@brief	Searches the widget for the indicated data.
 			******************************************************/
 			virtual void searchRequest(unsigned char s, QByteArray *data) = 0;
 
 			/**************************************************//*!
-			 *	@brief Sets the window's status contents.
+			*	@brief	Sets the window's status contents.
 			******************************************************/
 			virtual void statusRequest(QLabel *label, QProgressBar *progress) = 0;
 
 			/**************************************************//*!
-			 *	@return Attempts to close the widget.
-			 *	@return True if the widget was closed, false otherwise.
+			*	@return	True if the widget was closed, false otherwise.
 			******************************************************/
 			virtual bool closeResource(Resource *resource)
 			{
@@ -107,32 +114,63 @@ namespace NGM
 			}
 
 			/**************************************************//*!
-			 *	@return The value of the indicated property.
+			*	@return	The value of the indicated property.
 			******************************************************/
 			virtual QVariant property(const char* property) = 0;
 
 			/**************************************************//*!
-			 *	@return A list of all possible properties.
+			*	@return	A list of all possible properties.
 			******************************************************/
 			virtual QStringList	getPropertyList() = 0;
 
 			/**************************************************//*!
-			 *	@brief Sets the indicated property to the
-			 *		indicated value.
+			*	@brief	Sets the indicated property to the
+			*			indicated value.
 			******************************************************/
 			virtual void setProperty(const char* property, QVariant value) = 0;
 
 			/**************************************************//*!
-			 *	@return The widget toolbar settings.
+			*	@return	The widget toolbar settings.
 			******************************************************/
 			virtual uint8_t getSettings() = 0;
 
 		signals:
 
 			/**************************************************//*!
-			 *	@brief Requests to update the status bar.
+			*	@brief	Requests to update the status bar.
 			******************************************************/
-			void requestStatusUpdate();
+			void updateStatus();
+
+			/**************************************************//*!
+			*	@brief	Tells if it can copy or not.
+			******************************************************/
+			void canCopy(bool);
+
+			/**************************************************//*!
+			*	@brief	Tells if it can paste or not.
+			******************************************************/
+			void canPaste(bool);
+
+			/**************************************************//*!
+			*	@brief	Tells if it can undo or not.
+			******************************************************/
+			void canUndo(bool);
+
+			/**************************************************//*!
+			*	@brief	Tells if it can redo or not.
+			******************************************************/
+			void canRedo(bool);
+
+			/**************************************************//*!
+			*	@brief	Tells if it can select or not.
+			******************************************************/
+			void caSelect(bool);
+
+			/**************************************************//*!
+			*	@brief	Tells if it is modified or not.
+			******************************************************/
+			void isModifed(bool);
+
 		};
 	}
 }

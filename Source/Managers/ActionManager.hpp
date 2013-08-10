@@ -161,11 +161,6 @@ namespace NGM
 			~ActionManager();
 
 			/**************************************************//*!
-			*	@brief	Contains all actions.
-			******************************************************/
-			QAction *actions[48];
-
-			/**************************************************//*!
 			*	@brief	Contains all drag & drop icons.
 			******************************************************/
 			QIcon *dragdrop[192];
@@ -174,6 +169,11 @@ namespace NGM
 			*	@brief	Contains generic resource icons.
 			******************************************************/
 			QIcon *icons[16];
+
+			/**************************************************//*!
+			*	@brief	Returns the indicated action.
+			******************************************************/
+			const QAction *getAction(size_t type) const;
 
 			/**************************************************//*!
 			*	@brief	Gets an icon based on the current theme.
@@ -246,6 +246,11 @@ namespace NGM
 			*	@brief	Contains action related settings.
 			******************************************************/
 			WindowManager *manager;
+
+			/**************************************************//*!
+			*	@brief	Contains all actions.
+			******************************************************/
+			QAction *actions[48];
 
 			friend class NGM::Manager::WindowManager;
 		};

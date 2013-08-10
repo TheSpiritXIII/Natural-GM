@@ -5,9 +5,10 @@
 #----------------------------------------------
 greaterThan(QT_MAJOR_VERSION, 5)
 QT			+=	widgets
-TEMPLATE	=	app
-TARGET		=	"Natural-GM"
+TEMPLATE	 =	app
+TARGET		 =	"Natural-GM"
 CONFIG		+=	c++11
+#LIBS		+=	-L$$[QT_INSTALL_LIBS] -lqscintilla2
 #----------------------------------------------
 #   Include locations.
 #----------------------------------------------
@@ -61,8 +62,8 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Classes/RapidXML/RapidXML.hpp \
 	Dialogs/AboutDialog.hpp \
 	Widgets/ResourceDialog.hpp \
-    Resources/Serializers/GMXSerializer.hpp \
-    Managers/SettingManager.hpp
+	Resources/Serializers/GMXSerializer.hpp \
+	Managers/SettingManager.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -88,7 +89,10 @@ SOURCES		+= \
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------
-#win32:RC_FILE = resource.rc
+win32:RC_FILE	=	Application/Windows.rc
+#----------------------------------------------
+#	Translations.
+#----------------------------------------------
 TRANSLATIONS	=	untranslated.ts
 #----------------------------------------------
 #   Static building.

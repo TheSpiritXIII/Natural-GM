@@ -24,7 +24,7 @@
 #pragma once
 #ifndef _NGM_RESOURCE__HPP
 #define _NGM_RESOURCE__HPP
-#include "Global.hpp"
+#include "../Global.hpp"
 #include <QString>
 #include <string>
 #include <vector>
@@ -84,14 +84,14 @@ namespace NGM
 			/*! Describes the bits used to check a resource's status. */
 			enum StatusBits
 			{
-				Edited      =   0b00000001,
-				Loaded      =   0b00000010,
-				IsCached	=	0b00000100,
-				IsLoading	=	0b00001000,
-				HasError	=	0b00010000,
-				Reserved	=	0b00100000,
-				IsFilename	=	0b01000000,
-				Bit2		=	0b10000000
+				Edited      =   0x01,//0b00000001,
+				Loaded      =   0x02,//0b00000010,
+				IsCached	=	0x04,//0b00000100,
+				IsLoading	=	0x08,//0b00001000,
+				HasError	=	0x10,//0b00010000,
+				Reserved	=	0x20,//0b00100000,
+				IsFilename	=	0x40,//0b01000000,
+				Bit2		=	0x80//0b10000000
 			};
 
 			/*! Contains the status of the resource (eg. loaded or edited). */

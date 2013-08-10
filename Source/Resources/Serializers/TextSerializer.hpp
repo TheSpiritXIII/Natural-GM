@@ -21,7 +21,7 @@
 #pragma once
 #ifndef _NGM_TEXTSERIALIZER__HPP
 #define _NGM_TEXTSERIALIZER__HPP
-#include "Resources/Serializer.hpp"
+#include "../Resources/Serializer.hpp"
 
 namespace NGM
 {
@@ -36,6 +36,16 @@ namespace NGM
 
 			/*! Writes a resource based on widget data. */
 			void write(Widget *widget, Resource *resource);
+
+			/**************************************************//*!
+			*	@brief	Creates the project tree structure.
+			******************************************************/
+			virtual void structure(Model::ResourceProjectItem *item) {}
+
+			/**************************************************//*!
+			*	@brief	Restructures changed files.
+			******************************************************/
+			virtual void restructure(const QString &file, Changed changed) {}
 
 		private:
 

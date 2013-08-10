@@ -27,8 +27,8 @@
 #include <QDebug>
 #include <QStandardItem>
 #include <QStandardItemModel>
-#include "Models/BasicModel.hpp"
-#include "Models/BasicItem.hpp"
+#include "../Models/BasicModel.hpp"
+#include "../Models/BasicItem.hpp"
 #include "ResourceProjectItem.hpp"
 #include "ResourceItemModel.hpp"
 
@@ -77,7 +77,7 @@ namespace NGM
 
 		active = true;
 
-		resourceSplitter = new Widget::ResourceSplitter(this);
+		resourceSplitter = new Widget::ResourceSplitter(data, this);
 		setCentralWidget(resourceSplitter);
 
 		connect(docks[DockHeirarchy], &QDockWidget::visibilityChanged, this, &MainWindow::heirarchyVisibilityChanged);
@@ -108,8 +108,9 @@ namespace NGM
 		{
 			qDebug() << "Visible.";
 			heirarchyView = new QTreeView(this);
+			heirarchyView->setAlternatingRowColors(true);
 			docks[DockHeirarchy]->setWidget(heirarchyView);
-			heirarchyView->setModel(data->hierarchy);
+			heirarchyView->setModel(data->heirarchy);
 			heirarchyView->setHeaderHidden(true);
 			heirarchyView->setSelectionBehavior(QAbstractItemView::SelectItems);
 			heirarchyView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);

@@ -15,7 +15,16 @@ namespace NGM
 			layout->addWidget(textEdit);
 			textEdit->setAcceptRichText(false);
 			textEdit->setFrameStyle(QFrame::NoFrame);
-			this->connect(textEdit, &QTextEdit::textChanged, this, &TextWidget::requestStatusUpdate);
+			connect(textEdit, &QTextEdit::copyAvailable, [this](const bool &value)
+			{
+				emit canCopy(value);
+			});
+			connect(this, &TextWidget::canPaste, [this](const bool &value)
+			{
+				qDebug() << "Pasted!!!!!";
+			});
+
+			emit canPaste(textEdit->canPaste());
 		}
 
 		TextWidget::~TextWidget()

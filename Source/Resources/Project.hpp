@@ -1,7 +1,5 @@
 /**
  *  @file Project.hpp
- *  @brief Declares a project class that holds metadata.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -25,7 +23,7 @@
 #ifndef _NGM_RESOURCE_PROJECT__HPP
 #define _NGM_RESOURCE_PROJECT__HPP
 #include "Type.hpp"
-#include "Global.hpp"
+#include "../Global.hpp"
 #include <QString>
 #include <QIcon>
 

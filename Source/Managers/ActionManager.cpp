@@ -23,7 +23,7 @@
 #include "ActionManager.hpp"
 #include "WindowManager.hpp"
 #include "ProjectManager.hpp"
-#include "Resources/Project.hpp"
+#include "../Resources/Project.hpp"
 #include <QDebug>
 
 namespace NGM
@@ -31,8 +31,9 @@ namespace NGM
 	namespace Manager
 	{
 		ActionManager::ActionManager(WindowManager *manager, ProjectManager *project) :
-			dragdrop
-			{
+			theme("icons/Silk Icons"), project(project), manager(manager)
+			/*dragdrop
+			(
 				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
@@ -57,8 +58,7 @@ namespace NGM
 				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
-			},
-			theme("icons/Silk Icons"), project(project), manager(manager)
+			)*/
 		{
 			// None. Load only when requested.
 		}
@@ -91,6 +91,10 @@ namespace NGM
 			if (QFile::exists(theme+"/main/save.png"))
 			{
 				actions[ActionSave]->setIcon(QIcon(theme+"/main/save.png"));
+			}
+			if (QFile::exists(theme+"/main/saveall.png"))
+			{
+				actions[ActionSaveAll]->setIcon(QIcon(theme+"/main/saveall.png"));
 			}
 			if (QFile::exists(theme+"/main/cut.png"))
 			{

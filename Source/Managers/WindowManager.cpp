@@ -40,9 +40,14 @@ namespace NGM
 	namespace Manager
 	{
 		WindowManager::WindowManager(int argc, char *argv[]) :
-			QApplication(argc, argv), actionManager(this, &projectManager),
-			directory(QDir::homePath()+"/Documents/GameMaker/Projects")
+			QApplication(argc, argv), actionManager(this, &projectManager)
 		{
+#ifdef Q_OS_WIN32
+			setWindowIcon(QIcon("naturalgm.ico"));
+#elif defined Q_OS_MAC
+			setWindowIcon(QIcon("naturalgm.icns"));
+#endif
+
 			installEventFilter(this);
 
 			actionManager.actions[ActionManager::ActionNewProject] = new QAction(tr("New Project"), this);
@@ -71,6 +76,10 @@ namespace NGM
 			actionManager.actions[ActionManager::ActionCopy]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionPaste] = new QAction(tr("Paste"), this);
 			actionManager.actions[ActionManager::ActionPaste]->setEnabled(false);
+			connect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, [this]()
+			{
+				this->currentWindow->resourceSplitter->paste();
+			});
 			actionManager.actions[ActionManager::ActionRedo] = new QAction(tr("Redo"), this);
 			actionManager.actions[ActionManager::ActionRedo]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionUndo] = new QAction(tr("Undo"), this);
@@ -83,7 +92,7 @@ namespace NGM
 			});
 
 			actionManager.reload();
-			hierarchy = new Model::ResourceItemModel();
+			heirarchy = new Model::ResourceItemModel();
 			addWindow();
 		}
 
@@ -158,18 +167,18 @@ namespace NGM
 
 		void WindowManager::createProjectDialog()
 		{
-			Dialog::ProjectDialog *d = new Dialog::ProjectDialog(&projectManager, this);
+			Dialog::ProjectDialog *d = new Dialog::ProjectDialog(&projectManager, &settingManager, this);
 			d->show();
 		}
 
 		void WindowManager::addProject(Model::ResourceProjectItem *project)
 		{
-			hierarchy->append(project);
+			heirarchy->append(project);
 		}
 
 		void WindowManager::openProjectDialog()
 		{
-			QFileDialog d(0, tr("Open an Existing Project"));
+			QFileDialog *d = new QFileDialog(0, tr("Open an Existing Project"));
 
 			QString formats = tr("All Files")+"  (*.*);;";
 			for(auto& i : projectManager.projects)
@@ -184,23 +193,24 @@ namespace NGM
 			}
 			formats.chop(2);
 
-			d.setNameFilter(formats);
+			d->setNameFilter(formats);
 
-			d.exec();
+			if (d->exec() == QDialog::Accepted)
+			{
+				QString filename = d->selectedFiles().first();
+				QString type = d->selectedNameFilter();
+				type.truncate(type.lastIndexOf('('));
 
-			QString filename = d.selectedFiles().first();
-			QString type = d.selectedNameFilter();
-			type.truncate(type.lastIndexOf('('));
+				Resource::Project *project = projectManager.projects.find(type)->second;
 
-			Resource::Project *project = projectManager.projects.find(type)->second;
+				Resource::Resource *r = new Resource::Resource(project->type, NULL, filename, Resource::Resource::IsFilename);
+				heirarchy->append(new Model::ResourceProjectItem(r, project, filename.right(filename.size()-filename.lastIndexOf('/')-1)));
+			}
 
-			Resource::Resource *r = new Resource::Resource(project->type, NULL, filename, Resource::Resource::IsFilename);
-			hierarchy->append(new Model::ResourceProjectItem(r, project, filename.right(filename.size()-filename.lastIndexOf('/')-1)));
-			//windows.front()->resourceSplitter->resourceOpen()
-			//project->widget()
+			d->deleteLater();
 		}
 
-		bool WindowManager::eventFilter(QObject*, QEvent *event)
+		bool WindowManager::eventFilter(QObject *object, QEvent *event)
 		{
 			if (event->type() == QEvent::KeyPress)
 			{
@@ -222,7 +232,29 @@ namespace NGM
 				}
 				return false;
 			}
-			return false;
+			return QObject::eventFilter(object, event);;
+		}
+
+		void WindowManager::canCopy(const bool &value)
+		{
+			actionManager.actions[ActionManager::ActionCut]->setEnabled(value);
+			actionManager.actions[ActionManager::ActionCopy]->setEnabled(value);
+		}
+
+
+		void WindowManager::canPaste(const bool &value)
+		{
+			actionManager.actions[ActionManager::ActionPaste]->setEnabled(value);
+		}
+
+		void WindowManager::canSelect(const bool &value)
+		{
+			actionManager.actions[ActionManager::ActionSelectAll]->setEnabled(value);
+		}
+
+		void WindowManager::isModified(const bool &value)
+		{
+			actionManager.actions[ActionManager::ActionSave]->setEnabled(value);
 		}
 	}
 }

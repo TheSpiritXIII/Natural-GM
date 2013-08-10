@@ -29,15 +29,17 @@
 
 namespace NGM
 {
+	namespace Manager
+	{
+		class WindowManager;
+	}
 	namespace Widget
 	{
 		class ResourceSplitter : public QSplitter
 		{
-
 			Q_OBJECT
 
 		public:
-
 
 			enum Settings
 			{
@@ -50,7 +52,7 @@ namespace NGM
 			/**************************************************//*!
 			 *	@brief	Creates an empty splitter.
 			******************************************************/
-			ResourceSplitter(QWidget *parent = NULL);
+			ResourceSplitter(Manager::WindowManager *windowManager, QWidget *parent = 0);
 
 			/**************************************************//*!
 			 *	@brief	Opens the indicated resource.
@@ -87,7 +89,14 @@ namespace NGM
 			******************************************************/
 			void cut();
 
+			void paste();
+
 		private:
+
+			/**************************************************//*!
+			 *	@brief	Stores the window manager.
+			******************************************************/
+			Manager::WindowManager *windowManager;
 
 			/**************************************************//*!
 			 *	@brief	Stores the current active resource tab.

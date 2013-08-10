@@ -23,6 +23,7 @@
 #ifndef _NGM_RESOURCEGROUPITEM__HPP
 #define _NGM_RESOURCEGROUPITEM__HPP
 #include "ResourceBaseItem.hpp"
+#include <vector>
 
 namespace NGM
 {

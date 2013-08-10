@@ -19,7 +19,7 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#include "Global.hpp"
+#include "../Global.hpp"
 #include "Resource.hpp"
 #include "Project.hpp"
 #include "MainWindow.hpp"
@@ -43,9 +43,12 @@ namespace NGM
 	namespace Dialog
 	{
 		ProjectDialog::ProjectDialog(Manager::ProjectManager *projectManager,
-			Manager::WindowManager *windowManager, QWidget *parent) :
+									 Manager::SettingManager *settingManager,
+									 Manager::WindowManager *windowManager,
+									 QWidget *parent) :
 			QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint),
-			windowManager(windowManager), projectManager(projectManager)
+			windowManager(windowManager), projectManager(projectManager),
+			settingManager(settingManager)
 		{
 			// Set the dialog properties.
 			setMinimumSize(800, 480);
@@ -162,7 +165,7 @@ namespace NGM
 			fileLayout->setMargin(0);
 
 			fileLayout->addWidget(new QLabel(tr("Directory: "), this));
-			directoryEdit = new QLineEdit(windowManager->directory, this);
+			directoryEdit = new QLineEdit(settingManager->directory, this);
 			directoryEdit->setReadOnly(true);
 			fileLayout->addWidget(directoryEdit, 2);
 
@@ -171,7 +174,7 @@ namespace NGM
 			fileLayout->addWidget(browseButton);
 
 			dirUseCheck = new QCheckBox(tr("Use as default"), this);
-			dirUseCheck->setChecked(windowManager->settings & Manager::WindowManager::UseDirectory);
+			dirUseCheck->setChecked(settingManager->settings & Manager::SettingManager::UseDirectory);
 			dirUseCheck->setToolTip(tr("If checked, then this directory is stored "
 			"and set as the default next time you create a project."));
 			fileLayout->addWidget(dirUseCheck);
@@ -186,7 +189,7 @@ namespace NGM
 			nameLayout->addWidget(projectEdit);
 
 			dirAddCheck = new QCheckBox(tr("Add new directory"), this);
-			dirAddCheck->setChecked(windowManager->settings & Manager::WindowManager::AddDirectory);
+			dirAddCheck->setChecked(settingManager->settings & Manager::SettingManager::AddDirectory);
 			dirAddCheck->setToolTip(tr("If checked, then an extra directory is created "
 			"before the project directory and named the same as the project."));
 			nameLayout->addWidget(dirAddCheck);
@@ -280,7 +283,7 @@ namespace NGM
 		void ProjectDialog::chooseRequest()
 		{
 			QString proj = directoryEdit->text()+"/";
-			if (windowManager->settings & Manager::WindowManager::AddDirectory)
+			if (settingManager->settings & Manager::SettingManager::AddDirectory)
 			{
 				proj += projectEdit->text()+"/";
 			}

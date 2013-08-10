@@ -21,10 +21,10 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#include "Global.hpp"
+#include "../Global.hpp"
 #include "ProjectManager.hpp"
 #include <QMessageBox>
-#include "Resources/Types/TextType.hpp"
+#include "../Resources/Types/TextType.hpp"
 #include <QDebug>
 using std::map;
 using std::pair;
@@ -36,20 +36,11 @@ namespace NGM
 	using namespace Resource;
 	namespace Manager
 	{
-		ProjectManager::ProjectManager() :
-			types
-			{
-				pair<const char*, Resource::Type*>("Plain Text", new Resource::TextType(QObject::tr("ngm_PlainText"), QObject::tr("Plain Text")))
-			},
-			projects
-			{
-				pair<QString, Resource::Project*>(GMLScript, new Resource::Project(&textSerializer, nullptr, GMOther, GMLScriptDesc, QStringList(".gml"))),
-				pair<QString, Resource::Project*>(PlainText, new Resource::Project(&textSerializer, nullptr, General, PlainTextDesc, QStringList(".txt")))
-			}
+		ProjectManager::ProjectManager()
 		{
-			auto i = projects.begin();
-			i->second->type = types.begin()->second; ++i;
-			i->second->type = types.begin()->second;
+			types.insert(pair<const char*, NGM::Resource::Type*>("Plain Text", new NGM::Resource::TextType(QObject::tr("ngm_PlainText"), QObject::tr("Plain Text"))));
+			projects.insert(pair<QString, NGM::Resource::Project*>(GMLScript, new NGM::Resource::Project(&textSerializer, types.begin()->second, GMOther, GMLScriptDesc, QStringList(".gml"))));
+			projects.insert(pair<QString, NGM::Resource::Project*>(PlainText, new NGM::Resource::Project(&textSerializer, nullptr, General, PlainTextDesc, QStringList(".txt"))));
 		}
 
 		ProjectManager::~ProjectManager()
@@ -64,26 +55,26 @@ namespace NGM
 			}
 		}
 
-		void ProjectManager::registerProject(Resource::Serializer *serializer,
+		void ProjectManager::registerProject(NGM::Resource::Serializer *serializer,
 			const QString &name, const QString &category, const QString &description,
-			const QStringList extensions, Resource::Type *type)
+			const QStringList extensions, NGM::Resource::Type *type)
 		{
-			projects.insert(pair<QString, Resource::Project*>(name, new Resource::Project(serializer, type, category, description, extensions)));
+			projects.insert(pair<QString, NGM::Resource::Project*>(name, new NGM::Resource::Project(serializer, type, category, description, extensions)));
 		}
 
-		void ProjectManager::registerFileProject(Resource::Serializer *serializer,
+		void ProjectManager::registerFileProject(NGM::Resource::Serializer *serializer,
 			const QString &name, const QString &category, const QString &description,
-			const QStringList extensions, Resource::Type *type)
+			const QStringList extensions, NGM::Resource::Type *type)
 		{
-			files.insert(pair<QString, Resource::Project*>(name, new Resource::Project(serializer, type, category, description, extensions)));
+			files.insert(pair<QString, NGM::Resource::Project*>(name, new NGM::Resource::Project(serializer, type, category, description, extensions)));
 		}
 
 		void ProjectManager::registerType(const string &name, Type *type)
 		{
-			types.insert(pair<string, Resource::Type*>(name, type));
+			types.insert(pair<string, NGM::Resource::Type*>(name, type));
 		}
 
-		const Resource::Type *ProjectManager::getType(const std::string &name) const
+		const NGM::Resource::Type *ProjectManager::getType(const std::string &name) const
 		{
 			return types.find(name)->second;
 		}
@@ -100,7 +91,7 @@ namespace NGM
 
 		map<const QString, Project*> ProjectManager::getProjectCategory(QString category, bool root) const
 		{
-			map<const QString, Resource::Project*> p;
+			map<const QString, NGM::Resource::Project*> p;
 			for (auto& i : projects)
 			{
 				if (root)
@@ -120,7 +111,7 @@ namespace NGM
 
 		map<const QString, Project*> ProjectManager::getFileProjectCategory(const QString category, bool root) const
 		{
-			map<const QString, Resource::Project*> p;
+			map<const QString, NGM::Resource::Project*> p;
 			for (auto& i : projects)
 			{
 				if (root)

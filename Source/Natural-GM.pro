@@ -8,7 +8,7 @@ QT			+=	widgets
 TEMPLATE	 =	app
 TARGET		 =	"Natural-GM"
 CONFIG		+=	c++11
-#LIBS		+=	-L$$[QT_INSTALL_LIBS] -lqscintilla2
+LIBS		+=	-L$$[QT_INSTALL_LIBS] -lqscintilla2
 #----------------------------------------------
 #   Include locations.
 #----------------------------------------------

@@ -116,6 +116,7 @@ namespace NGM
 			heirarchyView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 			heirarchyView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 			connect(heirarchyView, &QTreeView::doubleClicked, this, &MainWindow::heirarchyOpenItem);
+			heirarchyView->setUniformRowHeights(true);
 		}
 		else
 		{

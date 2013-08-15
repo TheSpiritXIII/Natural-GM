@@ -41,6 +41,7 @@ namespace NGM
 			setContentsMargins(0, 0, 0, 0);
 			setContextMenuPolicy(Qt::CustomContextMenu);
 			setMovable(true);
+			setDocumentMode(true);
 
 			connect(this, &ResourceTab::customContextMenuRequested, [this](const QPoint &point)
 			{
@@ -114,6 +115,21 @@ namespace NGM
 		void ResourceTab::changeEvent(QEvent *event)
 		{
 			QTabWidget::changeEvent(event);
+		}
+
+		void ResourceTab::modifedWidget(const bool &modified)
+		{
+			int i = indexOf(static_cast<QWidget*>(sender()));
+			QString &text = tabText(i);
+			if (modified)
+			{
+				text.append('*');
+			}
+			else
+			{
+				text.chop(1);
+			}
+			setTabText(i, text);
 		}
 	}
 }

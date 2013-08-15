@@ -82,6 +82,13 @@ namespace NGM
 			******************************************************/
 			bool contains(Model::ResourceBaseItem *item);
 
+		public slots:
+
+			/**************************************************//*!
+			*	@brief	Updates the tab name.
+			******************************************************/
+			void modifedWidget(const bool &modified);
+
 		protected:
 
 			/**************************************************//*!

@@ -22,6 +22,8 @@
 #include "ResourceItemModel.hpp"
 #include "ResourceProjectItem.hpp"
 #include "ResourceGroupItem.hpp"
+#include "Project.hpp"
+#include "Type.hpp"
 #include <QDebug>
 
 namespace NGM
@@ -58,11 +60,12 @@ namespace NGM
 			}
 			if (role == Qt::DecorationRole)
 			{
-				/*ResourceItem *item = static_cast<BasicItem*>(index.internalPointer())->toResourceItem();
+				ResourceProjectItem *item = static_cast<ResourceBaseItem*>(index.internalPointer())->toResourceProjectItem();
 				if (item != NULL)
 				{
-					return item->resource->getIcon();
-				}*/
+					qDebug() << "OH!";
+					return item->project->type->icon;
+				}
 				//return actionManager->icons[ActionManager::Folder];
 			}
 

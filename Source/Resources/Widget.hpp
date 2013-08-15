@@ -26,6 +26,7 @@
 #include <string>
 #include <QString>
 #include <QAction>
+#include <QEvent>
 #include <QWidget>
 #include <QMessageBox>
 #include <QProgressBar>
@@ -45,6 +46,16 @@ namespace NGM
 			Q_OBJECT
 
 		public:
+
+			enum Settings
+			{
+				CanCopy		=	0x01, //0b00000001,
+				CanPaste	=	0x02, //0b00000010,
+				CanSelect	=	0x04, //0b00000100,
+				CanUndo		=	0x08, //0b00001000,
+				CanRedo		=	0x10, //0b00010000,
+				IsModified	=	0x20  //0b00100000
+			};
 
 			/**************************************************//*!
 			*	@brief	Creates a widget with the indicated parent.
@@ -130,9 +141,22 @@ namespace NGM
 			virtual void setProperty(const char* property, QVariant value) = 0;
 
 			/**************************************************//*!
-			*	@return	The widget toolbar settings.
+			*	@return	The widget's current state.
 			******************************************************/
-			virtual uint8_t getSettings() = 0;
+			virtual uint8_t getState() = 0;
+
+			/**************************************************//*!
+			*	@return	Processes a focus event for signals.
+			******************************************************/
+			bool event(QEvent *event)
+			{
+				if (event->type() == QEvent::FocusIn || event->type() == QEvent::Show)
+				{
+					emit isFocused(this);
+					return true;
+				}
+				return QWidget::event(event);
+			}
 
 		signals:
 
@@ -164,13 +188,17 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Tells if it can select or not.
 			******************************************************/
-			void caSelect(bool);
+			void canSelect(bool);
 
 			/**************************************************//*!
 			*	@brief	Tells if it is modified or not.
 			******************************************************/
-			void isModifed(bool);
+			void isModified(bool);
 
+			/**************************************************//*!
+			*	@brief	Emitted when the widget gains focus.
+			******************************************************/
+			void isFocused(Widget *widget);
 		};
 	}
 }

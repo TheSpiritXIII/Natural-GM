@@ -34,13 +34,14 @@
 #include <QDebug>
 #include <QKeyEvent>
 #include <QMenuBar>
+#include "Widget.hpp"
 
 namespace NGM
 {
 	namespace Manager
 	{
 		WindowManager::WindowManager(int argc, char *argv[]) :
-			QApplication(argc, argv), actionManager(this, &projectManager)
+			QApplication(argc, argv), actionManager(this, &projectManager), resourceWidget(nullptr)
 		{
 #ifdef Q_OS_WIN32
 			setWindowIcon(QIcon("naturalgm.ico"));
@@ -68,22 +69,16 @@ namespace NGM
 			actionManager.actions[ActionManager::ActionSaveAll]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionCut] = new QAction(tr("Cut"), this);
 			actionManager.actions[ActionManager::ActionCut]->setEnabled(false);
-			connect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, [this]()
-			{
-				this->currentWindow->resourceSplitter->cut();
-			});
 			actionManager.actions[ActionManager::ActionCopy] = new QAction(tr("Copy"), this);
 			actionManager.actions[ActionManager::ActionCopy]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionPaste] = new QAction(tr("Paste"), this);
 			actionManager.actions[ActionManager::ActionPaste]->setEnabled(false);
-			connect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, [this]()
-			{
-				this->currentWindow->resourceSplitter->paste();
-			});
 			actionManager.actions[ActionManager::ActionRedo] = new QAction(tr("Redo"), this);
 			actionManager.actions[ActionManager::ActionRedo]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionUndo] = new QAction(tr("Undo"), this);
 			actionManager.actions[ActionManager::ActionUndo]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionSelectAll] = new QAction(tr("SelectAll"), this);
+			actionManager.actions[ActionManager::ActionSelectAll]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionAbout] = new QAction(tr("About"), this);
 			connect(actionManager.actions[ActionManager::ActionAbout], &QAction::triggered, [this]()
 			{
@@ -180,16 +175,18 @@ namespace NGM
 		{
 			QFileDialog *d = new QFileDialog(0, tr("Open an Existing Project"));
 
-			QString formats = tr("All Files")+"  (*.*);;";
+			QString formats;
 			for(auto& i : projectManager.projects)
 			{
-				formats += i.first + "( ";
+				formats.append(i.first);
+				formats.append("( ");
 				for(QString j : i.second->extensions)
 				{
-					formats += "*" + j + " ";
+					formats.append(j);
+					formats.append(" ");
 				}
-				formats.chop(1);
-				formats += ");;";
+				formats.replace(formats.length(), 1, ')');
+				formats += ";;";
 			}
 			formats.chop(2);
 
@@ -241,7 +238,6 @@ namespace NGM
 			actionManager.actions[ActionManager::ActionCopy]->setEnabled(value);
 		}
 
-
 		void WindowManager::canPaste(const bool &value)
 		{
 			actionManager.actions[ActionManager::ActionPaste]->setEnabled(value);
@@ -255,6 +251,52 @@ namespace NGM
 		void WindowManager::isModified(const bool &value)
 		{
 			actionManager.actions[ActionManager::ActionSave]->setEnabled(value);
+		}
+
+		void WindowManager::canUndo(const bool &value)
+		{
+			actionManager.actions[ActionManager::ActionUndo]->setEnabled(value);
+		}
+
+		void WindowManager::canRedo(const bool &value)
+		{
+			actionManager.actions[ActionManager::ActionRedo]->setEnabled(value);
+		}
+
+		void WindowManager::setResourceWidget(Resource::Widget *widget)
+		{
+			if (resourceWidget != nullptr)
+			{
+				qDebug() << "Not NULLIO.";
+				disconnect(resourceWidget, &Resource::Widget::canCopy, this, &WindowManager::canCopy);
+				disconnect(resourceWidget, &Resource::Widget::canPaste, this, &WindowManager::canPaste);
+				disconnect(resourceWidget, &Resource::Widget::canSelect, this, &WindowManager::canSelect);
+				disconnect(resourceWidget, &Resource::Widget::canUndo, this, &WindowManager::canUndo);
+				disconnect(resourceWidget, &Resource::Widget::canRedo, this, &WindowManager::canRedo);
+				disconnect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, resourceWidget, &Resource::Widget::cutRequest);
+				disconnect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, resourceWidget, &Resource::Widget::copyRequest);
+				disconnect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, resourceWidget, &Resource::Widget::pasteRequest);
+				disconnect(actionManager.actions[ActionManager::ActionUndo], &QAction::triggered, resourceWidget, &Resource::Widget::undoRequest);
+				disconnect(actionManager.actions[ActionManager::ActionRedo], &QAction::triggered, resourceWidget, &Resource::Widget::redoRequest);
+			}
+			uint8_t settings = widget->getState();
+			canCopy(settings & Resource::Widget::CanCopy);
+			canPaste(settings & Resource::Widget::CanPaste);
+			canSelect(settings & Resource::Widget::CanSelect);
+			canUndo(settings & Resource::Widget::CanUndo);
+			canRedo(settings & Resource::Widget::CanRedo);
+			connect(widget, &Resource::Widget::canCopy, this, &WindowManager::canCopy);
+			connect(widget, &Resource::Widget::canPaste, this, &WindowManager::canPaste);
+			connect(widget, &Resource::Widget::canSelect, this, &WindowManager::canSelect);
+			connect(widget, &Resource::Widget::canUndo, this, &WindowManager::canUndo);
+			connect(widget, &Resource::Widget::canRedo, this, &WindowManager::canRedo);
+			connect(widget, &Resource::Widget::isModified, this, &WindowManager::isModified);
+			connect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, widget, &Resource::Widget::cutRequest);
+			connect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, widget, &Resource::Widget::copyRequest);
+			connect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, widget, &Resource::Widget::pasteRequest);
+			connect(actionManager.actions[ActionManager::ActionUndo], &QAction::triggered, widget, &Resource::Widget::undoRequest);
+			connect(actionManager.actions[ActionManager::ActionRedo], &QAction::triggered, widget, &Resource::Widget::redoRequest);
+			resourceWidget = widget;
 		}
 	}
 }

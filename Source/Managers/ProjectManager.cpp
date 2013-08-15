@@ -39,8 +39,8 @@ namespace NGM
 		ProjectManager::ProjectManager()
 		{
 			types.insert(pair<const char*, NGM::Resource::Type*>("Plain Text", new NGM::Resource::TextType(QObject::tr("ngm_PlainText"), QObject::tr("Plain Text"))));
-			projects.insert(pair<QString, NGM::Resource::Project*>(GMLScript, new NGM::Resource::Project(&textSerializer, types.begin()->second, GMOther, GMLScriptDesc, QStringList(".gml"))));
-			projects.insert(pair<QString, NGM::Resource::Project*>(PlainText, new NGM::Resource::Project(&textSerializer, nullptr, General, PlainTextDesc, QStringList(".txt"))));
+			projects.insert(pair<QString, NGM::Resource::Project*>(GMLScript, new NGM::Resource::Project(&textSerializer, types.begin()->second, GMOther, GMLScriptDesc, QStringList("*.gml"))));
+			projects.insert(pair<QString, NGM::Resource::Project*>(PlainText, new NGM::Resource::Project(&textSerializer, types.begin()->second, General, PlainTextDesc, QStringList("*.txt") << "*.*")));
 		}
 
 		ProjectManager::~ProjectManager()
@@ -69,12 +69,12 @@ namespace NGM
 			files.insert(pair<QString, NGM::Resource::Project*>(name, new NGM::Resource::Project(serializer, type, category, description, extensions)));
 		}
 
-		void ProjectManager::registerType(const string &name, Type *type)
+		void ProjectManager::registerType(const QString &name, Type *type)
 		{
-			types.insert(pair<string, NGM::Resource::Type*>(name, type));
+			types.insert(pair<QString, NGM::Resource::Type*>(name, type));
 		}
 
-		const NGM::Resource::Type *ProjectManager::getType(const std::string &name) const
+		const NGM::Resource::Type *ProjectManager::getType(const QString &name) const
 		{
 			return types.find(name)->second;
 		}

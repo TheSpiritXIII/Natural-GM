@@ -43,18 +43,11 @@ namespace NGM
 			{
 				ResourceTab *tab = new ResourceTab(this);
 				Resource::Widget *widget = tab->resourceOpen(resource);
-				widget->connect(widget, &Resource::Widget::canCopy, [this](const bool &value)
-				{
-					this->windowManager->canCopy(value);
-				});
-				widget->connect(widget, &Resource::Widget::canPaste, [this](const bool &value)
-				{
-					qDebug() << "PASTING.";
-					this->windowManager->canPaste(value);
-				});
 				addWidget(tab);
+				focusWidget(widget);
 				current	= tab;
 				tabs.push_back(current);
+				connect(widget, &Resource::Widget::isModified, tab, &ResourceTab::modifedWidget);
 			}
 			else
 			{
@@ -65,7 +58,7 @@ namespace NGM
 						return;
 					}
 				}
-				current->resourceOpen(resource);
+				focusWidget(current->resourceOpen(resource));
 			}
 		}
 
@@ -138,6 +131,15 @@ namespace NGM
 		{
 			Resource::Widget *widget = static_cast<Resource::Widget*>(current->currentWidget());
 			widget->pasteRequest();
+		}
+
+		void ResourceSplitter::focusWidget(Resource::Widget *widget)
+		{
+			windowManager->setResourceWidget(widget);
+			connect(widget, &Resource::Widget::isFocused, [this](Resource::Widget *widget)
+			{
+				this->focusWidget(widget);
+			});
 		}
 	}
 }

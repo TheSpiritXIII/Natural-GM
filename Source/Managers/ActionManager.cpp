@@ -32,35 +32,11 @@ namespace NGM
 	{
 		ActionManager::ActionManager(WindowManager *manager, ProjectManager *project) :
 			theme("icons/Silk Icons"), project(project), manager(manager)
-			/*dragdrop
-			(
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-				nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
-			)*/
 		{
-			// None. Load only when requested.
+			for (size_t i =0; i != 193; ++i)
+			{
+				dragdrop[i] = nullptr;
+			}
 		}
 
 		ActionManager::~ActionManager()
@@ -118,7 +94,14 @@ namespace NGM
 			}
 			for(auto& i : project->types)
 			{
-				//i.second->icon = QIcon(theme+"/project/"+i.first);
+				QString path = theme;
+				path.append("/project/");
+				path.append(i.first);
+				path.append(".png");
+				if (QFile::exists(path))
+				{
+					i.second->icon = QIcon(path);
+				}
 			}
 		}
 

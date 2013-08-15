@@ -93,12 +93,12 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Stores and adds a resource type.
 			******************************************************/
-			void registerType(const std::string &name, Resource::Type *type);
+			void registerType(const QString &name, Resource::Type *type);
 
 			/**************************************************//*!
 			*	@brief	Returns the type with the specified name.
 			******************************************************/
-			const Resource::Type *getType(const std::string &name) const;
+			const Resource::Type *getType(const QString &name) const;
 
 			/**************************************************//*!
 			*	@brief	Returns a list of all registered projects.
@@ -138,7 +138,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Stores all registered types.
 			******************************************************/
-			std::map<const std::string, Resource::Type*> types;
+			std::map<const QString, Resource::Type*> types;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered projects.

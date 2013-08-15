@@ -45,6 +45,11 @@ namespace NGM
 		class ResourceSplitter;
 	}
 
+	namespace Resource
+	{
+		class Widget;
+	}
+
 	namespace Manager
 	{
 		class ResourceManager;
@@ -144,9 +149,24 @@ namespace NGM
 			void canSelect(const bool &value);
 
 			/**************************************************//*!
+			*	@brief	Activates the undo action.
+			******************************************************/
+			void canUndo(const bool &value);
+
+			/**************************************************//*!
+			*	@brief	Activates the redo action.
+			******************************************************/
+			void canRedo(const bool &value);
+
+			/**************************************************//*!
 			*	@brief	Activates the save actions.
 			******************************************************/
 			void isModified(const bool &value);
+
+			/**************************************************//*!
+			*	@brief	Sets the current resource widget.
+			******************************************************/
+			void setResourceWidget(Resource::Widget *widget);
 
 			friend class Widget::ResourceSplitter;
 
@@ -161,6 +181,11 @@ namespace NGM
 			*	@brief	Stores the current focused window.
 			******************************************************/
 			MainWindow *currentWindow;
+
+			/**************************************************//*!
+			*	@brief	Stores the currently focused widget.
+			******************************************************/
+			Resource::Widget *resourceWidget;
 		};
 	}
 }

@@ -22,8 +22,9 @@
 #ifndef _NGM_TEXTWIDGET__HPP
 #define _NGM_TEXTWIDGET__HPP
 #include "../Resources/Widget.hpp"
-#include <QTextEdit>
 #include "../Global.hpp"
+#define QSCINTILLA_DLL
+#include <Qsci/qsciscintilla.h>
 
 namespace NGM
 {
@@ -102,15 +103,19 @@ namespace NGM
 			/**************************************************//*!
 			 *	@return The widget toolbar settings.
 			******************************************************/
-			uint8_t getSettings();
+			uint8_t getState();
 
 		private:
 
 			/**************************************************//*!
 			 *	@brief The editable widget.
 			******************************************************/
-			QTextEdit *textEdit;
+			QsciScintilla *textEdit;
 
+			/**************************************************//*!
+			 *	@brief Stores the current state.
+			******************************************************/
+			uint8_t state;
 		};
 	}
 }

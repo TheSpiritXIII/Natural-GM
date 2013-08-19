@@ -89,12 +89,15 @@ namespace NGM
 		{
 			using NGM::Resource::Widget;
 			Resource::Resource *r = resource->toResourceProjectItem()->resource;
-			Widget *widget = r->type->widget();
+			Widget *widget = r->type->widget(this);
 			if (widget != nullptr)
 			{
+				widget->block(true);
 				resource->root()->project->serializer->read(widget, r);
+				widget->block(false);
 				setCurrentIndex(addTab(widget, resource->data().toString()));
 				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Widget*>(resource, widget));
+				splitter->parentWidget->setWindowFilePath(tabText(currentIndex()));
 				return widget;
 			}
 			return nullptr;
@@ -119,8 +122,9 @@ namespace NGM
 
 		void ResourceTab::modifedWidget(const bool &modified)
 		{
+			qDebug() << modified;
 			int i = indexOf(static_cast<QWidget*>(sender()));
-			QString &text = tabText(i);
+			QString text = tabText(i);
 			if (modified)
 			{
 				text.append('*');
@@ -130,6 +134,7 @@ namespace NGM
 				text.chop(1);
 			}
 			setTabText(i, text);
+			splitter->parentWidget->setWindowFilePath(tabText(currentIndex()));
 		}
 	}
 }

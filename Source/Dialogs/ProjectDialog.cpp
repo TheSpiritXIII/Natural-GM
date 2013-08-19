@@ -324,7 +324,7 @@ namespace NGM
 			NGM::MainWindow *window = qobject_cast<NGM::MainWindow*>(QApplication::activeWindow());
 			if (window)
 			{
-				window->heirarchyOpenProject(item);
+				//window->heirarchyOpenProject(item);
 			}
 		}
 

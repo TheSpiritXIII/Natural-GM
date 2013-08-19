@@ -35,7 +35,6 @@ namespace NGM
 
 			Widget *widget(QWidget *parent)
 			{
-				qDebug() << "Correct type.";
 				return new TextWidget(parent);
 			}
 

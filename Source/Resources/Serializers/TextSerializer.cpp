@@ -9,17 +9,14 @@ namespace NGM
 	{
 		void TextSerializer::read(Widget *widget, Resource *resource)
 		{
-			qDebug() << "Opening...";
 			if (resource->status & Resource::IsFilename)
 			{
-				qDebug() << "Hello!...";
 				QFile file(resource->location);
 				file.open(QIODevice::ReadOnly);
 				widget->setProperty("text", file.readAll());
 				file.close();
 				return;
 			}
-			qDebug() << "Noes...";
 			widget->setProperty("text", resource->data);
 		}
 

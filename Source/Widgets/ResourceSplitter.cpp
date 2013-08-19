@@ -32,7 +32,7 @@ namespace NGM
 	namespace Widget
 	{
 		ResourceSplitter::ResourceSplitter(Manager::WindowManager *windowManager, QWidget *parent) :
-			QSplitter(parent), windowManager(windowManager)
+			QSplitter(parent), windowManager(windowManager), parentWidget(parent)
 		{
 			setChildrenCollapsible(false);
 		}
@@ -47,7 +47,12 @@ namespace NGM
 				focusWidget(widget);
 				current	= tab;
 				tabs.push_back(current);
+
 				connect(widget, &Resource::Widget::isModified, tab, &ResourceTab::modifedWidget);
+				connect(widget, &Resource::Widget::isFocused, [this](Resource::Widget *widget)
+				{
+					this->focusWidget(widget);
+				});
 			}
 			else
 			{
@@ -58,7 +63,14 @@ namespace NGM
 						return;
 					}
 				}
-				focusWidget(current->resourceOpen(resource));
+				Resource::Widget *widget = current->resourceOpen(resource);
+				focusWidget(widget);
+
+				connect(widget, &Resource::Widget::isModified, current, &ResourceTab::modifedWidget);
+				connect(widget, &Resource::Widget::isFocused, [this](Resource::Widget *widget)
+				{
+					this->focusWidget(widget);
+				});
 			}
 		}
 
@@ -136,10 +148,6 @@ namespace NGM
 		void ResourceSplitter::focusWidget(Resource::Widget *widget)
 		{
 			windowManager->setResourceWidget(widget);
-			connect(widget, &Resource::Widget::isFocused, [this](Resource::Widget *widget)
-			{
-				this->focusWidget(widget);
-			});
 		}
 	}
 }

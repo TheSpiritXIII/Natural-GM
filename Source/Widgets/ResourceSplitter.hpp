@@ -33,6 +33,8 @@ namespace NGM
 	{
 		class WindowManager;
 	}
+	class MainWindow;
+
 	namespace Widget
 	{
 		class ResourceSplitter : public QSplitter
@@ -92,24 +94,29 @@ namespace NGM
 			void paste();
 
 			/**************************************************//*!
-			 *	@brief	Assigns
+			*	@brief	Assigns
 			******************************************************/
 			void focusWidget(Resource::Widget *widget);
+
+			/**************************************************//*!
+			*	@brief	Stores the parent widget.
+			******************************************************/
+			QWidget *const parentWidget;
 
 		private:
 
 			/**************************************************//*!
-			 *	@brief	Stores the window manager.
+			*	@brief	Stores the window manager.
 			******************************************************/
 			Manager::WindowManager *windowManager;
 
 			/**************************************************//*!
-			 *	@brief	Stores the current active resource tab.
+			*	@brief	Stores the current active resource tab.
 			******************************************************/
 			ResourceTab *current;
 
 			/**************************************************//*!
-			 *	@brief	Stores all tab widgets for quick access.
+			*	@brief	Stores all tab widgets for quick access.
 			******************************************************/
 			std::list<ResourceTab*> tabs;
 		};

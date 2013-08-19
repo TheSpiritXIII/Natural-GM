@@ -51,13 +51,13 @@ namespace NGM
 			{
 				state ^= value ? CanPaste : 0;
 			});
-			connect(this, &TextWidget::canUndo, [this](const bool &value)
+			connect(this, &TextWidget::canUndo, [this](const bool &)
 			{
-				state ^= value ? CanUndo : 0;
+				state ^= CanUndo;
 			});
-			connect(this, &TextWidget::canRedo, [this](const bool &value)
+			connect(this, &TextWidget::canRedo, [this](const bool &)
 			{
-				state ^= value ? CanRedo : 0;
+				state ^= CanRedo;
 			});
 			connect(this, &TextWidget::canSelect, [this](const bool &value)
 			{
@@ -65,10 +65,21 @@ namespace NGM
 			});
 			connect(textEdit, &QsciScintilla::modificationChanged, [this](const bool &value)
 			{
-				state ^= value ? IsModified : 0;
-				emit canUndo(textEdit->isUndoAvailable());
-				emit canRedo(textEdit->isRedoAvailable());
-				emit isModified(value);
+				qDebug() << state;
+				qDebug() << "Mofied?" << value << ":" << static_cast<bool>(state & IsModified);
+				if (value != static_cast<bool>(state & IsModified))
+				{
+					state ^= IsModified;
+					emit isModified(value);
+				}
+				if (textEdit->isUndoAvailable() != static_cast<bool>(state & CanUndo))
+				{
+					emit canUndo(textEdit->isUndoAvailable());
+				}
+				if (textEdit->isRedoAvailable() != static_cast<bool>(state & CanRedo))
+				{
+					emit canRedo(textEdit->isRedoAvailable());
+				}
 			});
 			connect(textEdit, &QsciScintilla::linesChanged, [this]()
 			{
@@ -125,7 +136,7 @@ namespace NGM
 
 		uint8_t TextWidget::getState()
 		{
-			return state;//settings	& (textEdit->canPaste() ? 0 : Settings::CanPaste);
+			return state;
 		}
 
 		void TextWidget::searchRequest(uint8_t settings, QByteArray *data)
@@ -168,6 +179,12 @@ namespace NGM
 		QStringList TextWidget::getPropertyList()
 		{
 			return QStringList("text");
+		}
+
+		void TextWidget::block(const bool &blocked)
+		{
+			blockSignals(blocked);
+			textEdit->blockSignals(blocked);
 		}
 	}
 }

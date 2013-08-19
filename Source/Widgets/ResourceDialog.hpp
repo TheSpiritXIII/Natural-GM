@@ -74,6 +74,8 @@ namespace NGM
 			*	@brief	Contains all opened resources.
 			******************************************************/
 			ResourceSplitter *splitter;
+
+
 		};
 	}
 }

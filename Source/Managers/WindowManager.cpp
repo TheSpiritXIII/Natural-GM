@@ -51,6 +51,8 @@ namespace NGM
 
 			installEventFilter(this);
 
+			setApplicationDisplayName("Natural GM");
+
 			actionManager.actions[ActionManager::ActionNewProject] = new QAction(tr("New Project"), this);
 			connect(actionManager.actions[ActionManager::ActionNewProject], &QAction::triggered, [this]()
 			{
@@ -280,6 +282,7 @@ namespace NGM
 				disconnect(actionManager.actions[ActionManager::ActionRedo], &QAction::triggered, resourceWidget, &Resource::Widget::redoRequest);
 			}
 			uint8_t settings = widget->getState();
+			qDebug() << "Is really modified?" << settings;
 			canCopy(settings & Resource::Widget::CanCopy);
 			canPaste(settings & Resource::Widget::CanPaste);
 			canSelect(settings & Resource::Widget::CanSelect);

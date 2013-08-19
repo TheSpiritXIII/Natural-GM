@@ -158,6 +158,8 @@ namespace NGM
 				return QWidget::event(event);
 			}
 
+			virtual void block(const bool &blocked) = 0;
+
 		signals:
 
 			/**************************************************//*!

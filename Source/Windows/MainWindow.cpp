@@ -73,12 +73,15 @@ namespace NGM
 		docks[DockOutput]->hide();
 		docks[DockMessages]->hide();
 
-		updateTitle();
-
 		active = true;
 
 		resourceSplitter = new Widget::ResourceSplitter(data, this);
+		//resourceSplitter->updateWindowFilePath = &MainWindow::setWindowFilePath;
+		//resourceSplitter->updateWindowModified = &MainWindow::setWindowModified;
 		setCentralWidget(resourceSplitter);
+
+		//CALL_MEMBER_FN(*resourceSplitter, resourceSplitter->updateWindowFilePath)("Testing.");
+		//(resourceSplitter->*updateWindowFilePath)("TESTING!");
 
 		connect(docks[DockHeirarchy], &QDockWidget::visibilityChanged, this, &MainWindow::heirarchyVisibilityChanged);
 	}
@@ -87,8 +90,7 @@ namespace NGM
 	{
 		if (windowFilePath().length() != 0)
 		{
-			auto modified = [this] () { return isWindowModified() ? "*": ""; };
-			setWindowTitle(windowFilePath() + modified() + " - Natural GM");
+			setWindowTitle(windowFilePath() + " - Natural GM");
 		}
 		else
 		{
@@ -128,8 +130,8 @@ namespace NGM
 		}
 	}
 
-	void MainWindow::heirarchyOpenProject(Model::ResourceProjectItem *item)
+	void MainWindow::heirarchySetItem(const QString &name)
 	{
-		resourceSplitter->resourceOpen(item);
+
 	}
 }

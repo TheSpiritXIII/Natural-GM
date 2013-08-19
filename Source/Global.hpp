@@ -36,6 +36,8 @@ namespace NGM
 	const uint16_t BUILD = 1;
 }
 
+#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
+
 // Enable threading if GCC 4.8 or higher is detected.
 #ifdef __GNUC__
 	#if __GNUC__ < 5

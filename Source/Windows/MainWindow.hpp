@@ -26,6 +26,7 @@
 #define _NGM_MAINWINDOW__HPP
 #include <QMainWindow>
 #include <QDockWidget>
+#include <QString>
 #include <vector>
 
 #include <QTreeView>
@@ -78,7 +79,7 @@ namespace NGM
 		/*! Updates the window title. */
 		void updateTitle();
 
-		void heirarchyOpenProject(Model::ResourceProjectItem *item);
+		//void heirarchyOpenProject(Model::ResourceProjectItem *item);
 
 	protected:
 
@@ -106,6 +107,8 @@ namespace NGM
 		void heirarchyOpenItem(const QModelIndex & index);
 
 		void heirarchyVisibilityChanged(bool visible);
+
+		void heirarchySetItem(const QString &name);
 	};
 }
 

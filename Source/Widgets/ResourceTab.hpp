@@ -53,11 +53,15 @@ namespace NGM
 
 			/**************************************************//*!
 			 *	@brief	Opens the indicated resource.
-			 *	@param	resource The resource to add.
-			 *	@param	active True to add to the current tab, or
-			 *			false to add as a new tab.
+			 *	@param	resource The resource to open.
 			******************************************************/
 			Resource::Widget *resourceOpen(Model::ResourceBaseItem *resource);
+
+			/**************************************************//*!
+			 *	@brief	Save the indicated resource.
+			 *	@param	widget The widget to save.
+			******************************************************/
+			void resourceSave(Resource::Widget *widget) const;
 
 			/**************************************************//*!
 			 *	@brief	Returns the tab index to the indicated

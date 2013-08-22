@@ -31,6 +31,7 @@
 #include "../Models/BasicItem.hpp"
 #include "ResourceProjectItem.hpp"
 #include "ResourceItemModel.hpp"
+#include <QStatusBar>
 
 const auto DockMovable = QDockWidget::DockWidgetMovable;
 const auto DockClosable = QDockWidget::DockWidgetClosable;
@@ -41,6 +42,7 @@ namespace NGM
 		QMainWindow(parent), data(data), active(false)
 	{
 		setMinimumSize(640, 480);
+		resize(800, 600);
 		docks[DockHeirarchy] = new QDockWidget(tr("Heirarchy"), this);
 		docks[DockHeirarchy]->setFeatures(DockFeatures);
 		addDockWidget(Qt::LeftDockWidgetArea, docks[DockHeirarchy]);
@@ -84,6 +86,17 @@ namespace NGM
 		//(resourceSplitter->*updateWindowFilePath)("TESTING!");
 
 		connect(docks[DockHeirarchy], &QDockWidget::visibilityChanged, this, &MainWindow::heirarchyVisibilityChanged);
+
+		QStatusBar *status = new QStatusBar(this);
+		setStatusBar(status);
+		status->showMessage("Ready.");
+
+		statusLabel = new QLabel(this);
+		statusProgress = new QProgressBar(this);
+		statusProgress->setTextVisible(false);
+
+		status->addPermanentWidget(statusLabel, 3);
+		status->addPermanentWidget(statusProgress, 1);
 	}
 
 	void MainWindow::updateTitle()

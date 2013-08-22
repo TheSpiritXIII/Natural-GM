@@ -4,7 +4,7 @@
 #   Qt specific options.
 #----------------------------------------------
 greaterThan(QT_MAJOR_VERSION, 5)
-QT			+=	widgets
+QT			+=	widgets network
 TEMPLATE	 =	app
 TARGET		 =	"Natural-GM"
 CONFIG		+=	c++11
@@ -63,7 +63,8 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Dialogs/AboutDialog.hpp \
 	Widgets/ResourceDialog.hpp \
 	Resources/Serializers/GMXSerializer.hpp \
-	Managers/SettingManager.hpp
+	Managers/SettingManager.hpp \
+	Managers/ThreadManager.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------

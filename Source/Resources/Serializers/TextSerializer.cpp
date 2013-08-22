@@ -24,12 +24,13 @@ namespace NGM
 		{
 			if (resource->status & Resource::IsFilename)
 			{
-				QFile file(resource->data);
-				file.write(widget->property("data").toByteArray());
+				QFile file(resource->location);
+				file.open(QIODevice::WriteOnly);
+				file.write(widget->property("text").toByteArray());
 				file.close();
 				return;
 			}
-			resource->data = widget->property("data").toByteArray();
+			resource->data = widget->property("text").toByteArray();
 		}
 	}
 }

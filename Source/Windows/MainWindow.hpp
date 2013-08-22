@@ -28,6 +28,8 @@
 #include <QDockWidget>
 #include <QString>
 #include <vector>
+#include <QLabel>
+#include <QProgressBar>
 
 #include <QTreeView>
 #include <QPushButton>
@@ -101,6 +103,9 @@ namespace NGM
 		QTreeView *heirarchyView;
 
 		friend class Manager::WindowManager;
+
+		QLabel *statusLabel;
+		QProgressBar *statusProgress;
 
 	private slots:
 

@@ -33,6 +33,7 @@
 #include "ResourceContentItem.hpp"
 #include "../Resources/Project.hpp"
 #include "../Resources/Serializer.hpp"
+#include "ResourceTab.hpp"
 
 namespace NGM
 {
@@ -49,18 +50,21 @@ namespace NGM
 
 			enum Settings
 			{
-				CanCopy		=	0x01, //0b00000001,
-				CanPaste	=	0x02, //0b00000010,
-				CanSelect	=	0x04, //0b00000100,
-				CanUndo		=	0x08, //0b00001000,
-				CanRedo		=	0x10, //0b00010000,
-				IsModified	=	0x20  //0b00100000
+				CanCopy		=	0x01,
+				CanPaste	=	0x02,
+				CanSelect	=	0x04,
+				CanUndo		=	0x08,
+				CanRedo		=	0x10,
+				CanZoomIn	=	0x20,
+				CanZoomOut	=	0x40,
+				IsModified	=	0x80
 			};
 
 			/**************************************************//*!
 			*	@brief	Creates a widget with the indicated parent.
 			******************************************************/
-			Widget(QWidget *parent = 0) : QWidget(parent) {}
+			Widget(NGM::Widget::ResourceTab * const parent) :
+				QWidget(parent), resourceTab(parent), state(0) {}
 
 			/**************************************************//*!
 			*	@brief	Destroys the widget and all of its children.
@@ -91,6 +95,21 @@ namespace NGM
 			*	@brief	Requests the widget to redo its data.
 			******************************************************/
 			virtual void redoRequest() = 0;
+
+			/**************************************************//*!
+			*	@brief	Requests the widget to zoom in.
+			******************************************************/
+			virtual void zoomInRequest() = 0;
+
+			/**************************************************//*!
+			*	@brief	Requests the widget to zoom out.
+			******************************************************/
+			virtual void zoomOutRequest() = 0;
+
+			/**************************************************//*!
+			*	@brief	Requests the widget to normalize zoom.
+			******************************************************/
+			virtual void zoomRequest() = 0;
 
 			/**************************************************//*!
 			*	@brief	Searches the widget for the indicated data.
@@ -141,9 +160,15 @@ namespace NGM
 			virtual void setProperty(const char* property, QVariant value) = 0;
 
 			/**************************************************//*!
-			*	@return	The widget's current state.
+			*	@brief	Block's the widget's signals.
 			******************************************************/
-			virtual uint8_t getState() = 0;
+			virtual void block(const bool &blocked) = 0;
+
+			/**************************************************//*!
+			*	@return	Tells the widget that it was saved. The
+			*			state should remove its modified flag.
+			******************************************************/
+			virtual void isSaved() = 0;
 
 			/**************************************************//*!
 			*	@return	Processes a focus event for signals.
@@ -158,7 +183,33 @@ namespace NGM
 				return QWidget::event(event);
 			}
 
-			virtual void block(const bool &blocked) = 0;
+			/**************************************************//*!
+			*	@return	The widget's current state.
+			******************************************************/
+			const uint8_t getState()
+			{
+				return state;
+			}
+
+			/**************************************************//*!
+			*	@return	The parent ResourceTabWidget.
+			******************************************************/
+			const NGM::Widget::ResourceTab * const getResourceTabWidget()
+			{
+				return resourceTab;
+			}
+
+		protected:
+
+			/**************************************************//*!
+			 *	@brief Stores the current state.
+			******************************************************/
+			uint8_t state;
+
+			/**************************************************//*!
+			*	@return	The parent ResourceTabWidget.
+			******************************************************/
+			NGM::Widget::ResourceTab * const resourceTab;
 
 		signals:
 
@@ -191,6 +242,16 @@ namespace NGM
 			*	@brief	Tells if it can select or not.
 			******************************************************/
 			void canSelect(bool);
+
+			/**************************************************//*!
+			*	@brief	Tells if it can zoom in or not.
+			******************************************************/
+			void canZoomIn(bool);
+
+			/**************************************************//*!
+			*	@brief	Tells if it can zoom out or not.
+			******************************************************/
+			void canZoomOut(bool);
 
 			/**************************************************//*!
 			*	@brief	Tells if it is modified or not.

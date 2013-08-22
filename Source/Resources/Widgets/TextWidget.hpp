@@ -37,7 +37,7 @@ namespace NGM
 			/**************************************************//*!
 			 *	@brief Creates a widget with the indicated parent.
 			******************************************************/
-			TextWidget(QWidget *parent = 0);
+			TextWidget(NGM::Widget::ResourceTab *parent);
 
 			/**************************************************//*!
 			 *	@brief Destroys the widget and all of its children.
@@ -70,6 +70,21 @@ namespace NGM
 			void redoRequest();
 
 			/**************************************************//*!
+			*	@brief	Requests the widget to zoom in.
+			******************************************************/
+			void zoomInRequest();
+
+			/**************************************************//*!
+			*	@brief	Requests the widget to zoom out.
+			******************************************************/
+			void zoomOutRequest();
+
+			/**************************************************//*!
+			*	@brief	Requests the widget to normalize zoom.
+			******************************************************/
+			void zoomRequest();
+
+			/**************************************************//*!
 			 *	@brief Searches the widget for the indicated data.
 			******************************************************/
 			void searchRequest(uint8_t settings, QByteArray *data);
@@ -80,9 +95,10 @@ namespace NGM
 			void statusRequest(QLabel *label, QProgressBar *progress);
 
 			/**************************************************//*!
-			 *	@brief Opens the indicated widget.
+			*	@return	Tells the widget that it was saved. The
+			*			state should remove its modified flag.
 			******************************************************/
-			//void openResource(Resource *resource) = 0;
+			void isSaved();
 
 			/**************************************************//*!
 			 *	@return The value of the indicated property.
@@ -100,11 +116,6 @@ namespace NGM
 			******************************************************/
 			void setProperty(const char* property, QVariant value);
 
-			/**************************************************//*!
-			 *	@return The widget toolbar settings.
-			******************************************************/
-			uint8_t getState();
-
 			void block(const bool &blocked);
 
 		private:
@@ -113,11 +124,6 @@ namespace NGM
 			 *	@brief The editable widget.
 			******************************************************/
 			QsciScintilla *textEdit;
-
-			/**************************************************//*!
-			 *	@brief Stores the current state.
-			******************************************************/
-			uint8_t state;
 		};
 	}
 }

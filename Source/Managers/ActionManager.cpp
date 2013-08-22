@@ -92,6 +92,18 @@ namespace NGM
 			{
 				actions[ActionUndo]->setIcon(QIcon(theme+"/main/undo.png"));
 			}
+			if (QFile::exists(theme+"/main/zoomin.png"))
+			{
+				actions[ActionZoomIn]->setIcon(QIcon(theme+"/main/zoomin.png"));
+			}
+			if (QFile::exists(theme+"/main/zoomout.png"))
+			{
+				actions[ActionZoomOut]->setIcon(QIcon(theme+"/main/zoomout.png"));
+			}
+			if (QFile::exists(theme+"/main/zoom.png"))
+			{
+				actions[ActionZoom]->setIcon(QIcon(theme+"/main/zoom.png"));
+			}
 			for(auto& i : project->types)
 			{
 				QString path = theme;

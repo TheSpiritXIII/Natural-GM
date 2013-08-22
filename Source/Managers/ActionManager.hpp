@@ -65,34 +65,34 @@ namespace NGM
 				ActionCopy			=	17,
 				ActionPaste			=	18,
 				ActionSelectAll		=	19,
-				ActionFindReplace	=	20,
-				ActionBuild			=	21,
-				ActionBuildAll		=	22,
-				ActionRebuild		=	23,
-				ActionRebuildAll	=	24,
-				ActionClean			=	25,
-				ActionCleanAll		=	26,
-				ActionRun			=	27,
-				ActionDebug			=	28,
-				ActionPause			=	29,
-				ActionStop			=	30,
-				ActionContinue		=	31,
-				ActionStepOver		=	32,
-				ActionStepInto		=	33,
-				ActionLayout		=	34,
-				ActionPreferences	=	35,
-				ActionHelp			=	36,
-				ActionManual		=	37,
-				ActionAbout			=	38,
-				ActionUnused0		=	39,
-				ActionUnused1		=	40,
-				ActionUnused2		=	41,
-				ActionUnused3		=	42,
-				ActionUnused4		=	43,
-				ActionUnused5		=	44,
-				ActionUnused6		=	45,
-				ActionUnused7		=	46,
-				ActionUnused8		=	47
+				ActionZoomIn		=	20,
+				ActionZoomOut		=	21,
+				ActionZoom			=	22,
+				ActionFindReplace	=	23,
+				ActionBuild			=	24,
+				ActionBuildAll		=	25,
+				ActionRebuild		=	26,
+				ActionRebuildAll	=	27,
+				ActionClean			=	28,
+				ActionCleanAll		=	29,
+				ActionRun			=	30,
+				ActionDebug			=	31,
+				ActionPause			=	32,
+				ActionStop			=	33,
+				ActionContinue		=	34,
+				ActionStepOver		=	35,
+				ActionStepInto		=	36,
+				ActionLayout		=	37,
+				ActionPreferences	=	38,
+				ActionHelp			=	39,
+				ActionManual		=	40,
+				ActionAbout			=	41,
+				ActionUnused0		=	42,
+				ActionUnused1		=	43,
+				ActionUnused2		=	44,
+				ActionUnused3		=	45,
+				ActionUnused4		=	46,
+				ActionUnused5		=	47
 			};
 
 			/**************************************************//*!
@@ -250,7 +250,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Contains all actions.
 			******************************************************/
-			QAction *actions[48];
+			QAction *actions[64];
 
 			friend class NGM::Manager::WindowManager;
 		};

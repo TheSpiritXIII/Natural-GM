@@ -8,8 +8,10 @@ namespace NGM
 {
 	namespace Resource
 	{
-		TextWidget::TextWidget(QWidget *parent) : Widget(parent), state(0)
+		TextWidget::TextWidget(NGM::Widget::ResourceTab *parent) : Widget(parent)
 		{
+			state = CanPaste | CanZoomIn | CanZoomOut;
+
 			textEdit = new QsciScintilla(this);
 
 #ifdef Q_OS_WIN32
@@ -55,10 +57,6 @@ namespace NGM
 			{
 				state ^= CanUndo;
 			});
-			connect(this, &TextWidget::canRedo, [this](const bool &)
-			{
-				state ^= CanRedo;
-			});
 			connect(this, &TextWidget::canSelect, [this](const bool &value)
 			{
 				state ^= value ? CanSelect : 0;
@@ -100,8 +98,6 @@ namespace NGM
 					this->textEdit->setMarginWidth(0, QFontMetrics(this->textEdit->font()).width("__")+8);
 				}
 			});
-
-			emit canPaste(true);
 		}
 
 		TextWidget::~TextWidget()
@@ -134,9 +130,43 @@ namespace NGM
 			textEdit->redo();
 		}
 
-		uint8_t TextWidget::getState()
+		void TextWidget::zoomInRequest()
 		{
-			return state;
+			textEdit->zoomIn();
+			if (textEdit->font().pointSize() == 8)
+			{
+				emit canZoomIn(false);
+			}
+			if (~state & CanZoomOut)
+			{
+				emit canZoomOut(true);
+			}
+		}
+
+		void TextWidget::zoomOutRequest()
+		{
+			textEdit->zoomOut();
+			if (textEdit->font().pointSize() == 72)
+			{
+				emit canZoomOut(false);
+			}
+			if (~state & CanZoomIn)
+			{
+				emit canZoomIn(true);
+			}
+		}
+
+		void TextWidget::zoomRequest()
+		{
+			textEdit->zoomTo(11);
+			if (~state & CanZoomIn)
+			{
+				emit canZoomIn(true);
+			}
+			if (~state & CanZoomOut)
+			{
+				emit canZoomOut(true);
+			}
 		}
 
 		void TextWidget::searchRequest(uint8_t settings, QByteArray *data)
@@ -185,6 +215,12 @@ namespace NGM
 		{
 			blockSignals(blocked);
 			textEdit->blockSignals(blocked);
+		}
+
+		void TextWidget::isSaved()
+		{
+			textEdit->setModified(false);
+			state &= ~IsModified;
 		}
 	}
 }

@@ -90,6 +90,7 @@ namespace NGM
 			using NGM::Resource::Widget;
 			Resource::Resource *r = resource->toResourceProjectItem()->resource;
 			Widget *widget = r->type->widget(this);
+			qDebug() << "No Resource found." << widget;
 			if (widget != nullptr)
 			{
 				widget->block(true);
@@ -101,6 +102,21 @@ namespace NGM
 				return widget;
 			}
 			return nullptr;
+		}
+
+		void ResourceTab::resourceSave(Resource::Widget *widget) const
+		{
+			qDebug() << "Searching...";
+			for (auto &i : widgets)
+			{
+				if (i.second == widget)
+				{
+					qDebug() << "Found!";
+					Model::ResourceProjectItem *r = i.first->toResourceProjectItem();
+					r->project->serializer->write(widget, r->resource);
+					break;
+				}
+			}
 		}
 
 		bool ResourceTab::contains(Model::ResourceBaseItem *item)

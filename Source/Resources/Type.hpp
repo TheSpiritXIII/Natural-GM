@@ -7,6 +7,10 @@
 
 namespace NGM
 {
+	namespace Widget
+	{
+		class ResourceTab;
+	}
 	namespace Resource
 	{
 		class Widget;
@@ -29,7 +33,7 @@ namespace NGM
 			QAction *getAction() { return action; }
 
 			/*! @return An usable widget for this type. */
-			virtual Widget *widget(QWidget *parent = 0)
+			virtual Widget *widget(NGM::Widget::ResourceTab *parent = 0)
 			{
 				Q_UNUSED(parent)
 				return NULL;

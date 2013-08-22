@@ -23,6 +23,7 @@
 #ifndef _NGM_WINDOWMANAGER_HPP
 #define _NGM_WINDOWMANAGER__HPP
 #include <QApplication>
+#include <QSharedMemory>
 #include "ActionManager.hpp"
 #include "ProjectManager.hpp"
 #include "SettingManager.hpp"
@@ -42,6 +43,7 @@ namespace NGM
 
 	namespace Widget
 	{
+		class ResourceTabWidget;
 		class ResourceSplitter;
 	}
 
@@ -183,9 +185,34 @@ namespace NGM
 			MainWindow *currentWindow;
 
 			/**************************************************//*!
+			*	@brief	Stores the current focused window.
+			******************************************************/
+			Widget::ResourceTabWidget *currentTabWidget;
+
+			/**************************************************//*!
 			*	@brief	Stores the currently focused widget.
 			******************************************************/
 			Resource::Widget *resourceWidget;
+
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			QString message;
+
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			int progressMax;
+
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			int progressMin;
+
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			int progressCurrent;
 		};
 	}
 }

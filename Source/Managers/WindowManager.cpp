@@ -65,6 +65,11 @@ namespace NGM
 			});
 			actionManager.actions[ActionManager::ActionSave] = new QAction(tr("Save"), this);
 			actionManager.actions[ActionManager::ActionSave]->setEnabled(false);
+			connect(actionManager.actions[ActionManager::ActionSave], &QAction::triggered, [this]()
+			{
+				this->resourceWidget->isSaved();
+				this->resourceWidget->getResourceTabWidget()->resourceSave(this->resourceWidget);
+			});
 			actionManager.actions[ActionManager::ActionSaveAs] = new QAction(tr("Save As..."), this);
 			actionManager.actions[ActionManager::ActionSaveAs]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionSaveAll] = new QAction(tr("Save All"), this);
@@ -79,8 +84,14 @@ namespace NGM
 			actionManager.actions[ActionManager::ActionRedo]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionUndo] = new QAction(tr("Undo"), this);
 			actionManager.actions[ActionManager::ActionUndo]->setEnabled(false);
-			actionManager.actions[ActionManager::ActionSelectAll] = new QAction(tr("SelectAll"), this);
+			actionManager.actions[ActionManager::ActionSelectAll] = new QAction(tr("Select All"), this);
 			actionManager.actions[ActionManager::ActionSelectAll]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionZoomIn] = new QAction(tr("Zoom In"), this);
+			actionManager.actions[ActionManager::ActionZoomIn]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionZoomOut] = new QAction(tr("Zoom Out"), this);
+			actionManager.actions[ActionManager::ActionZoomOut]->setEnabled(false);
+			actionManager.actions[ActionManager::ActionZoom] = new QAction(tr("Zoom"), this);
+			actionManager.actions[ActionManager::ActionZoom]->setEnabled(false);
 			actionManager.actions[ActionManager::ActionAbout] = new QAction(tr("About"), this);
 			connect(actionManager.actions[ActionManager::ActionAbout], &QAction::triggered, [this]()
 			{
@@ -122,6 +133,10 @@ namespace NGM
 			toolbar->addSeparator();
 			toolbar->addAction(actionManager.actions[ActionManager::ActionUndo]);
 			toolbar->addAction(actionManager.actions[ActionManager::ActionRedo]);
+			toolbar->addSeparator();
+			toolbar->addAction(actionManager.actions[ActionManager::ActionZoomIn]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionZoomOut]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionZoom]);
 			toolbar->setIconSize(QSize(16, 16));
 			add->addToolBar(toolbar);
 
@@ -145,7 +160,6 @@ namespace NGM
 			menuBar->addMenu(menu);
 			add->setMenuBar(menuBar);
 
-			currentWindow = add;
 			return add;
 		}
 

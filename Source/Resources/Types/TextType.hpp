@@ -33,7 +33,7 @@ namespace NGM
 		{
 		public:
 
-			Widget *widget(QWidget *parent)
+			Widget *widget(NGM::Widget::ResourceTab *parent)
 			{
 				return new TextWidget(parent);
 			}

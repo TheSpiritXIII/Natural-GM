@@ -24,3 +24,6 @@ makefile
 
 # The build directories
 build*
+
+#Windows thumbnails
+Thumbs.db

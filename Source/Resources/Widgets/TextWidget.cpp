@@ -158,7 +158,7 @@ namespace NGM
 
 		void TextWidget::zoomRequest()
 		{
-			textEdit->zoomTo(11);
+			textEdit->zoomTo(0);
 			if (~state & CanZoomIn)
 			{
 				emit canZoomIn(true);

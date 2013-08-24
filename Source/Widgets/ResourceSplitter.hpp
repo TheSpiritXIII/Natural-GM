@@ -103,12 +103,12 @@ namespace NGM
 			******************************************************/
 			QWidget *const parentWidget;
 
-		private:
-
 			/**************************************************//*!
 			*	@brief	Stores the window manager.
 			******************************************************/
 			Manager::WindowManager *windowManager;
+
+		private:
 
 			/**************************************************//*!
 			*	@brief	Stores the current active resource tab.

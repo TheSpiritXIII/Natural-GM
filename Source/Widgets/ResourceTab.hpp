@@ -3,6 +3,7 @@
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013 Joshua Spayd
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -86,18 +87,18 @@ namespace NGM
 			******************************************************/
 			bool contains(Model::ResourceBaseItem *item);
 
-
-			/**************************************************//*!
-			 *	@brief	Closes the requested tab.
-			******************************************************/
-			void closeTab(int ind);
-
 		public slots:
 
 			/**************************************************//*!
 			*	@brief	Updates the tab name.
 			******************************************************/
 			void modifedWidget(const bool &modified);
+
+
+			/**************************************************//*!
+			 *	@brief	Closes the requested tab.
+			******************************************************/
+			void closeTab(int ind);
 
 		protected:
 

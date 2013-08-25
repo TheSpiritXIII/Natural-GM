@@ -1,5 +1,5 @@
 /**
- *  @file TextType.hpp
+ *  @file Type.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -25,29 +25,62 @@
  *		THE SOFTWARE.
 **/
 #pragma once
-#ifndef _NGM_TEXTTYPE__HPP
-#define _NGM_TEXTTYPE__HPP
-#include "Type.hpp"
+#ifndef _NGM_TYPE__HPP
+#define _NGM_TYPE__HPP
+#include <QString>
+#include <QAction>
 
 namespace NGM
 {
+	namespace Widget
+	{
+		class ResourceTab;
+	}
 	namespace Resource
 	{
-		class TextType : public Type
+		class Editor;
+
+		/**************************************************//*!
+		*	@brief	Metadata for resource types.
+		******************************************************/
+		class Type
 		{
 		public:
 
 			/**************************************************//*!
+			*	@brief	The human readable name for menus. This
+			*			value is also used for loading the icon.
+			******************************************************/
+			const QString name;
+
+			/**************************************************//*!
+			*	@brief	The plural name. This is used in tabs and groups.
+			******************************************************/
+			const QString plural;
+
+			/**************************************************//*!
+			*	@brief	A visual representation of the type.
+			*	@see	name
+			******************************************************/
+			QIcon icon;
+
+			/**************************************************//*!
+			*	@brief	The Qt based action for this type.
+			******************************************************/
+			QAction *action;
+
+			/**************************************************//*!
 			*	@return	A usable widget for this type.
 			******************************************************/
-			Editor *widget(NGM::Widget::ResourceTab *parent) const;
+			virtual Editor *widget(NGM::Widget::ResourceTab *parent = 0) const = 0;
 
 			/**************************************************//*!
 			*	@brief	Sets up constant metadata.
 			******************************************************/
-			TextType(QString name, QString plural);
+			Type(const QString &name, const QString &plural);
+
 		};
 	}
 }
 
-#endif // _NGM_TEXTTYPE__HPP
+#endif // _NGM_Type__HPP

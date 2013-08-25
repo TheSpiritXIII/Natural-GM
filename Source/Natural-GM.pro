@@ -9,10 +9,12 @@ TEMPLATE	 =	app
 TARGET		 =	"Natural-GM"
 CONFIG		+=	c++11
 LIBS		+=	-L$$[QT_INSTALL_LIBS] -lqscintilla2
+DEFINES		+=	QSCINTILLA_DLL
 #----------------------------------------------
 #   Include locations.
 #----------------------------------------------
-DEPENDPATH	+=	Windows \
+INCLUDEPATH	+=	$$PWD/ \
+	Windows \
 	Classes/ErrorLogger \
 	Managers \
 	Models \
@@ -20,16 +22,10 @@ DEPENDPATH	+=	Windows \
 	Widgets \
 	Resources \
 	Models/ResourceItemModel \
-	Resources/Serializers
-INCLUDEPATH	+=	Windows \
-	Classes/ErrorLogger \
-	Managers \
-	Models \
-	Dialogs \
-	Widgets \
-	Resources \
-	Models/ResourceItemModel \
-	Resources\Serializers
+	Resources/Serializers \
+	Resources/Base \
+	Resources/Editors \
+	Resources/Types
 #----------------------------------------------
 #   Header files.
 #----------------------------------------------
@@ -41,18 +37,12 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Models/ColumnItem.hpp \
 	Models/BasicModel.hpp \
 	Models/ColumnModel.hpp \
-	Resources/Resource.hpp \
 	Dialogs/ProjectDialog.hpp \
 	Global.hpp \
 	Managers/ProjectManager.hpp \
-	Resources/Project.hpp \
-	Resources/Serializer.hpp \
 	Resources/Serializers/TextSerializer.hpp \
-	Resources/Widget.hpp \
-	Resources/Type.hpp \
 	Widgets/ResourceTab.hpp \
 	Widgets/ResourceSplitter.hpp \
-	Resources/Widgets/TextWidget.hpp \
 	Resources/Types/TextType.hpp \
 	Models/ResourceItemModel/ResourceBaseItem.hpp \
 	Models/ResourceItemModel/ResourceContentItem.hpp \
@@ -64,7 +54,15 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Widgets/ResourceDialog.hpp \
 	Resources/Serializers/GMXSerializer.hpp \
 	Managers/SettingManager.hpp \
-	Managers/ThreadManager.hpp
+	Managers/ThreadManager.hpp \
+	Resources/Base/Serializer.hpp \
+	Resources/Base/Type.hpp \
+	Resources/Base/Project.hpp \
+	Defines.hpp \
+	Resources/Base/SerialData.hpp \
+	Resources/Base/Resource.hpp \
+	Resources/Base/Editor.hpp \
+	Resources/Editors/TextEditor.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -81,12 +79,15 @@ SOURCES		+= \
 	Widgets/ResourceSplitter.cpp \
 	Widgets/ResourceTab.cpp \
 	Resources/Serializers/TextSerializer.cpp \
-	Resources/Widgets/TextWidget.cpp \
 	Models/ResourceItemModel/ResourceBaseItem.cpp \
 	Models/ResourceItemModel/ResourceGroupItem.cpp \
 	Models/ResourceItemModel/ResourceItemModel.cpp \
 	Dialogs/AboutDialog.cpp \
-	Widgets/ResourceDialog.cpp
+	Widgets/ResourceDialog.cpp \
+	Resources/Base/SerialData.cpp \
+	Resources/Base/Base.cpp \
+	Resources/Types/TextType.cpp \
+	Resources/Editors/TextEditor.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------
@@ -94,7 +95,7 @@ win32:RC_FILE	=	Platform/Windows.rc
 #----------------------------------------------
 #	Translations.
 #----------------------------------------------
-TRANSLATIONS	=	untranslated.ts
+TRANSLATIONS	=	Translations/untranslated.ts
 #----------------------------------------------
 #   Static building.
 #----------------------------------------------

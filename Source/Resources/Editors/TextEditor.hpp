@@ -1,48 +1,52 @@
 /**
- *  @section License
+ *  @file TextEditor.hpp
+ *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *      This file is a part of the Natural GM IDE. MIT License.
  *
- *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License as published by
- *      the Free Software Foundation, either version 3 of the License, or
- *      (at your option) any later version.
+ *      Permission is hereby granted, free of charge, to any person obtaining a copy
+ *		of this software and associated documentation files (the "Software"), to deal
+ *		in the Software without restriction, including without limitation the rights
+ *		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *		copies of the Software, and to permit persons to whom the Software is
+ *		furnished to do so, subject to the following conditions:
  *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
+ *		The above copyright notice and this permission notice shall be included in
+ *		all copies or substantial portions of the Software.
  *
- *      You should have received a copy of the GNU General Public License
- *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *		FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *		THE SOFTWARE.
 **/
 #pragma once
-#ifndef _NGM_TEXTWIDGET__HPP
-#define _NGM_TEXTWIDGET__HPP
-#include "../Resources/Widget.hpp"
-#include "../Global.hpp"
-#define QSCINTILLA_DLL
+#ifndef _NGM_TEXTEDITOR__HPP
+#define _NGM_TEXTEDITOR__HPP
+#include "Editor.hpp"
 #include <Qsci/qsciscintilla.h>
 
 namespace NGM
 {
 	namespace Resource
 	{
-		class TextWidget : public Widget
+		class TextEditor : public Editor
 		{
 		public:
 
 			/**************************************************//*!
 			 *	@brief Creates a widget with the indicated parent.
 			******************************************************/
-			TextWidget(NGM::Widget::ResourceTab *parent);
+			TextEditor(NGM::Widget::ResourceTab *parent);
 
 			/**************************************************//*!
 			 *	@brief Destroys the widget and all of its children.
 			******************************************************/
-			~TextWidget();
+			~TextEditor();
 
 			/**************************************************//*!
 			 *	@brief Requests the widget to cut its data.
@@ -103,7 +107,7 @@ namespace NGM
 			/**************************************************//*!
 			 *	@return The value of the indicated property.
 			******************************************************/
-			QVariant property(const char* property);
+			QVariant property(const char* property) const;
 
 			/**************************************************//*!
 			 *	@return A list of all possible properties.
@@ -116,7 +120,25 @@ namespace NGM
 			******************************************************/
 			void setProperty(const char* property, QVariant value);
 
+			/**************************************************//*!
+			*	@brief	Block's the widget's signals.
+			******************************************************/
 			void block(const bool &blocked);
+
+			/**************************************************//*!
+			*	@brief	Clones the widget into another view.
+			******************************************************/
+			Editor *clone(NGM::Widget::ResourceTab *parent);
+
+			/**************************************************//*!
+			*	@brief	Saves this widget's state.
+			******************************************************/
+			void saveState();
+
+			/**************************************************//*!
+			*	@brief	Saves this widget's state.
+			******************************************************/
+			void loadState();
 
 		private:
 
@@ -124,8 +146,13 @@ namespace NGM
 			 *	@brief The editable widget.
 			******************************************************/
 			QsciScintilla *textEdit;
+
+			/**************************************************//*!
+			 *	@brief Updates the line font metrics width.
+			******************************************************/
+			void updateLineLength();
 		};
 	}
 }
 
-#endif // _NGM_TEXTWIDGET__HPP
+#endif // _NGM_TEXTEDITOR__HPP

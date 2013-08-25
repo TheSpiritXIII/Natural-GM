@@ -1,5 +1,5 @@
 /**
- *  @file TextSerializer.hpp
+ *  @file Resource.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -25,48 +25,68 @@
  *		THE SOFTWARE.
 **/
 #pragma once
-#ifndef _NGM_TEXTSERIALIZER__HPP
-#define _NGM_TEXTSERIALIZER__HPP
-#include "Serializer.hpp"
+#ifndef _NGM_RESOURCE__HPP
+#define _NGM_RESOURCE__HPP
+#include "../Global.hpp"
+#include "SerialData.hpp"
+#include <QByteArray>
+#include "Type.hpp"
+#include <QString>
+#include <string>
+#include <map>
 
 namespace NGM
 {
 	namespace Resource
 	{
-		struct TextSerializer : Serializer
+		/**************************************************//*!
+		*	@brief	Contains resource data.
+		******************************************************/
+		struct Resource
 		{
 
 			/**************************************************//*!
-			*	@brief	Sets the default settings.
+			*	@brief	Flags that describe the resources's status.
 			******************************************************/
-			TextSerializer();
+			enum StatusBits
+			{
+				Loaded      =   0x01,
+				Cached		=	0x02,
+				HasError	=	0x04,
+				IsFilename	=	0x08
+			};
 
 			/**************************************************//*!
-			*	@brief	Inputs resource data to editor data.
+			*	@brief	Contains the status of the resource.
 			******************************************************/
-			void read(Editor *editor, Resource *resource) const;
+			uint8_t status;
 
 			/**************************************************//*!
-			*	@brief	Outputs editor data to resource data.
+			*	@brief	The type identifier of the resource.
 			******************************************************/
-			void write(Editor *editor, Resource *resource) const;
+			const Type * const type;
 
 			/**************************************************//*!
-			*	@brief	Creates the project tree structure.
+			*	@brief	Holds all resource data.
 			******************************************************/
-			void structure(Model::ResourceProjectItem *item) const;
+			SerialObject *serialData;
 
 			/**************************************************//*!
-			*	@brief	Requests a restructure of the indicated item.
+			*	@brief	Stores the file location of the resource.
 			******************************************************/
-			void restructure(Model::ResourceProjectItem *item) const;
+			QString location;
 
 			/**************************************************//*!
-			*	@brief	Destoys the indicated item.
+			*	@brief	Returns the icon for this resource type.
 			******************************************************/
-			void destructure(Model::ResourceProjectItem *item) const;
+			virtual QIcon getIcon() { return type->icon; }
+
+			/**************************************************//*!
+			*	@brief	Initializes the resource.
+			******************************************************/
+			Resource(const Type * const type, QString location, uint8_t status = 0);
 		};
 	}
 }
 
-#endif // _NGM_TEXTSERIALIZER__HPP
+#endif // _NGM_RESOURCE__HPP

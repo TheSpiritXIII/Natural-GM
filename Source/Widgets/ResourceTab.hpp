@@ -30,8 +30,8 @@ namespace NGM
 {
 	namespace Resource
 	{
-		class Widget;
-		class Resource;
+		class Editor;
+		struct Resource;
 	}
 	namespace Widget
 	{
@@ -55,13 +55,13 @@ namespace NGM
 			 *	@brief	Opens the indicated resource.
 			 *	@param	resource The resource to open.
 			******************************************************/
-			Resource::Widget *resourceOpen(Model::ResourceBaseItem *resource);
+			Resource::Editor *resourceOpen(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
 			 *	@brief	Save the indicated resource.
 			 *	@param	widget The widget to save.
 			******************************************************/
-			void resourceSave(Resource::Widget *widget) const;
+			void resourceSave(Resource::Editor *editor) const;
 
 			/**************************************************//*!
 			 *	@brief	Returns the tab index to the indicated
@@ -86,6 +86,11 @@ namespace NGM
 			******************************************************/
 			bool contains(Model::ResourceBaseItem *item);
 
+			/**************************************************//*!
+			 *	@brief	Closes the requested tab.
+			******************************************************/
+			void closeTab(int ind);
+
 		public slots:
 
 			/**************************************************//*!
@@ -105,7 +110,7 @@ namespace NGM
 			/**************************************************//*!
 			 *	@brief	Maps a resource item to its open widget.
 			******************************************************/
-			std::map<Model::ResourceBaseItem*, Resource::Widget*> widgets;
+			std::map<Model::ResourceBaseItem*, Resource::Editor*> widgets;
 
 			/**************************************************//*!
 			 *	@brief	The parent of this widget.

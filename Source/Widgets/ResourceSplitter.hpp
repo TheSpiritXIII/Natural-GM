@@ -96,7 +96,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Assigns
 			******************************************************/
-			void focusWidget(Resource::Widget *widget);
+			void focusWidget(Resource::Editor *widget);
 
 			/**************************************************//*!
 			*	@brief	Stores the parent widget.

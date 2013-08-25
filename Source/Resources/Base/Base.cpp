@@ -1,5 +1,5 @@
 /**
- *  @file TextType.hpp
+ *  @file Base.cpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -24,30 +24,49 @@
  *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *		THE SOFTWARE.
 **/
-#pragma once
-#ifndef _NGM_TEXTTYPE__HPP
-#define _NGM_TEXTTYPE__HPP
+#include "Project.hpp"
+#include "Resource.hpp"
+#include "Serializer.hpp"
+#include "Editor.hpp"
 #include "Type.hpp"
 
 namespace NGM
 {
 	namespace Resource
 	{
-		class TextType : public Type
+		Project::Project(const Serializer * const serializer,const Type * const type,
+				const QString category, const QString description, const QStringList extensions) :
+			serializer(serializer), type(type), category(category),
+			description(description), extensions(extensions) {}
+
+		Resource::Resource(const Type * const type, QString location, uint8_t status) :
+			status(status), type(type), location(location) {}
+
+		Serializer::Serializer(const uint8_t &settings) : settings(settings) {}
+
+		Type::Type(const QString &name, const QString &plural) : name(name), plural(plural) {}
+
+		Editor::Editor(NGM::Widget::ResourceTab * const parent) :
+			QWidget(parent), resourceTab(parent), state(0) {}
+
+		bool Editor::event(QEvent *event)
 		{
-		public:
+			if (event->type() == QEvent::FocusIn || event->type() == QEvent::Show)
+			{
+				emit isFocused(this);
+				return true;
+			}
+			return QWidget::event(event);
+		}
 
-			/**************************************************//*!
-			*	@return	A usable widget for this type.
-			******************************************************/
-			Editor *widget(NGM::Widget::ResourceTab *parent) const;
+		const uint8_t Editor::getState()
+		{
+			return state;
+		}
 
-			/**************************************************//*!
-			*	@brief	Sets up constant metadata.
-			******************************************************/
-			TextType(QString name, QString plural);
-		};
+		const NGM::Widget::ResourceTab * const Editor::getResourceTabWidget()
+		{
+			return resourceTab;
+		}
 	}
 }
-
-#endif // _NGM_TEXTTYPE__HPP

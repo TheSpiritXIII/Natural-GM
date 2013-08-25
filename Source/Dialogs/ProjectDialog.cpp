@@ -316,7 +316,7 @@ namespace NGM
 			}
 			Resource::Project *project = cache.find(projectList->currentItem()->text())->second;
 			QString location = dir.absolutePath()+QChar('/')+projectEdit->text();
-			Resource::Resource *resource = new Resource::Resource(project->type, NULL, location, Resource::Resource::IsFilename);
+			Resource::Resource *resource = new Resource::Resource(project->type, location, Resource::Resource::IsFilename);
 			Model::ResourceProjectItem *item = new Model::ResourceProjectItem(resource, project, projectEdit->text());
 			windowManager->addProject(item);
 			close();

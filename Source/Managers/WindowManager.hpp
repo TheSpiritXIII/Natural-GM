@@ -33,203 +33,203 @@
 
 namespace NGM
 {
-    class MainWindow;
+	class MainWindow;
 
-    namespace Model
-    {
-        class ResourceItemModel;
-        class ResourceProjectItem;
-    }
+	namespace Model
+	{
+		class ResourceItemModel;
+		class ResourceProjectItem;
+	}
 
-    namespace Widget
-    {
-        class ResourceTabWidget;
-        class ResourceSplitter;
-    }
+	namespace Widget
+	{
+		class ResourceTabWidget;
+		class ResourceSplitter;
+	}
 
-    namespace Resource
-    {
-        class Widget;
-    }
+	namespace Resource
+	{
+		class Editor;
+	}
 
-    namespace Manager
-    {
-        class ResourceManager;
-        class ProjectManager;
-        class ActionManager;
+	namespace Manager
+	{
+		class ResourceManager;
+		class ProjectManager;
+		class ActionManager;
 
-        /**************************************************//*!
-        *	@brief	Creates Windows and manages all other
-        *			resources and managers.
-        ******************************************************/
-        class WindowManager : public QApplication
-        {
-            Q_OBJECT
+		/**************************************************//*!
+		*	@brief	Creates Windows and manages all other
+		*			resources and managers.
+		******************************************************/
+		class WindowManager : public QApplication
+		{
+			Q_OBJECT
 
-        public:
+		public:
 
-            /**************************************************//*!
-            *	@brief	Creates a single window.
-            ******************************************************/
-            WindowManager(int argc, char *argv[]);
+			/**************************************************//*!
+			*	@brief	Creates a single window.
+			******************************************************/
+			WindowManager(int argc, char *argv[]);
 
-            /**************************************************//*!
-            *	@brief	Destroys all windows.
-            ******************************************************/
-            ~WindowManager();
+			/**************************************************//*!
+			*	@brief	Destroys all windows.
+			******************************************************/
+			~WindowManager();
 
-            /**************************************************//*!
-            *	@brief	Contains all project metadata.
-            ******************************************************/
-            Manager::ProjectManager projectManager;
+			/**************************************************//*!
+			*	@brief	Contains all project metadata.
+			******************************************************/
+			Manager::ProjectManager projectManager;
 
-            /**************************************************//*!
-            *	@brief	Contains all actions and icons.
-            ******************************************************/
-            Manager::ActionManager actionManager;
+			/**************************************************//*!
+			*	@brief	Contains all actions and icons.
+			******************************************************/
+			Manager::ActionManager actionManager;
 
-            /**************************************************//*!
-            *	@brief	Contains all settings.
-            ******************************************************/
-            Manager::SettingManager settingManager;
+			/**************************************************//*!
+			*	@brief	Contains all settings.
+			******************************************************/
+			Manager::SettingManager settingManager;
 
-            /**************************************************//*!
-            *	@brief	Adds and returns a new and empty window.
-            ******************************************************/
-            MainWindow *addWindow();
+			/**************************************************//*!
+			*	@brief	Adds and returns a new and empty window.
+			******************************************************/
+			MainWindow *addWindow();
 
-            /**************************************************//*!
-            *	@brief	Permanantely destroys the indicated window.
-            ******************************************************/
-            void removeWindow(MainWindow *window);
+			/**************************************************//*!
+			*	@brief	Permanantely destroys the indicated window.
+			******************************************************/
+			void removeWindow(MainWindow *window);
 
-            /**************************************************//*!
-            *	@brief	Adds a new project to the heirachy model.
-            ******************************************************/
-            void addProject(NGM::Model::ResourceProjectItem *project);
+			/**************************************************//*!
+			*	@brief	Adds a new project to the heirachy model.
+			******************************************************/
+			void addProject(NGM::Model::ResourceProjectItem *project);
 
-        protected:
+		protected:
 
-            /**************************************************//*!
-            *	@brief	Contains all loaded projects and resources.
-            ******************************************************/
-            Model::ResourceItemModel *heirarchy;
+			/**************************************************//*!
+			*	@brief	Contains all loaded projects and resources.
+			******************************************************/
+			Model::ResourceItemModel *heirarchy;
 
-            /**************************************************//*!
-            *	@brief	Creates a new project with user input.
-            ******************************************************/
-            void createProjectDialog();
+			/**************************************************//*!
+			*	@brief	Creates a new project with user input.
+			******************************************************/
+			void createProjectDialog();
 
-            /**************************************************//*!
-            *	@brief	Opens an existing project with user input.
-            ******************************************************/
-            void openProjectDialog();
+			/**************************************************//*!
+			*	@brief	Opens an existing project with user input.
+			******************************************************/
+			void openProjectDialog();
 
-            /**************************************************//*!
-            *	@brief	Filters keyboard shortcuts.
-            ******************************************************/
-            bool eventFilter(QObject*object, QEvent *event);
+			/**************************************************//*!
+			*	@brief	Filters keyboard shortcuts.
+			******************************************************/
+			bool eventFilter(QObject*object, QEvent *event);
 
-            friend class NGM::MainWindow;
-            friend class Manager::ActionManager;
+			friend class NGM::MainWindow;
+			friend class Manager::ActionManager;
 
-        protected:
+		protected:
 
-            /**************************************************//*!
-            *	@brief	Activates cut/copy actions.
-            ******************************************************/
-            void canCopy(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates cut/copy actions.
+			******************************************************/
+			void canCopy(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the paste action.
-            ******************************************************/
-            void canPaste(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the paste action.
+			******************************************************/
+			void canPaste(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the select action.
-            ******************************************************/
-            void canSelect(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the select action.
+			******************************************************/
+			void canSelect(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the undo action.
-            ******************************************************/
-            void canUndo(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the undo action.
+			******************************************************/
+			void canUndo(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the redo action.
-            ******************************************************/
-            void canRedo(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the redo action.
+			******************************************************/
+			void canRedo(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the zoom in action.
-            ******************************************************/
-            void canZoomIn(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the zoom in action.
+			******************************************************/
+			void canZoomIn(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the zoom out action.
-            ******************************************************/
-            void canZoomOut(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the zoom out action.
+			******************************************************/
+			void canZoomOut(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the zoom action.
-            ******************************************************/
-            void canZoom(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the zoom action.
+			******************************************************/
+			void canZoom(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Activates the save actions.
-            ******************************************************/
-            void isModified(const bool &value);
+			/**************************************************//*!
+			*	@brief	Activates the save actions.
+			******************************************************/
+			void isModified(const bool &value);
 
-            /**************************************************//*!
-            *	@brief	Sets the current resource widget.
-            ******************************************************/
-            void setResourceWidget(Resource::Widget *widget);
+			/**************************************************//*!
+			*	@brief	Sets the current resource widget.
+			******************************************************/
+			void setResourceWidget(Resource::Editor *widget);
 
-            friend class Widget::ResourceSplitter;
+			friend class Widget::ResourceSplitter;
 
-        private:
+		private:
 
-            /**************************************************//*!
-            *	@brief	Stores all created windows.
-            ******************************************************/
-            std::list<MainWindow*> windows;
+			/**************************************************//*!
+			*	@brief	Stores all created windows.
+			******************************************************/
+			std::list<MainWindow*> windows;
 
-            /**************************************************//*!
-            *	@brief	Stores the current focused window.
-            ******************************************************/
-            MainWindow *currentWindow;
+			/**************************************************//*!
+			*	@brief	Stores the current focused window.
+			******************************************************/
+			MainWindow *currentWindow;
 
-            /**************************************************//*!
-            *	@brief	Stores the current focused window.
-            ******************************************************/
-            Widget::ResourceTabWidget *currentTabWidget;
+			/**************************************************//*!
+			*	@brief	Stores the current focused window.
+			******************************************************/
+			Widget::ResourceTabWidget *currentTabWidget;
 
-            /**************************************************//*!
-            *	@brief	Stores the currently focused widget.
-            ******************************************************/
-            Resource::Widget *resourceWidget;
+			/**************************************************//*!
+			*	@brief	Stores the currently focused widget.
+			******************************************************/
+			Resource::Editor *resourceWidget;
 
-            /**************************************************//*!
-            *	@brief	Stores a message for statusbars.
-            ******************************************************/
-            QString message;
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			QString message;
 
-            /**************************************************//*!
-            *	@brief	Stores a message for statusbars.
-            ******************************************************/
-            int progressMax;
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			int progressMax;
 
-            /**************************************************//*!
-            *	@brief	Stores a message for statusbars.
-            ******************************************************/
-            int progressMin;
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			int progressMin;
 
-            /**************************************************//*!
-            *	@brief	Stores a message for statusbars.
-            ******************************************************/
-            int progressCurrent;
-        };
-    }
+			/**************************************************//*!
+			*	@brief	Stores a message for statusbars.
+			******************************************************/
+			int progressCurrent;
+		};
+	}
 }
 
 #endif // _NGM_WINDOWMANAGER__HPP

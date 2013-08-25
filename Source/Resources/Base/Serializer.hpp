@@ -1,5 +1,5 @@
 /**
- *  @file TextSerializer.hpp
+ *  @file Serializer.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -25,48 +25,69 @@
  *		THE SOFTWARE.
 **/
 #pragma once
-#ifndef _NGM_TEXTSERIALIZER__HPP
-#define _NGM_TEXTSERIALIZER__HPP
-#include "Serializer.hpp"
+#ifndef _NGM_SERIALIZER__HPP
+#define _NGM_SERIALIZER__HPP
+#include "ResourceProjectItem.hpp"
+#include <QString>
+#include <cstdint>
 
 namespace NGM
 {
 	namespace Resource
 	{
-		struct TextSerializer : Serializer
+		class Editor;
+
+		/**************************************************//*!
+		*	@brief	Loads and creates project structures.
+		******************************************************/
+		struct Serializer
 		{
 
 			/**************************************************//*!
-			*	@brief	Sets the default settings.
+			*	@brief	Flags for serializer settings.
 			******************************************************/
-			TextSerializer();
+			enum Settings
+			{
+				ResaveAll		=	0x01,
+				CanPreload		=	0x02,
+				CanMoveRoots	=	0x04,
+				CanRenameRoots	=	0x08,
+				PathResources	=	0x10,
+				CanBeTemporary	=	0x20
+			};
+
+			/**************************************************//*!
+			*	@brief	Creates a serializer with the indicated settings.
+			******************************************************/
+			Serializer(const uint8_t &settings = 0);
 
 			/**************************************************//*!
 			*	@brief	Inputs resource data to editor data.
 			******************************************************/
-			void read(Editor *editor, Resource *resource) const;
+			virtual void read(Editor *editor, Resource *resource) const = 0;
 
 			/**************************************************//*!
 			*	@brief	Outputs editor data to resource data.
 			******************************************************/
-			void write(Editor *editor, Resource *resource) const;
+			virtual void write(Editor *editor, Resource *resource) const = 0;
 
 			/**************************************************//*!
 			*	@brief	Creates the project tree structure.
 			******************************************************/
-			void structure(Model::ResourceProjectItem *item) const;
+			virtual void structure(Model::ResourceProjectItem *item) const = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests a restructure of the indicated item.
 			******************************************************/
-			void restructure(Model::ResourceProjectItem *item) const;
+			virtual void restructure(Model::ResourceProjectItem *item) const = 0;
 
 			/**************************************************//*!
-			*	@brief	Destoys the indicated item.
+			*	@brief	Determines how the project is structured.
 			******************************************************/
-			void destructure(Model::ResourceProjectItem *item) const;
+			const uint8_t settings;
+
 		};
 	}
 }
 
-#endif // _NGM_TEXTSERIALIZER__HPP
+#endif // _NGM_SERIALIZER__HPP

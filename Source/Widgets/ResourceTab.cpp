@@ -3,30 +3,31 @@
  *
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *	  Copyright (C) 2013 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *	  This file is a part of the Natural GM IDE.
  *
- *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License as published by
- *      the Free Software Foundation, either version 3 of the License, or
- *      (at your option) any later version.
+ *	  This program is free software: you can redistribute it and/or modify
+ *	  it under the terms of the GNU General Public License as published by
+ *	  the Free Software Foundation, either version 3 of the License, or
+ *	  (at your option) any later version.
  *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
+ *	  This program is distributed in the hope that it will be useful,
+ *	  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	  GNU General Public License for more details.
  *
- *      You should have received a copy of the GNU General Public License
- *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	  You should have received a copy of the GNU General Public License
+ *	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ResourceTab.hpp"
-#include "../Resources/Widget.hpp"
+#include "Editor.hpp"
 #include "ResourceProjectItem.hpp"
 #include "ResourceSplitter.hpp"
 #include "WindowManager.hpp"
 #include <QMenu>
 #include <QDebug>
+#include <QMessageBox>
 using std::list;
 using std::pair;
 
@@ -83,13 +84,15 @@ namespace NGM
 				menu->addAction("Move Next Window");*/
 				menu->popup(this->mapToGlobal(point));
 			});
+
+			connect(this, &ResourceTab::tabCloseRequested, this, &ResourceTab::closeTab);
 		}
 
-		Resource::Widget *ResourceTab::resourceOpen(Model::ResourceBaseItem *resource)
+		Resource::Editor *ResourceTab::resourceOpen(Model::ResourceBaseItem *resource)
 		{
-			using NGM::Resource::Widget;
+			using NGM::Resource::Editor;
 			Resource::Resource *r = resource->toResourceProjectItem()->resource;
-			Widget *widget = r->type->widget(this);
+			Editor *widget = r->type->widget(this);
 			qDebug() << "No Resource found." << widget;
 			if (widget != nullptr)
 			{
@@ -97,23 +100,21 @@ namespace NGM
 				resource->root()->project->serializer->read(widget, r);
 				widget->block(false);
 				setCurrentIndex(addTab(widget, resource->data().toString()));
-				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Widget*>(resource, widget));
+				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(resource, widget));
 				splitter->parentWidget->setWindowFilePath(tabText(currentIndex()));
 				return widget;
 			}
 			return nullptr;
 		}
 
-		void ResourceTab::resourceSave(Resource::Widget *widget) const
+		void ResourceTab::resourceSave(Resource::Editor *editor) const
 		{
-			qDebug() << "Searching...";
 			for (auto &i : widgets)
 			{
-				if (i.second == widget)
+				if (i.second == editor)
 				{
-					qDebug() << "Found!";
 					Model::ResourceProjectItem *r = i.first->toResourceProjectItem();
-					r->project->serializer->write(widget, r->resource);
+					r->project->serializer->write(editor, r->resource);
 					break;
 				}
 			}
@@ -121,7 +122,7 @@ namespace NGM
 
 		bool ResourceTab::contains(Model::ResourceBaseItem *item)
 		{
-			std::map<Model::ResourceBaseItem*, Resource::Widget*>::iterator i;
+			std::map<Model::ResourceBaseItem*, Resource::Editor*>::iterator i;
 			i = widgets.find(item);
 			if (i != widgets.end())
 			{
@@ -134,6 +135,31 @@ namespace NGM
 		void ResourceTab::changeEvent(QEvent *event)
 		{
 			QTabWidget::changeEvent(event);
+		}
+
+		void ResourceTab::closeTab(int ind)
+		{
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(this, "", "Close tab " + tabText(ind) + "?", QMessageBox::Yes|QMessageBox::No);
+
+			if (reply == QMessageBox::Yes)
+				removeTab(ind);
+
+			/*QMessageBox message;
+				//message.setText("The resource '"+resource->name+"'' has been modified.");
+				message.setInformativeText("Do you want to save your changes?");
+				message.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+				message.setDefaultButton(QMessageBox::Save);
+				switch (message.exec())
+				{
+				case QMessageBox::Save:
+					//saveResource(resource);
+					return true;
+				case QMessageBox::Discard:
+					return true;
+				default:
+					return false;
+				}*/
 		}
 
 		void ResourceTab::modifedWidget(const bool &modified)

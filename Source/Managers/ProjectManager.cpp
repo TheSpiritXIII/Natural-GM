@@ -26,10 +26,12 @@
 #include <QMessageBox>
 #include "../Resources/Types/TextType.hpp"
 #include <QDebug>
+#include "../Defines.hpp"
 using std::map;
 using std::pair;
 using std::string;
 using std::multimap;
+using namespace NGM::Definition;
 
 namespace NGM
 {

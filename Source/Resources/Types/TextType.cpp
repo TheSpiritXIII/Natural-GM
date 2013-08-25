@@ -1,5 +1,5 @@
 /**
- *  @file TextType.hpp
+ *  @file TextType.cpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -24,30 +24,18 @@
  *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *		THE SOFTWARE.
 **/
-#pragma once
-#ifndef _NGM_TEXTTYPE__HPP
-#define _NGM_TEXTTYPE__HPP
-#include "Type.hpp"
+#include "TextType.hpp"
+#include "TextEditor.hpp"
 
 namespace NGM
 {
 	namespace Resource
 	{
-		class TextType : public Type
+		Editor *TextType::widget(NGM::Widget::ResourceTab *parent) const
 		{
-		public:
+			return new TextEditor(parent);
+		}
 
-			/**************************************************//*!
-			*	@return	A usable widget for this type.
-			******************************************************/
-			Editor *widget(NGM::Widget::ResourceTab *parent) const;
-
-			/**************************************************//*!
-			*	@brief	Sets up constant metadata.
-			******************************************************/
-			TextType(QString name, QString plural);
-		};
+		TextType::TextType(QString name, QString plural) : Type(name, plural) {}
 	}
 }
-
-#endif // _NGM_TEXTTYPE__HPP

@@ -28,8 +28,8 @@ namespace NGM
 {
 	namespace Resource
 	{
-		class Resource;
-		class Project;
+		struct Resource;
+		struct Project;
 	}
 	namespace Model
 	{

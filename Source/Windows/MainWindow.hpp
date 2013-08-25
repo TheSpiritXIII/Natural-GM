@@ -39,8 +39,8 @@
 #include <QStandardItem>
 #include <QStandardItemModel>
 
-#include "../Resources/Project.hpp"
-#include "../Resources/Resource.hpp"
+#include "Project.hpp"
+#include "Resource.hpp"
 #include "ResourceSplitter.hpp"
 
 namespace NGM

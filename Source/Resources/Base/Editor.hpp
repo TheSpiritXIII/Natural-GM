@@ -1,27 +1,32 @@
 /**
- *  @file Widget.hpp
- *  @section License
+ *  @file Editor.hpp
+ *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *      This file is a part of the Natural GM IDE. MIT License.
  *
- *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License as published by
- *      the Free Software Foundation, either version 3 of the License, or
- *      (at your option) any later version.
+ *      Permission is hereby granted, free of charge, to any person obtaining a copy
+ *		of this software and associated documentation files (the "Software"), to deal
+ *		in the Software without restriction, including without limitation the rights
+ *		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *		copies of the Software, and to permit persons to whom the Software is
+ *		furnished to do so, subject to the following conditions:
  *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
+ *		The above copyright notice and this permission notice shall be included in
+ *		all copies or substantial portions of the Software.
  *
- *      You should have received a copy of the GNU General Public License
- *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *		FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *		THE SOFTWARE.
 **/
 #pragma once
-#ifndef _NGM_RESOURCE_WIDGET__HPP
-#define _NGM_RESOURCE_WIDGET__HPP
+#ifndef _NGM_RESOURCE_EDITOR__HPP
+#define _NGM_RESOURCE_EDITOR__HPP
 #include "../Global.hpp"
 #include <string>
 #include <QString>
@@ -31,8 +36,8 @@
 #include <QMessageBox>
 #include <QProgressBar>
 #include "ResourceContentItem.hpp"
-#include "../Resources/Project.hpp"
-#include "../Resources/Serializer.hpp"
+#include "Project.hpp"
+#include "Serializer.hpp"
 #include "ResourceTab.hpp"
 
 namespace NGM
@@ -42,13 +47,16 @@ namespace NGM
 		/**************************************************//*!
 		*	@brief	An editable widget for a specific resource.
 		******************************************************/
-		class Widget : public QWidget
+		class Editor : public QWidget
 		{
 			Q_OBJECT
 
 		public:
 
-			enum Settings
+			/**************************************************//*!
+			*	@brief	Flags for status modifiers.
+			******************************************************/
+			enum Status
 			{
 				CanCopy		=	0x01,
 				CanPaste	=	0x02,
@@ -63,13 +71,12 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Creates a widget with the indicated parent.
 			******************************************************/
-			Widget(NGM::Widget::ResourceTab * const parent) :
-				QWidget(parent), resourceTab(parent), state(0) {}
+			Editor(NGM::Widget::ResourceTab * const parent);
 
 			/**************************************************//*!
 			*	@brief	Destroys the widget and all of its children.
 			******************************************************/
-			~Widget() {}
+			~Editor() {}
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to cut.
@@ -122,31 +129,9 @@ namespace NGM
 			virtual void statusRequest(QLabel *label, QProgressBar *progress) = 0;
 
 			/**************************************************//*!
-			*	@return	True if the widget was closed, false otherwise.
-			******************************************************/
-			virtual bool closeResource(Resource *resource)
-			{
-				QMessageBox message;
-				//message.setText("The resource '"+resource->name+"'' has been modified.");
-				message.setInformativeText("Do you want to save your changes?");
-				message.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-				message.setDefaultButton(QMessageBox::Save);
-				switch (message.exec())
-				{
-				case QMessageBox::Save:
-					//saveResource(resource);
-					return true;
-				case QMessageBox::Discard:
-					return true;
-				default:
-					return false;
-				}
-			}
-
-			/**************************************************//*!
 			*	@return	The value of the indicated property.
 			******************************************************/
-			virtual QVariant property(const char* property) = 0;
+			virtual QVariant property(const char* property) const = 0;
 
 			/**************************************************//*!
 			*	@return	A list of all possible properties.
@@ -173,31 +158,17 @@ namespace NGM
 			/**************************************************//*!
 			*	@return	Processes a focus event for signals.
 			******************************************************/
-			bool event(QEvent *event)
-			{
-				if (event->type() == QEvent::FocusIn || event->type() == QEvent::Show)
-				{
-					emit isFocused(this);
-					return true;
-				}
-				return QWidget::event(event);
-			}
+			bool event(QEvent *event);
 
 			/**************************************************//*!
 			*	@return	The widget's current state.
 			******************************************************/
-			const uint8_t getState()
-			{
-				return state;
-			}
+			const uint8_t getState();
 
 			/**************************************************//*!
 			*	@return	The parent ResourceTabWidget.
 			******************************************************/
-			const NGM::Widget::ResourceTab * const getResourceTabWidget()
-			{
-				return resourceTab;
-			}
+			const NGM::Widget::ResourceTab * const getResourceTabWidget();
 
 		protected:
 
@@ -205,6 +176,8 @@ namespace NGM
 			 *	@brief Stores the current state.
 			******************************************************/
 			uint8_t state;
+
+		private:
 
 			/**************************************************//*!
 			*	@return	The parent ResourceTabWidget.
@@ -219,51 +192,51 @@ namespace NGM
 			void updateStatus();
 
 			/**************************************************//*!
-			*	@brief	Tells if it can copy or not.
+			*	@brief	Signals if a copy is available or not.
 			******************************************************/
 			void canCopy(bool);
 
 			/**************************************************//*!
-			*	@brief	Tells if it can paste or not.
+			*	@brief	Signals if a paste is available or not.
 			******************************************************/
 			void canPaste(bool);
 
 			/**************************************************//*!
-			*	@brief	Tells if it can undo or not.
+			*	@brief	Signals if a undo is available or not.
 			******************************************************/
 			void canUndo(bool);
 
 			/**************************************************//*!
-			*	@brief	Tells if it can redo or not.
+			*	@brief	Signals if a redo is available or not.
 			******************************************************/
 			void canRedo(bool);
 
 			/**************************************************//*!
-			*	@brief	Tells if it can select or not.
+			*	@brief	Signals if a copy is available or not.
 			******************************************************/
 			void canSelect(bool);
 
 			/**************************************************//*!
-			*	@brief	Tells if it can zoom in or not.
+			*	@brief	Signals if a zoom in is available or not.
 			******************************************************/
 			void canZoomIn(bool);
 
 			/**************************************************//*!
-			*	@brief	Tells if it can zoom out or not.
+			*	@brief	Signals if a zoom out is available or not.
 			******************************************************/
 			void canZoomOut(bool);
 
 			/**************************************************//*!
-			*	@brief	Tells if it is modified or not.
+			*	@brief	Signals when the widget was modified.
 			******************************************************/
 			void isModified(bool);
 
 			/**************************************************//*!
 			*	@brief	Emitted when the widget gains focus.
 			******************************************************/
-			void isFocused(Widget *widget);
+			void isFocused(Editor *editor);
 		};
 	}
 }
 
-#endif // _NGM_RESOURCE_WIDGET__HPP
+#endif // _NGM_RESOURCE_EDITOR__HPP

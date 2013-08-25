@@ -24,7 +24,7 @@
 #include "WindowManager.hpp"
 #include <QDebug>
 #include <QLabel>
-#include "Widget.hpp"
+#include "Editor.hpp"
 #include <QDebug>
 
 namespace NGM
@@ -42,14 +42,14 @@ namespace NGM
 			if (count() == 0 || active == false)
 			{
 				ResourceTab *tab = new ResourceTab(this);
-				Resource::Widget *widget = tab->resourceOpen(resource);
+				Resource::Editor *widget = tab->resourceOpen(resource);
 				addWidget(tab);
 				focusWidget(widget);
 				current	= tab;
 				tabs.push_back(current);
 
-				connect(widget, &Resource::Widget::isModified, tab, &ResourceTab::modifedWidget);
-				connect(widget, &Resource::Widget::isFocused, [this](Resource::Widget *widget)
+				connect(widget, &Resource::Editor::isModified, tab, &ResourceTab::modifedWidget);
+				connect(widget, &Resource::Editor::isFocused, [this](Resource::Editor *widget)
 				{
 					this->focusWidget(widget);
 				});
@@ -63,11 +63,11 @@ namespace NGM
 						return;
 					}
 				}
-				Resource::Widget *widget = current->resourceOpen(resource);
+				Resource::Editor *widget = current->resourceOpen(resource);
 				focusWidget(widget);
 
-				connect(widget, &Resource::Widget::isModified, current, &ResourceTab::modifedWidget);
-				connect(widget, &Resource::Widget::isFocused, [this](Resource::Widget *widget)
+				connect(widget, &Resource::Editor::isModified, current, &ResourceTab::modifedWidget);
+				connect(widget, &Resource::Editor::isFocused, [this](Resource::Editor *widget)
 				{
 					this->focusWidget(widget);
 				});
@@ -135,17 +135,17 @@ namespace NGM
 
 		void ResourceSplitter::cut()
 		{
-			Resource::Widget *widget = static_cast<Resource::Widget*>(current->currentWidget());
+			Resource::Editor *widget = static_cast<Resource::Editor*>(current->currentWidget());
 			widget->cutRequest();
 		}
 
 		void ResourceSplitter::paste()
 		{
-			Resource::Widget *widget = static_cast<Resource::Widget*>(current->currentWidget());
+			Resource::Editor *widget = static_cast<Resource::Editor*>(current->currentWidget());
 			widget->pasteRequest();
 		}
 
-		void ResourceSplitter::focusWidget(Resource::Widget *widget)
+		void ResourceSplitter::focusWidget(Resource::Editor *widget)
 		{
 			windowManager->setResourceWidget(widget);
 		}

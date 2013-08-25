@@ -23,7 +23,7 @@
 #include "ActionManager.hpp"
 #include "WindowManager.hpp"
 #include "ProjectManager.hpp"
-#include "../Resources/Project.hpp"
+#include "Project.hpp"
 #include <QDebug>
 
 namespace NGM

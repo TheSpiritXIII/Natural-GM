@@ -1,5 +1,5 @@
 /**
- *  @file TextType.hpp
+ *  @file Project.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -25,29 +25,60 @@
  *		THE SOFTWARE.
 **/
 #pragma once
-#ifndef _NGM_TEXTTYPE__HPP
-#define _NGM_TEXTTYPE__HPP
+#ifndef _NGM_RESOURCE_PROJECT__HPP
+#define _NGM_RESOURCE_PROJECT__HPP
 #include "Type.hpp"
+#include <QString>
+#include <QIcon>
 
 namespace NGM
 {
 	namespace Resource
 	{
-		class TextType : public Type
+		struct Serializer;
+
+		/**************************************************//*!
+		*	@brief	Metadata for project types.
+		******************************************************/
+		struct Project
 		{
-		public:
 
 			/**************************************************//*!
-			*	@return	A usable widget for this type.
+			*	@brief	The serializer is what loads and saves
+			*			the resources used in this project type.
 			******************************************************/
-			Editor *widget(NGM::Widget::ResourceTab *parent) const;
+			const Serializer * const serializer;
 
 			/**************************************************//*!
-			*	@brief	Sets up constant metadata.
+			*	@brief	The resource item type. For icons and actions.
 			******************************************************/
-			TextType(QString name, QString plural);
+			const Type * const type;
+
+			/**************************************************//*!
+			*	@brief	The category of which the project belongs to.
+			******************************************************/
+			const QString category;
+
+			/**************************************************//*!
+			*	@brief	Contains a short description of this
+			*			project type.
+			******************************************************/
+			const QString description;
+
+			/**************************************************//*!
+			*	@brief	Contains a list of extensions used in the
+			*			project type.
+			******************************************************/
+			const QStringList extensions;
+
+			/**************************************************//*!
+			*	@brief	Initializes all member variables.
+			******************************************************/
+			Project(const Serializer * const serializer, const Type * const type,
+					const QString category, const QString description, const QStringList extensions);
+
 		};
 	}
 }
 
-#endif // _NGM_TEXTTYPE__HPP
+#endif // _NGM_RESOURCE_PROJECT__HPP

@@ -4,6 +4,7 @@
  *  @section License
  *
  *	  Copyright (C) 2013 Daniel Hrabovcak
+ *	  Copyright (C) 2013 Joshua Spayd
  *
  *	  This file is a part of the Natural GM IDE.
  *
@@ -25,6 +26,7 @@
 #include "ResourceProjectItem.hpp"
 #include "ResourceSplitter.hpp"
 #include "WindowManager.hpp"
+#include "MainWindow.hpp"
 #include <QMenu>
 #include <QDebug>
 #include <QMessageBox>
@@ -46,7 +48,14 @@ namespace NGM
 
 			connect(this, &ResourceTab::customContextMenuRequested, [this](const QPoint &point)
 			{
-				rightClicked = widget(tabBar()->tabAt(point));
+				int num = tabBar()->tabAt(point);
+
+				//Do nothing if there was no tab clicked.
+				if (num == -1)
+					return;
+
+				rightClicked = widget(num);
+
 				QMenu *menu = new QMenu(this);
 				if (count() != 1)
 				{
@@ -79,9 +88,21 @@ namespace NGM
 						});
 					}
 				}
-				/*menu->addSeparator();
-				menu->addAction("Move Next Dialog");
-				menu->addAction("Move Next Window");*/
+				menu->addSeparator();
+				//menu->addAction("Move Next Dialog");
+				connect(menu->addAction("Move Next Window"), &QAction::triggered, [this]()
+				{
+					MainWindow* win = splitter->windowManager->addWindow();
+					for (auto &i : widgets)
+					{
+						if (i.second == rightClicked)
+						{
+							Model::ResourceBaseItem* item = i.first;
+							win->resourceSplitter->resourceOpen(item);
+							removeTab(indexOf(rightClicked));
+						}
+					}
+				});
 				menu->popup(this->mapToGlobal(point));
 			});
 
@@ -142,7 +163,7 @@ namespace NGM
 		void ResourceTab::closeTab(int ind)
 		{
 			QMessageBox::StandardButton reply;
-			reply = QMessageBox::question(this, "", "Close tab " + tabText(ind) + "?", QMessageBox::Yes|QMessageBox::No);
+			reply = QMessageBox::question(this, "", "Close tab " + tabText(ind) + "?", QMessageBox::Yes | QMessageBox::No);
 
 			if (reply == QMessageBox::Yes)
 				removeTab(ind);

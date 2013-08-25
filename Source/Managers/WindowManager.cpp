@@ -3,6 +3,7 @@
  *  @section License
  *
  *	  Copyright (C) 2013 Daniel Hrabovcak
+ *	  Copyright (C) 2013 Joshua Spayd
  *
  *	  This file is a part of the Natural GM IDE.
  *
@@ -31,7 +32,6 @@
 #include "ResourceProjectItem.hpp"
 #include <QToolBar>
 #include "AboutDialog.hpp"
-#include <QDebug>
 #include <QKeyEvent>
 #include <QMenuBar>
 #include "Widget.hpp"

@@ -3,7 +3,7 @@
  *
  *  @section License
  *
- *	  Copyright (C) 2013 Daniel Hrabovcak
+ *	  Copyright (C) 2013 Daniel Hrabovcak and Joshua Spayd
  *
  *	  This file is a part of the Natural GM IDE.
  *
@@ -25,6 +25,7 @@
 #include "ResourceProjectItem.hpp"
 #include "ResourceSplitter.hpp"
 #include "WindowManager.hpp"
+#include "MainWindow.hpp"
 #include <QMenu>
 #include <QDebug>
 #include <QMessageBox>
@@ -46,7 +47,14 @@ namespace NGM
 
 			connect(this, &ResourceTab::customContextMenuRequested, [this](const QPoint &point)
 			{
-				rightClicked = widget(tabBar()->tabAt(point));
+				int num = tabBar()->tabAt(point);
+
+				//Do nothing if there was no tab clicked.
+				if (num == -1)
+					return;
+
+				rightClicked = widget(num);
+
 				QMenu *menu = new QMenu(this);
 				if (count() != 1)
 				{
@@ -79,13 +87,79 @@ namespace NGM
 						});
 					}
 				}
-				/*menu->addSeparator();
-				menu->addAction("Move Next Dialog");
-				menu->addAction("Move Next Window");*/
+				menu->addSeparator();
+				//menu->addAction("Move Next Dialog");
+				connect(menu->addAction("Move Next Window"), &QAction::triggered, [this]()
+				{
+					MainWindow* win = splitter->windowManager->addWindow();
+					for (auto &i : widgets)
+					{
+						if (i.second == rightClicked)
+						{
+							Model::ResourceBaseItem* item = i.first;
+							win->resourceSplitter->resourceOpen(item);
+							removeTab(indexOf(rightClicked));
+						}
+					}
+				});
 				menu->popup(this->mapToGlobal(point));
 			});
 
-			connect(this, &ResourceTab::tabCloseRequested, this, &ResourceTab::closeTab);
+			connect(this, &ResourceTab::tabCloseRequested, [this](int index)
+			{
+				QWidget *w = this->widget(index);
+				Resource::Editor *editor = static_cast<Resource::Editor*>(w);
+				if (editor != nullptr)
+				{
+					auto &i = this->widgets.begin();
+					Model::ResourceBaseItem *item;
+					for(; i != this->widgets.end(); ++i)
+					{
+						if (i->second == editor)
+						{
+							item = i->first;
+							break;
+						}
+					}
+					if (editor->getState() & Resource::Editor::IsModified)
+					{
+						Model::ResourceProjectItem *projectItem = item->toResourceProjectItem();
+
+						QMessageBox message;
+						message.setIcon(QMessageBox::Question);
+						message.setText("The resource '" + item->data().toString() + "'' has been modified.");
+						message.setInformativeText("Do you want to save your changes?");
+						message.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+						message.setDefaultButton(QMessageBox::Yes);
+
+						switch (message.exec())
+						{
+						case QMessageBox::Yes:
+							if (projectItem != nullptr)
+							{
+								projectItem->project->serializer->write(editor, projectItem->resource);
+							}
+							else
+							{
+								Model::ResourceContentItem *contentItem = item->toResourceContentItem();
+								contentItem->root()->project->serializer->write(editor, contentItem->resource);
+							}
+							break;
+						case QMessageBox::No:
+							break;
+						default:
+							return;
+						}
+					}
+					if (this->count() == 1)
+					{
+						splitter->resetState();
+					}
+					widgets.erase(i);
+				}
+				removeTab(index);
+				w->deleteLater();
+			});
 		}
 
 		Resource::Editor *ResourceTab::resourceOpen(Model::ResourceBaseItem *resource)
@@ -102,6 +176,7 @@ namespace NGM
 				setCurrentIndex(addTab(widget, resource->data().toString()));
 				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(resource, widget));
 				splitter->parentWidget->setWindowFilePath(tabText(currentIndex()));
+				qDebug() << "End.";
 				return widget;
 			}
 			return nullptr;
@@ -135,31 +210,6 @@ namespace NGM
 		void ResourceTab::changeEvent(QEvent *event)
 		{
 			QTabWidget::changeEvent(event);
-		}
-
-		void ResourceTab::closeTab(int ind)
-		{
-			QMessageBox::StandardButton reply;
-			reply = QMessageBox::question(this, "", "Close tab " + tabText(ind) + "?", QMessageBox::Yes|QMessageBox::No);
-
-			if (reply == QMessageBox::Yes)
-				removeTab(ind);
-
-			/*QMessageBox message;
-				//message.setText("The resource '"+resource->name+"'' has been modified.");
-				message.setInformativeText("Do you want to save your changes?");
-				message.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-				message.setDefaultButton(QMessageBox::Save);
-				switch (message.exec())
-				{
-				case QMessageBox::Save:
-					//saveResource(resource);
-					return true;
-				case QMessageBox::Discard:
-					return true;
-				default:
-					return false;
-				}*/
 		}
 
 		void ResourceTab::modifedWidget(const bool &modified)

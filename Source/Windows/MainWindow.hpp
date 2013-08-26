@@ -83,6 +83,8 @@ namespace NGM
 
 		//void heirarchyOpenProject(Model::ResourceProjectItem *item);
 
+		Widget::ResourceSplitter *resourceSplitter;
+
 	protected:
 
 		/*! Main dock widgets. */
@@ -98,8 +100,6 @@ namespace NGM
 
 		Model::ResourceBaseItem *item;
 		QStandardItem *item2;
-
-		Widget::ResourceSplitter *resourceSplitter;
 		QTreeView *heirarchyView;
 
 		friend class Manager::WindowManager;

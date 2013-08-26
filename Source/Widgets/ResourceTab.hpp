@@ -3,6 +3,7 @@
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013 Joshua Spayd
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -85,11 +86,6 @@ namespace NGM
 			 *			open as a page on this tab.
 			******************************************************/
 			bool contains(Model::ResourceBaseItem *item);
-
-			/**************************************************//*!
-			 *	@brief	Closes the requested tab.
-			******************************************************/
-			void closeTab(int ind);
 
 		public slots:
 

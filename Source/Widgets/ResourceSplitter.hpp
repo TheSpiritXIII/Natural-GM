@@ -71,9 +71,9 @@ namespace NGM
 			int resourceIsOpen(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief	Closes the resource if it is open.
+			 *	@brief	Requests to reset the window manager state.
 			******************************************************/
-			void resourceClose(Model::ResourceBaseItem *resource);
+			void resetState();
 
 			/**************************************************//*!
 			 *	@brief	Set the tab index to the indicated index.
@@ -103,12 +103,12 @@ namespace NGM
 			******************************************************/
 			QWidget *const parentWidget;
 
-		private:
-
 			/**************************************************//*!
 			*	@brief	Stores the window manager.
 			******************************************************/
 			Manager::WindowManager *windowManager;
+
+		private:
 
 			/**************************************************//*!
 			*	@brief	Stores the current active resource tab.

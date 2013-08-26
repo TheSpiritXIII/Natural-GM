@@ -2,22 +2,22 @@
  *  @file WindowManager.cpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *	  Copyright (C) 2013 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *	  This file is a part of the Natural GM IDE.
  *
- *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License as published by
- *      the Free Software Foundation, either version 3 of the License, or
- *      (at your option) any later version.
+ *	  This program is free software: you can redistribute it and/or modify
+ *	  it under the terms of the GNU General Public License as published by
+ *	  the Free Software Foundation, either version 3 of the License, or
+ *	  (at your option) any later version.
  *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
+ *	  This program is distributed in the hope that it will be useful,
+ *	  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	  GNU General Public License for more details.
  *
- *      You should have received a copy of the GNU General Public License
- *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	  You should have received a copy of the GNU General Public License
+ *	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "MainWindow.hpp"
 #include "WindowManager.hpp"
@@ -31,7 +31,6 @@
 #include "ResourceProjectItem.hpp"
 #include <QToolBar>
 #include "AboutDialog.hpp"
-#include <QDebug>
 #include <QKeyEvent>
 #include <QMenuBar>
 #include "Editor.hpp"
@@ -220,7 +219,6 @@ namespace NGM
 				type.truncate(type.lastIndexOf('('));
 
 				Resource::Project *project = projectManager.projects.find(type)->second;
-
 				Resource::Resource *r = new Resource::Resource(project->type, filename, Resource::Resource::IsFilename);
 				heirarchy->append(new Model::ResourceProjectItem(r, project, filename.right(filename.size()-filename.lastIndexOf('/')-1)));
 			}
@@ -297,23 +295,19 @@ namespace NGM
 		void WindowManager::canZoomIn(const bool &value)
 		{
 			actionManager.actions[ActionManager::ActionZoomIn]->setEnabled(value);
+			actionManager.actions[ActionManager::ActionZoom]->setEnabled(value || actionManager.actions[ActionManager::ActionZoomOut]->isEnabled());
 		}
 
 		void WindowManager::canZoomOut(const bool &value)
 		{
 			actionManager.actions[ActionManager::ActionZoomOut]->setEnabled(value);
-		}
-
-		void WindowManager::canZoom(const bool &value)
-		{
-			actionManager.actions[ActionManager::ActionZoom]->setEnabled((Resource::Editor::CanZoomIn | Resource::Editor::CanZoomOut));
+			actionManager.actions[ActionManager::ActionZoom]->setEnabled(value || actionManager.actions[ActionManager::ActionZoomIn]->isEnabled());
 		}
 
 		void WindowManager::setResourceWidget(Resource::Editor *widget)
 		{
 			if (resourceWidget != nullptr)
 			{
-				qDebug() << "Not NULLIO.";
 				disconnect(resourceWidget, &Resource::Editor::canCopy, this, &WindowManager::canCopy);
 				disconnect(resourceWidget, &Resource::Editor::canPaste, this, &WindowManager::canPaste);
 				disconnect(resourceWidget, &Resource::Editor::canSelect, this, &WindowManager::canSelect);
@@ -321,8 +315,6 @@ namespace NGM
 				disconnect(resourceWidget, &Resource::Editor::canRedo, this, &WindowManager::canRedo);
 				disconnect(resourceWidget, &Resource::Editor::canZoomIn, this, &WindowManager::canZoomIn);
 				disconnect(resourceWidget, &Resource::Editor::canZoomOut, this, &WindowManager::canZoomOut);
-				disconnect(resourceWidget, &Resource::Editor::canZoomIn, this, &WindowManager::canZoom);
-				disconnect(resourceWidget, &Resource::Editor::canZoomOut, this, &WindowManager::canZoom);
 				disconnect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, resourceWidget, &Resource::Editor::cutRequest);
 				disconnect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, resourceWidget, &Resource::Editor::copyRequest);
 				disconnect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, resourceWidget, &Resource::Editor::pasteRequest);
@@ -333,7 +325,6 @@ namespace NGM
 				disconnect(actionManager.actions[ActionManager::ActionZoom], &QAction::triggered, resourceWidget, &Resource::Editor::zoomRequest);
 			}
 			uint8_t settings = widget->getState();
-			qDebug() << "Is really modified?" << settings;
 			canCopy(settings & Resource::Editor::CanCopy);
 			canPaste(settings & Resource::Editor::CanPaste);
 			canSelect(settings & Resource::Editor::CanSelect);
@@ -341,7 +332,6 @@ namespace NGM
 			canRedo(settings & Resource::Editor::CanRedo);
 			canZoomIn(settings & Resource::Editor::CanZoomIn);
 			canZoomOut(settings & Resource::Editor::CanZoomOut);
-			canZoom(settings & (Resource::Editor::CanZoomIn | Resource::Editor::CanZoomOut));
 			connect(widget, &Resource::Editor::canCopy, this, &WindowManager::canCopy);
 			connect(widget, &Resource::Editor::canPaste, this, &WindowManager::canPaste);
 			connect(widget, &Resource::Editor::canSelect, this, &WindowManager::canSelect);
@@ -350,8 +340,6 @@ namespace NGM
 			connect(widget, &Resource::Editor::isModified, this, &WindowManager::isModified);
 			connect(widget, &Resource::Editor::canZoomIn, this, &WindowManager::canZoomIn);
 			connect(widget, &Resource::Editor::canZoomOut, this, &WindowManager::canZoomOut);
-			connect(widget, &Resource::Editor::canZoomIn, this, &WindowManager::canZoom);
-			connect(widget, &Resource::Editor::canZoomOut, this, &WindowManager::canZoom);
 			connect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, widget, &Resource::Editor::cutRequest);
 			connect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, widget, &Resource::Editor::copyRequest);
 			connect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, widget, &Resource::Editor::pasteRequest);
@@ -361,6 +349,18 @@ namespace NGM
 			connect(actionManager.actions[ActionManager::ActionZoomOut], &QAction::triggered, widget, &Resource::Editor::zoomOutRequest);
 			connect(actionManager.actions[ActionManager::ActionZoom], &QAction::triggered, widget, &Resource::Editor::zoomRequest);
 			resourceWidget = widget;
+		}
+
+		void WindowManager::resetState()
+		{
+			resourceWidget = nullptr;
+			canCopy(false);
+			canPaste(false);
+			canSelect(false);
+			canUndo(false);
+			canRedo(false);
+			canZoomIn(false);
+			canZoomOut(false);
 		}
 	}
 }

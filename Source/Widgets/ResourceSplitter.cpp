@@ -149,5 +149,10 @@ namespace NGM
 		{
 			windowManager->setResourceWidget(widget);
 		}
+
+		void ResourceSplitter::resetState()
+		{
+			windowManager->resetState();
+		}
 	}
 }

@@ -1,6 +1,6 @@
 /**
- *  @file ErrorLogger.hpp
- *	@section License
+ *  @file ResourceProxyModel.hpp
+ *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
@@ -19,21 +19,32 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_ERRORLOGGER__HPP
-#define _NGM_ERRORLOGGER__HPP
-#include <QString>
+#include "ResourceProxyModel.hpp"
+#include <QFont>
 
 namespace NGM
 {
-	namespace Debug
+	namespace Model
 	{
-		/**************************************************//*!
-		*	@brief	Handles a message handler function that
-		*			logs to a text file for Qt's error stream.
-		******************************************************/
-		void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+		QModelIndex ResourceProxyModel::mapFromSource(const QModelIndex & sourceIndex) const
+		{
+			return sourceIndex;
+		}
+
+		QModelIndex ResourceProxyModel::mapToSource(const QModelIndex &proxyIndex) const
+		{
+			return proxyIndex;
+		}
+
+		QVariant ResourceProxyModel::data(const QModelIndex & proxyIndex, int role = Qt::DisplayRole) const
+		{
+			if (role == Qt::FontRole && proxyIndex.internalPointer() == _activeProjectItem)
+			{
+				QFont font;
+				font.setBold(true);
+				return font;
+			}
+			//return
+		}
 	}
 }
-
-#endif // _NGM_ERRORLOGGER__HPP

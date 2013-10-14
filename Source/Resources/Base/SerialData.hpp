@@ -2,27 +2,22 @@
  *  @file SerialData.hpp
  *	@section License
  *
- *      Copyright (C) 2013 Josh Ventura and Daniel Hrabovcak
+ *      Copyright (C) 2013 Daniel Hrabovcak and Josh Ventura
  *
- *      This file is a part of the Natural GM IDE. MIT License.
+ *      This file is a part of the Natural GM IDE.
  *
- *      Permission is hereby granted, free of charge, to any person obtaining a copy
- *		of this software and associated documentation files (the "Software"), to deal
- *		in the Software without restriction, including without limitation the rights
- *		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *		copies of the Software, and to permit persons to whom the Software is
- *		furnished to do so, subject to the following conditions:
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      (at your option) any later version.
  *
- *		The above copyright notice and this permission notice shall be included in
- *		all copies or substantial portions of the Software.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
  *
- *		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *		FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *		THE SOFTWARE.
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
 #ifndef _NGM_SERIALDATA__H
@@ -32,7 +27,7 @@
 #include <vector>
 #include <cstdint>
 #include <QImage>
-#include <QByteArray>
+#include <Variant.hpp>
 
 namespace NGM
 {
@@ -51,6 +46,7 @@ namespace NGM
 		struct SerialAnimation;
 		struct SerialBlob;
 		struct SerialResource;
+		struct SerialVariant;
 
 		/**************************************************//*!
 		*	@brief	Contains SerialData identifiers. As a
@@ -67,6 +63,7 @@ namespace NGM
 			const uint8_t animation	[8]	=	{'N', 'G', 'M', '-', 'a', 'n', 'i', 'm'};
 			const uint8_t blob		[8]	=	{'N', 'G', 'M', '-', 'b', 'l', 'o', 'b'};
 			const uint8_t resource	[8]	=	{'N', 'G', 'M', '-', 'r', 's', 'r', 'c'};
+			const uint8_t variant	[8]	=	{'N', 'G', 'M', '-', 'v', 'a', 'r', 't'};
 		}
 
 		/**************************************************//*!
@@ -76,34 +73,39 @@ namespace NGM
 		{
 
 			/**************************************************//*!
-			*	@return	The unique identifier for this data type.
+			*	@breif	Returns a unique identifier for class type.
 			******************************************************/
-			virtual const uint8_t *getUUID();
+			virtual const uint8_t *getUUID() const;
 
 			/**************************************************//*!
-			*	@return	A safe cast to an object type.
+			*	@brief	A safe cast to an object type.
 			******************************************************/
 			virtual SerialObject *asObject();
 
 			/**************************************************//*!
-			*	@return	A safe cast to an image type.
+			*	@brief	A safe cast to an image type.
 			******************************************************/
 			virtual SerialImage *asImage();
 
 			/**************************************************//*!
-			*	@return	A safe cast to an animation type.
+			*	@brief	A safe cast to an animation type.
 			******************************************************/
 			virtual SerialAnimation *asAnimation();
 
 			/**************************************************//*!
-			*	@return	A safe cast to a blob type.
+			*	@brief	A safe cast to a blob type.
 			******************************************************/
 			virtual SerialBlob *asBlob();
 
 			/**************************************************//*!
-			*	@return	A safe cast to a resource type.
+			*	@brief	A safe cast to a resource type.
 			******************************************************/
 			virtual SerialResource *asResource();
+
+			/**************************************************//*!
+			*	@brief	A safe cast to a variant type.
+			******************************************************/
+			virtual SerialVariant *asVariant();
 
 		};
 
@@ -120,12 +122,12 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	A group of attributes
 			******************************************************/
-			map<string, vector<char>> attributes;
+			map<string, string> attributes;
 
 			/**************************************************//*!
-			*	@return	The unique identifier for this data type.
+			*	@breif	Returns a unique identifier for class type.
 			******************************************************/
-			virtual const uint8_t *getUUID();
+			virtual const uint8_t *getUUID() const;
 
 			/**************************************************//*!
 			*	@brief	Removes all children.
@@ -154,9 +156,9 @@ namespace NGM
 			SerialImage();
 
 			/**************************************************//*!
-			*	@return	The unique identifier for this data type.
+			*	@breif	Returns a unique identifier for class type.
 			******************************************************/
-			virtual const uint8_t *getUUID();
+			virtual const uint8_t *getUUID() const;
 
 			/**************************************************//*!
 			*	@brief	Removes image data.
@@ -180,9 +182,9 @@ namespace NGM
 			vector<QImage*> images;
 
 			/**************************************************//*!
-			*	@return	The unique identifier for this data type.
+			*	@breif	Returns a unique identifier for class type.
 			******************************************************/
-			virtual const uint8_t *getUUID();
+			virtual const uint8_t *getUUID() const;
 
 			/**************************************************//*!
 			*	@brief	Removes all image data.
@@ -203,12 +205,12 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Contains the data.
 			******************************************************/
-			QByteArray data;
+			char *data;
 
 			/**************************************************//*!
-			*	@return	The unique identifier for this data type.
+			*	@breif	Returns a unique identifier for class type.
 			******************************************************/
-			virtual const uint8_t *getUUID();
+			virtual const uint8_t *getUUID() const;
 
 			/**************************************************//*!
 			*	@brief	Returns this.
@@ -227,14 +229,35 @@ namespace NGM
 			vector<Resource*> resources;
 
 			/**************************************************//*!
-			*	@return	The unique identifier for this data type.
+			*	@breif	Returns a unique identifier for class type.
 			******************************************************/
-			virtual const uint8_t *getUUID();
+			virtual const uint8_t *getUUID() const;
 
 			/**************************************************//*!
 			*	@brief	Returns this.
 			******************************************************/
 			virtual SerialResource *asResource();
+		};
+
+		/**************************************************//*!
+		*	@brief	Stores indexed resources.
+		******************************************************/
+		struct SerialVariant : SerialData
+		{
+			/**************************************************//*!
+			*	@brief	Contains all resources.
+			******************************************************/
+			Variant variant;
+
+			/**************************************************//*!
+			*	@breif	Returns a unique identifier for class type.
+			******************************************************/
+			virtual const uint8_t *getUUID() const;
+
+			/**************************************************//*!
+			*	@brief	Returns this.
+			******************************************************/
+			virtual SerialVariant *asVariant();
 		};
 	}
 }

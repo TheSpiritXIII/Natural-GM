@@ -8,7 +8,15 @@ QT			+=	widgets network
 TEMPLATE	 =	app
 TARGET		 =	"Natural-GM"
 CONFIG		+=	c++11
-LIBS		+=	-L$$[QT_INSTALL_LIBS] -lqscintilla2
+LIBS		+=	-L$$[QT_INSTALL_LIBS]
+debug
+{
+	LIBS	+=	-lqscintilla2d
+}
+release
+{
+	LIBS	+=	-lqscintilla2
+}
 DEFINES		+=	QSCINTILLA_DLL
 #----------------------------------------------
 #   Include locations.
@@ -16,11 +24,13 @@ DEFINES		+=	QSCINTILLA_DLL
 INCLUDEPATH	+=	$$PWD/ \
 	Windows \
 	Classes/ErrorLogger \
+	Classes/RapidXML \
 	Managers \
 	Models \
 	Dialogs \
 	Widgets \
 	Resources \
+	Containers \
 	Models/ResourceItemModel \
 	Resources/Serializers \
 	Resources/Base \
@@ -62,7 +72,19 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Resources/Base/SerialData.hpp \
 	Resources/Base/Resource.hpp \
 	Resources/Base/Editor.hpp \
-	Resources/Editors/TextEditor.hpp
+	Resources/Editors/TextEditor.hpp \
+	Classes/StatusWidget.hpp \
+	Widgets/ResourceSplitterHandle.hpp \
+	Widgets/HighlightWidget.hpp \
+	Widgets/ResourceTabBar.hpp \
+	Models/ResourceItemModel/ResourceProxyModel.hpp \
+	Containers/String.hpp \
+	Containers/Map.hpp \
+	Containers/Vector.hpp \
+	Managers/ProgressManager.hpp \
+	Containers/List.hpp \
+	Containers/Set.hpp \
+	Containers/Queue.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -87,7 +109,12 @@ SOURCES		+= \
 	Resources/Base/SerialData.cpp \
 	Resources/Base/Base.cpp \
 	Resources/Types/TextType.cpp \
-	Resources/Editors/TextEditor.cpp
+	Resources/Editors/TextEditor.cpp \
+	Widgets/ResourceSplitterHandle.cpp \
+	Widgets/HighlightWidget.cpp \
+	Widgets/ResourceTabBar.cpp \
+	Resources/Serializers/GMXSerializer.cpp \
+    Models/ResourceItemModel/ResourceProxyModel.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------

@@ -19,6 +19,7 @@
  *	  You should have received a copy of the GNU General Public License
  *	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
+#define QT_DEBUG
 #include "MainWindow.hpp"
 #include "WindowManager.hpp"
 #include "ProjectDialog.hpp"
@@ -34,13 +35,16 @@
 #include <QKeyEvent>
 #include <QMenuBar>
 #include "Editor.hpp"
+#include <QMessageBox>
+#include <QButtonGroup>
+#include <QPlainTextEdit>
 
 namespace NGM
 {
 	namespace Manager
 	{
 		WindowManager::WindowManager(int argc, char *argv[]) :
-			QApplication(argc, argv), actionManager(this, &projectManager), resourceWidget(nullptr)
+			QApplication(argc, argv), actionManager(this, &projectManager), resourceWidget(nullptr), activeType(true)
 		{
 #ifdef Q_OS_WIN32
 			setWindowIcon(QIcon("naturalgm.ico"));
@@ -52,22 +56,32 @@ namespace NGM
 
 			setApplicationDisplayName("Natural GM");
 
-			actionManager.actions[ActionManager::ActionNewProject] = new QAction(tr("New Project"), this);
+			actionManager.actions[ActionManager::ActionNewProject] = new QAction(tr("New Project..."), this);
 			connect(actionManager.actions[ActionManager::ActionNewProject], &QAction::triggered, [this]()
 			{
-				this->createProjectDialog();
+				createProjectDialog(false);
 			});
-			actionManager.actions[ActionManager::ActionOpenProject] = new QAction(tr("Open Project"), this);
+			actionManager.actions[ActionManager::ActionNewFile] = new QAction(tr("New File..."), this);
+			connect(actionManager.actions[ActionManager::ActionNewFile], &QAction::triggered, [this]()
+			{
+				createProjectDialog(true);
+			});
+			actionManager.actions[ActionManager::ActionOpenProject] = new QAction(tr("Open Project..."), this);
 			connect(actionManager.actions[ActionManager::ActionOpenProject], &QAction::triggered, [this]()
 			{
-				this->openProjectDialog();
+				openProjectDialog(false);
+			});
+			actionManager.actions[ActionManager::ActionOpenFile] = new QAction(tr("Open Files..."), this);
+			connect(actionManager.actions[ActionManager::ActionOpenFile], &QAction::triggered, [this]()
+			{
+				openProjectDialog(true);
 			});
 			actionManager.actions[ActionManager::ActionSave] = new QAction(tr("Save"), this);
 			actionManager.actions[ActionManager::ActionSave]->setEnabled(false);
 			connect(actionManager.actions[ActionManager::ActionSave], &QAction::triggered, [this]()
 			{
-				this->resourceWidget->isSaved();
-				this->resourceWidget->getResourceTabWidget()->resourceSave(this->resourceWidget);
+				resourceWidget->saved();
+				resourceWidget->getResourceTab()->resourceSave(resourceWidget);
 			});
 			actionManager.actions[ActionManager::ActionSaveAs] = new QAction(tr("Save As..."), this);
 			actionManager.actions[ActionManager::ActionSaveAs]->setEnabled(false);
@@ -99,8 +113,18 @@ namespace NGM
 			});
 
 			actionManager.reload();
-			heirarchy = new Model::ResourceItemModel();
+			heirarchy = new Model::ResourceItemModel(&actionManager, this);
 			addWindow();
+
+			QString filename;
+			if (argc > 1)
+			{
+				for (int i = 1; i < argc; ++i)
+				{
+					filename = QString(argv[i]);
+					createProject(filename, projectType(filename));
+				}
+			}
 		}
 
 		WindowManager::~WindowManager()
@@ -118,8 +142,8 @@ namespace NGM
 			add->show();
 
 			QToolBar *toolbar = new QToolBar(tr("Main"), add);
-			toolbar->addAction(actionManager.actions[ActionManager::ActionNewProject]);
-			toolbar->addAction(actionManager.actions[ActionManager::ActionOpenProject]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionNewFile]);
+			toolbar->addAction(actionManager.actions[ActionManager::ActionOpenFile]);
 			toolbar->addAction(actionManager.actions[ActionManager::ActionSave]);
 			toolbar->addAction(actionManager.actions[ActionManager::ActionSaveAll]);
 			toolbar->setIconSize(QSize(16, 16));
@@ -142,7 +166,11 @@ namespace NGM
 			QMenuBar *menuBar = new QMenuBar(add);
 			QMenu *menu = new QMenu(tr("File"), add);
 			menu->addAction(actionManager.actions[ActionManager::ActionNewProject]);
+			menu->addAction(actionManager.actions[ActionManager::ActionNewFile]);
+			menu->addSeparator();
 			menu->addAction(actionManager.actions[ActionManager::ActionOpenProject]);
+			menu->addAction(actionManager.actions[ActionManager::ActionOpenFile]);
+			menu->addSeparator();
 			menu->addAction(actionManager.actions[ActionManager::ActionSave]);
 			menu->addAction(actionManager.actions[ActionManager::ActionSaveAll]);
 			menuBar->addMenu(menu);
@@ -154,16 +182,17 @@ namespace NGM
 			menu->addAction(actionManager.actions[ActionManager::ActionUndo]);
 			menu->addAction(actionManager.actions[ActionManager::ActionRedo]);
 			menuBar->addMenu(menu);
-			menu = new QMenu(tr("Help"), add);
-			menu->addAction(actionManager.actions[ActionManager::ActionAbout]);
-			menuBar->addMenu(menu);
 			menu = new QMenu(tr("View"), add);
 			menu->addAction(actionManager.actions[ActionManager::ActionZoomIn]);
 			menu->addAction(actionManager.actions[ActionManager::ActionZoomOut]);
 			menu->addAction(actionManager.actions[ActionManager::ActionZoom]);
+			menu = new QMenu(tr("Help"), add);
+			menu->addAction(actionManager.actions[ActionManager::ActionAbout]);
+			menuBar->addMenu(menu);
 			menuBar->addMenu(menu);
 			add->setMenuBar(menuBar);
 
+			currentWindow = add;
 			return add;
 		}
 
@@ -180,9 +209,9 @@ namespace NGM
 			}
 		}
 
-		void WindowManager::createProjectDialog()
+		void WindowManager::createProjectDialog(const bool& files)
 		{
-			Dialog::ProjectDialog *d = new Dialog::ProjectDialog(&projectManager, &settingManager, this);
+			Dialog::ProjectDialog *d = new Dialog::ProjectDialog(&projectManager, &settingManager, this, files);
 			d->show();
 		}
 
@@ -191,12 +220,13 @@ namespace NGM
 			heirarchy->append(project);
 		}
 
-		void WindowManager::openProjectDialog()
+		void WindowManager::openProjectDialog(const bool &files)
 		{
-			QFileDialog *d = new QFileDialog(0, tr("Open an Existing Project"));
+			QFileDialog d(currentWindow, tr("Open an Existing Project"));
+			d.setFileMode(files ? QFileDialog::ExistingFiles : QFileDialog::ExistingFile);
 
 			QString formats;
-			for(auto& i : projectManager.projects)
+			for(auto& i : (files ? projectManager.files : projectManager.projects))
 			{
 				formats.append(i.first);
 				formats.append("( ");
@@ -210,20 +240,26 @@ namespace NGM
 			}
 			formats.chop(2);
 
-			d->setNameFilter(formats);
+			d.setNameFilter(formats);
 
-			if (d->exec() == QDialog::Accepted)
+			if (d.exec() == QDialog::Accepted)
 			{
-				QString filename = d->selectedFiles().first();
-				QString type = d->selectedNameFilter();
+				QString type = d.selectedNameFilter();
 				type.truncate(type.lastIndexOf('('));
 
-				Resource::Project *project = projectManager.projects.find(type)->second;
-				Resource::Resource *r = new Resource::Resource(project->type, filename, Resource::Resource::IsFilename);
-				heirarchy->append(new Model::ResourceProjectItem(r, project, filename.right(filename.size()-filename.lastIndexOf('/')-1)));
+				Resource::Project *project = files ? projectManager.files.find(type)->second : projectManager.projects.find(type)->second;
+
+				for (QString& filename : d.selectedFiles())
+				{
+					Model::ResourceBaseItem *item = createProject(filename, project);
+					if (files)
+					{
+						currentWindow->resourceSplitter->resourceOpen(item);
+					}
+				}
 			}
 
-			d->deleteLater();
+			//d->deleteLater();
 		}
 
 		bool WindowManager::eventFilter(QObject *object, QEvent *event)
@@ -315,14 +351,14 @@ namespace NGM
 				disconnect(resourceWidget, &Resource::Editor::canRedo, this, &WindowManager::canRedo);
 				disconnect(resourceWidget, &Resource::Editor::canZoomIn, this, &WindowManager::canZoomIn);
 				disconnect(resourceWidget, &Resource::Editor::canZoomOut, this, &WindowManager::canZoomOut);
-				disconnect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, resourceWidget, &Resource::Editor::cutRequest);
-				disconnect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, resourceWidget, &Resource::Editor::copyRequest);
-				disconnect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, resourceWidget, &Resource::Editor::pasteRequest);
-				disconnect(actionManager.actions[ActionManager::ActionUndo], &QAction::triggered, resourceWidget, &Resource::Editor::undoRequest);
-				disconnect(actionManager.actions[ActionManager::ActionRedo], &QAction::triggered, resourceWidget, &Resource::Editor::redoRequest);
-				disconnect(actionManager.actions[ActionManager::ActionZoomIn], &QAction::triggered, resourceWidget, &Resource::Editor::zoomInRequest);
-				disconnect(actionManager.actions[ActionManager::ActionZoomOut], &QAction::triggered, resourceWidget, &Resource::Editor::zoomOutRequest);
-				disconnect(actionManager.actions[ActionManager::ActionZoom], &QAction::triggered, resourceWidget, &Resource::Editor::zoomRequest);
+				disconnect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, resourceWidget, &Resource::Editor::cut);
+				disconnect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, resourceWidget, &Resource::Editor::copy);
+				disconnect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, resourceWidget, &Resource::Editor::paste);
+				disconnect(actionManager.actions[ActionManager::ActionUndo], &QAction::triggered, resourceWidget, &Resource::Editor::undo);
+				disconnect(actionManager.actions[ActionManager::ActionRedo], &QAction::triggered, resourceWidget, &Resource::Editor::redo);
+				disconnect(actionManager.actions[ActionManager::ActionZoomIn], &QAction::triggered, resourceWidget, &Resource::Editor::zoomIn);
+				disconnect(actionManager.actions[ActionManager::ActionZoomOut], &QAction::triggered, resourceWidget, &Resource::Editor::zoomOut);
+				disconnect(actionManager.actions[ActionManager::ActionZoom], &QAction::triggered, resourceWidget, &Resource::Editor::zoom);
 			}
 			uint8_t settings = widget->getState();
 			canCopy(settings & Resource::Editor::CanCopy);
@@ -340,14 +376,14 @@ namespace NGM
 			connect(widget, &Resource::Editor::isModified, this, &WindowManager::isModified);
 			connect(widget, &Resource::Editor::canZoomIn, this, &WindowManager::canZoomIn);
 			connect(widget, &Resource::Editor::canZoomOut, this, &WindowManager::canZoomOut);
-			connect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, widget, &Resource::Editor::cutRequest);
-			connect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, widget, &Resource::Editor::copyRequest);
-			connect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, widget, &Resource::Editor::pasteRequest);
-			connect(actionManager.actions[ActionManager::ActionUndo], &QAction::triggered, widget, &Resource::Editor::undoRequest);
-			connect(actionManager.actions[ActionManager::ActionRedo], &QAction::triggered, widget, &Resource::Editor::redoRequest);
-			connect(actionManager.actions[ActionManager::ActionZoomIn], &QAction::triggered, widget, &Resource::Editor::zoomInRequest);
-			connect(actionManager.actions[ActionManager::ActionZoomOut], &QAction::triggered, widget, &Resource::Editor::zoomOutRequest);
-			connect(actionManager.actions[ActionManager::ActionZoom], &QAction::triggered, widget, &Resource::Editor::zoomRequest);
+			connect(actionManager.actions[ActionManager::ActionCut], &QAction::triggered, widget, &Resource::Editor::cut);
+			connect(actionManager.actions[ActionManager::ActionCopy], &QAction::triggered, widget, &Resource::Editor::copy);
+			connect(actionManager.actions[ActionManager::ActionPaste], &QAction::triggered, widget, &Resource::Editor::paste);
+			connect(actionManager.actions[ActionManager::ActionUndo], &QAction::triggered, widget, &Resource::Editor::undo);
+			connect(actionManager.actions[ActionManager::ActionRedo], &QAction::triggered, widget, &Resource::Editor::redo);
+			connect(actionManager.actions[ActionManager::ActionZoomIn], &QAction::triggered, widget, &Resource::Editor::zoomIn);
+			connect(actionManager.actions[ActionManager::ActionZoomOut], &QAction::triggered, widget, &Resource::Editor::zoomOut);
+			connect(actionManager.actions[ActionManager::ActionZoom], &QAction::triggered, widget, &Resource::Editor::zoom);
 			resourceWidget = widget;
 		}
 
@@ -361,6 +397,247 @@ namespace NGM
 			canRedo(false);
 			canZoomIn(false);
 			canZoomOut(false);
+			isModified(false);
+		}
+
+		void WindowManager::clearStatusWidgets()
+		{
+			while (!statusBarWidgets.empty())
+			{
+				currentWindow->statusBar()->removeWidget(statusBarWidgets.front());
+				statusBarWidgets.pop();
+			}
+		}
+
+		void WindowManager::addStatusWidget(QWidget *widget, const int &size)
+		{
+			if (activeType)
+			{
+				statusBarWidgets.push(widget);
+				currentWindow->statusBar()->addWidget(widget, size);
+			}
+		}
+
+		void WindowManager::closeWindow(MainWindow *window)
+		{
+			if (window->resourceSplitter->count() == 0)
+			{
+				destroyWindow(window);
+				return;
+			}
+
+			QString files;
+			findModifiedFiles(window, files);
+
+			if (files.size() == 0)
+			{
+				destroyWindow(window);
+				return;
+			}
+
+			switch (saveRequest(files))
+			{
+			case Yes:
+				destroyWindow(window);
+				return;
+			case No:
+				destroyWindow(window);
+				return;
+			default:
+				return;
+			}
+		}
+
+		void WindowManager::findModifiedFiles(MainWindow *window, QString &list)
+		{
+			Widget::ResourceTab *tab;
+			const Model::ResourceProjectItem *project = nullptr;
+			for (int i = 0; i < window->resourceSplitter->count(); ++i)
+			{
+				tab = static_cast<Widget::ResourceTab*>(window->resourceSplitter->widget(i));
+				if (tab != nullptr)
+				{
+					for (auto & j : tab->widgets)
+					{
+						if (j.second->getState() & Resource::Editor::IsModified)
+						{
+							if (j.second->projectItem != project)
+							{
+								project = j.second->projectItem;
+								list += project->name();
+								list += "*\n";
+							}
+							if (j.first != j.second->projectItem)
+							{
+								list += "   ";
+								list += j.first->name();
+								list += "*\n";
+							}
+						}
+						else
+						{
+							j.second->deleteLater();
+						}
+					}
+				}
+			}
+		}
+
+		void WindowManager::exitRequest()
+		{
+			QString files;
+			for (auto &i : windows)
+			{
+				findModifiedFiles(i, files);
+			}
+
+			if (files == "")
+			{
+				quit();
+				return;
+			}
+
+			switch (saveRequest(files))
+			{
+			case Yes:
+				quit();
+				return;
+			case No:
+				quit();
+				return;
+			default:
+				return;
+			}
+		}
+
+		void WindowManager::destroyWindow(MainWindow *window)
+		{
+			window->deleteLater();
+			windows.remove(window);
+		}
+
+		int WindowManager::saveRequest(const QString &list)
+		{
+			QDialog *messageBox = new QDialog(0, Qt::WindowCloseButtonHint);
+			QVBoxLayout *layout = new QVBoxLayout(messageBox);
+
+			QLabel *label = new QLabel(tr("Would you like to save the changes to the following files?"), messageBox);
+			QPlainTextEdit *fileList = new QPlainTextEdit(list, messageBox);
+			fileList->setReadOnly(true);
+
+			QWidget *buttonWidget = new QWidget(messageBox);
+			QPushButton *buttonYes = new QPushButton(tr("&Yes"), buttonWidget);
+			QPushButton *buttonNo = new QPushButton(tr("No"), buttonWidget);
+			QPushButton *buttonCancel = new QPushButton(tr("Cancel"), buttonWidget);
+
+			QHBoxLayout *buttonLayout = new QHBoxLayout(buttonWidget);
+			buttonLayout->addWidget(buttonYes);
+			buttonLayout->addWidget(buttonNo);
+			buttonLayout->addWidget(buttonCancel);
+
+			QButtonGroup *buttonGroup = new QButtonGroup(messageBox);
+			buttonGroup->addButton(buttonYes, Yes);
+			buttonGroup->addButton(buttonNo, No);
+			buttonGroup->addButton(buttonCancel, 0);
+			connect(buttonGroup, static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::buttonReleased), messageBox, &QMessageBox::done);
+
+			layout->addWidget(label);
+			layout->addWidget(fileList);
+			layout->addWidget(buttonWidget);
+
+			int value = messageBox->exec();
+			messageBox->deleteLater();
+			return value;
+		}
+
+		void WindowManager::saveResource(Resource::Editor *editor, Model::ResourceBaseItem *item)
+		{
+			Model::ResourceProjectItem *projectItem = item->toProjectItem();
+			if (projectItem != nullptr)
+			{
+				projectItem->project->serializer->write(editor, projectItem->resource);
+			}
+			else
+			{
+				Model::ResourceContentItem *contentItem = item->toContentItem();
+				contentItem->root()->project->serializer->write(editor, contentItem->resource);
+			}
+		}
+
+		Model::ResourceBaseItem *WindowManager::createProject(const QString &filename, Resource::Project *project)
+		{
+			if (QFile::exists(filename))
+			{
+				Resource::Resource *r = new Resource::Resource(project->type, filename, Resource::Resource::IsFilename);
+				Model::ResourceProjectItem *item = new Model::ResourceProjectItem(r, project, filename.right(filename.size()-filename.lastIndexOf('/')-1), 0);
+				heirarchy->append(item);
+				QProgressBar p;
+				project->serializer->structure(item, &p);
+				return item;
+			}
+			return nullptr;
+		}
+
+		Resource::Project *WindowManager::projectType(const QString &filename)
+		{
+			for (auto &i : projectManager.projects)
+			{
+				for (auto &j : (i.second->extensions))
+				{
+					if (j == "*.*")
+					{
+						continue;
+					}
+					if (!(j.endsWith('*')))
+					{
+						if (filename.rightRef(filename.size()-filename.indexOf('.')) !=
+							j.rightRef(filename.size()-filename.indexOf('.')))
+						{
+							continue;
+						}
+					}
+					if (!(j[0] != '*'))
+					{
+						if (filename.leftRef(filename.size()-filename.indexOf('.')) !=
+							j.leftRef(filename.size()-filename.indexOf('.')))
+						{
+							continue;
+						}
+					}
+					return i.second;
+				}
+			}
 		}
 	}
 }
+
+/*static void saveDialog(Model::ResourceBaseItem *item)
+{
+	Model::ResourceProjectItem *projectItem = item->toProjectItem();
+
+	QMessageBox message;
+	message.setIcon(QMessageBox::Question);
+	message.setText("The resource \"" + item->data().toString() + "\" has been modified.");
+	message.setInformativeText("Do you want to save your changes?");
+	message.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+	message.setDefaultButton(QMessageBox::Yes);
+
+	switch (message.exec())
+	{
+	case QMessageBox::Yes:
+		if (projectItem != nullptr)
+		{
+			projectItem->project->serializer->write(editor, projectItem->resource);
+		}
+		else
+		{
+			Model::ResourceContentItem *contentItem = item->toContentItem();
+			contentItem->root()->project->serializer->write(editor, contentItem->resource);
+		}
+		break;
+	case QMessageBox::No:
+		break;
+	default:
+		return;
+	}
+}*/

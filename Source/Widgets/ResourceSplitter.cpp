@@ -25,34 +25,31 @@
 #include <QDebug>
 #include <QLabel>
 #include "Editor.hpp"
-#include <QDebug>
+#include <QMimeData>
+#include "TextEditor.hpp"
 
 namespace NGM
 {
 	namespace Widget
 	{
+		QTabBar *ResourceSplitter::dragTab = nullptr;
+		HighlightWidget *ResourceSplitter::highlightWidget = nullptr;
+
 		ResourceSplitter::ResourceSplitter(Manager::WindowManager *windowManager, QWidget *parent) :
-			QSplitter(parent), windowManager(windowManager), parentWidget(parent)
+			QSplitter(parent), windowManager(windowManager), parentWidget(parent), focusedEditor(nullptr)
 		{
 			setChildrenCollapsible(false);
+			setAcceptDrops(true);
 		}
 
-		void ResourceSplitter::resourceOpen(Model::ResourceBaseItem *resource, bool active)
+		void ResourceSplitter::resourceOpen(Model::ResourceBaseItem *resource, const bool &active)
 		{
 			if (count() == 0 || active == false)
 			{
-				ResourceTab *tab = new ResourceTab(this);
-				Resource::Editor *widget = tab->resourceOpen(resource);
-				addWidget(tab);
-				focusWidget(widget);
-				current	= tab;
+				current = new ResourceTab(this);
+				addWidget(current);
 				tabs.push_back(current);
-
-				connect(widget, &Resource::Editor::isModified, tab, &ResourceTab::modifedWidget);
-				connect(widget, &Resource::Editor::isFocused, [this](Resource::Editor *widget)
-				{
-					this->focusWidget(widget);
-				});
+				current->end = ResourceTab::Left;
 			}
 			else
 			{
@@ -63,96 +60,223 @@ namespace NGM
 						return;
 					}
 				}
-				Resource::Editor *widget = current->resourceOpen(resource);
-				focusWidget(widget);
-
-				connect(widget, &Resource::Editor::isModified, current, &ResourceTab::modifedWidget);
-				connect(widget, &Resource::Editor::isFocused, [this](Resource::Editor *widget)
-				{
-					this->focusWidget(widget);
-				});
 			}
+
+			Resource::Editor *widget = current->resourceOpen(resource);
+			focusWidget(widget);
+
+			connect(widget, &Resource::Editor::isModified, current, &ResourceTab::modifiedWidget);
+			connect(widget, &Resource::Editor::isFocused, current, &ResourceTab::focused);
 		}
 
-		void ResourceSplitter::movePage(ResourceSplitter *move, uint8_t settings)
+		void ResourceSplitter::movePage(const int &index, ResourceSplitter *splitter, const uint8_t settings)
 		{
-			if (move == this)
+			if (splitter == this)
 			{
-				if (!(settings & Prev))
+				qDebug() << current;
+
+				// Find the next consecutive resource tab.
+				ResourceTab *clone, *tab = nullptr;
+				if (tabs.size() != 0 && current != nullptr)
 				{
-					std::list<ResourceTab*>::iterator i;
-					for (i = tabs.begin(); i != tabs.end(); ++i)
+					if (!(settings & Previous))
 					{
-						if ((*i) == current)
+						for (auto i = tabs.begin(); i != tabs.end()-1; ++i)
 						{
-							++i;
-							break;
+							if ((*i) == current)
+							{
+								tab = (*(i+1));
+								if (current->count() == 1 && !(settings & Clone))
+								{
+									tabs.erase(i);
+								}
+								break;
+							}
 						}
-					}
-					if (i == tabs.end())
-					{
-						ResourceTab *tab = new ResourceTab(this);
-						addWidget(tab);
-
-						QWidget *widget = current->currentWidget();
-						QString text = current->tabText(current->currentIndex());
-						current->removeTab(current->currentIndex());
-						tab->addTab(widget, text);
-
-						if (current->count() == 0)
+						if (current == (*(tabs.end()-1)) && current->count() == 1 && !(settings & Clone))
 						{
-							tabs.remove((*i));
-							current->deleteLater();
+							qDebug() << "Missing Code.";
+							//tabs.pop_back();
 						}
-
-						current	= tab;
-						tabs.push_back(current);
 					}
 					else
 					{
-						QWidget *widget = current->currentWidget();
-						QString text = current->tabText(current->currentIndex());
-						current->removeTab(current->currentIndex());
-
-						if (current->count() == 0)
+						for (auto i = tabs.rbegin(); i != tabs.rend()-1; ++i)
 						{
-							tabs.remove((*i));
-							current->deleteLater();
+							if ((*i) == current)
+							{
+								tab = (*(i+1));
+								if (current->count() == 1 && !(settings & Clone))
+								{
+									tabs.erase(i.base());
+								}
+								break;
+							}
 						}
+						if (current == (*(tabs.rend()-1)) && current->count() == 1 && !(settings & Clone))
+						{
+							qDebug() << "Missing code.";
+							//tabs.pop_front();
+						}
+					}
+				}
 
-						(*i)->addTab(widget, text);
-						current = (*i);
+				// Add the widget.
+				if (tab != nullptr)
+				{
+					Resource::Editor *editor = static_cast<Resource::Editor*>(current->widget(index));
+
+					if (!(settings & Clone))
+					{
+						if (editor != nullptr)
+						{
+							disconnect(editor, &Resource::Editor::isModified, current, &ResourceTab::modifiedWidget);
+							disconnect(editor, &Resource::Editor::isFocused, current, &ResourceTab::focused);
+							connect(editor, &Resource::Editor::isModified, tab, &ResourceTab::modifiedWidget);
+							connect(editor, &Resource::Editor::isFocused, tab, &ResourceTab::focused);
+						}
+						clone = current;
+						current->moveWidget(index, tab);
+					}
+					else
+					{
+						editor = (editor->clone(tab));
+						connect(editor, &Resource::Editor::isModified, tab, &ResourceTab::modifiedWidget);
+						connect(editor, &Resource::Editor::isFocused, tab, &ResourceTab::focused);
+						tab->setCurrentIndex(tab->addTab(editor, current->tabText(index)));
+					}
+
+					if (!(settings & Previous) && clone == (*tabs.begin()))
+					{
+						qDebug() << "RIGHT";
+						clone->end = ResourceTab::Left;
+					}
+					else if ((settings & Previous) && clone == (*tabs.end()))
+					{
+						qDebug() << "LEFT";
+						clone->end = ResourceTab::Right;
+					}
+					else
+					{
+						qDebug() << "NONE";
+						clone->end = ResourceTab::None;
 					}
 				}
 				else
 				{
+					tab = new ResourceTab(this);
+					Resource::Editor *editor = static_cast<Resource::Editor*>(current->widget(index));
 
+					if (!(settings & Clone))
+					{
+						if (editor != nullptr)
+						{
+							disconnect(editor, &Resource::Editor::isModified, current, &ResourceTab::modifiedWidget);
+							disconnect(editor, &Resource::Editor::isFocused, current, &ResourceTab::focused);
+							connect(editor, &Resource::Editor::isModified, tab, &ResourceTab::modifiedWidget);
+							connect(editor, &Resource::Editor::isFocused, tab, &ResourceTab::focused);
+						}
+						clone = current;
+						current->moveWidget(index, tab);
+					}
+					else
+					{
+						tab->setCurrentIndex(tab->addTab((editor->clone(tab)), current->tabText(index)));
+						connect(editor, &Resource::Editor::isModified, tab, &ResourceTab::modifiedWidget);
+						connect(editor, &Resource::Editor::isFocused, tab, &ResourceTab::focused);
+					}
+
+					if (!(settings & Previous))
+					{
+						tabs.push_back(current);
+						addWidget(current);
+						current->end = ResourceTab::Right;
+					}
+					else
+					{
+						tabs.push_front(current);
+						insertWidget(0, current);
+						current->end = ResourceTab::Left;
+					}
+
+					if (!(settings & Previous) && clone == (*tabs.begin()))
+					{
+						qDebug() << "RIGHT";
+						clone->end = ResourceTab::Left;
+					}
+					else if ((settings & Previous) && clone == (*tabs.end()))
+					{
+						qDebug() << "LEFT";
+						clone->end = ResourceTab::Right;
+					}
+					else
+					{
+						qDebug() << "NONE";
+						clone->end = ResourceTab::None;
+					}
+
+					// Hack to equalize splitter widths.
+					moveSplitter(0, 0);
 				}
 			}
-			//if (count() == 0)
-			//move->current->currentWidget()
+			else
+			{
+
+			}
 		}
 
-		void ResourceSplitter::cut()
+		void ResourceSplitter::focusWidget(Resource::Editor *editor)
 		{
-			Resource::Editor *widget = static_cast<Resource::Editor*>(current->currentWidget());
-			widget->cutRequest();
-		}
-
-		void ResourceSplitter::paste()
-		{
-			Resource::Editor *widget = static_cast<Resource::Editor*>(current->currentWidget());
-			widget->pasteRequest();
-		}
-
-		void ResourceSplitter::focusWidget(Resource::Editor *widget)
-		{
-			windowManager->setResourceWidget(widget);
+			if (focusedEditor != editor)
+			{
+				windowManager->clearStatusWidgets();
+				windowManager->setResourceWidget(editor);
+				parentWidget->setWindowFilePath(current->tabText(current->currentIndex()));
+				if (editor != nullptr)
+				{
+					editor->status(windowManager);
+				}
+				focusedEditor = editor;
+			}
+			else
+			{
+				qDebug() << "Bad request";
+			}
 		}
 
 		void ResourceSplitter::resetState()
 		{
 			windowManager->resetState();
+		}
+
+		QSplitterHandle *ResourceSplitter::createHandle()
+		{
+			return QSplitter::createHandle();
+			//return new ResourceSplitterHandle(orientation(), this);
+		}
+
+		void ResourceSplitter::dragEnterEvent(QDragEnterEvent *event)
+		{
+			if (event->mimeData()->hasFormat("natural-gm/tab-detach") && dragTab != nullptr && count() == 0)
+			{
+				highlightWidget = new HighlightWidget(parentWidget);
+				highlightWidget->setGeometry(geometry());
+				highlightWidget->show();
+				event->setDropAction(Qt::MoveAction);
+				event->accept();
+			}
+		}
+
+		void ResourceSplitter::dragLeaveEvent(QDragLeaveEvent*)
+		{
+			delete highlightWidget;
+			highlightWidget = nullptr;
+		}
+
+		void ResourceSplitter::dropEvent(QDropEvent*)
+		{
+			delete highlightWidget;
+			highlightWidget = nullptr;
 		}
 	}
 }

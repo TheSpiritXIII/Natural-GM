@@ -27,6 +27,14 @@ namespace NGM
 {
 	namespace Model
 	{
+		ResourceGroupItem::~ResourceGroupItem()
+		{
+			for (auto &i : _children)
+			{
+				delete i;
+			}
+		}
+
 		int ResourceGroupItem::count() const
 		{
 			return _children.size();
@@ -39,9 +47,6 @@ namespace NGM
 
 		void ResourceGroupItem::append(ResourceBaseItem *item)
 		{
-			qDebug() << "Append request.";
-			qDebug() << _children.size();
-			qDebug() << _model;
 			_model->beginInsert(index(), _children.size(), _children.size());
 			item->_parent = this;
 			item->_model = _model;
@@ -124,7 +129,7 @@ namespace NGM
 			_model->endInsert();
 		}
 
-		ResourceGroupItem *ResourceGroupItem::toResourceGroupItem()
+		ResourceGroupItem *ResourceGroupItem::toGroupItem()
 		{
 			return this;
 		}

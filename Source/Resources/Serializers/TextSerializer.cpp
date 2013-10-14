@@ -22,6 +22,8 @@
 #include "TextSerializer.hpp"
 #include "Editor.hpp"
 #include <QFile>
+#include <fstream>
+#include <QDebug>
 
 namespace NGM
 {
@@ -32,39 +34,50 @@ namespace NGM
 			// Intentionally empty.
 		}
 
-		void TextSerializer::read(Editor *widget, Resource *resource) const
+		void TextSerializer::read(Editor *widget, Resource *resource, const SerializerOptions &options) const
 		{
 			if (resource->status & Resource::IsFilename)
 			{
-				QFile file(resource->location);
+				std::ifstream file;
+				file.open(resource->location.toLatin1(), std::ios::in);
+				std::string data;
+				file.seekg(0, std::ios::end);
+				data.resize(file.tellg());
+				file.seekg(0, std::ios::beg);
+				file.read(&data[0], data.size());
+				qDebug() << &data[0];
+				Variant var(&data[0]);
+				widget->setProperty("text", var);
+				file.close();
+				/*QFile file(resource->location);
 				file.open(QIODevice::ReadOnly);
 				widget->setProperty("text", file.readAll());
-				file.close();
+				file.close();*/
 				return;
 			}
-			auto &i = resource->serialData->attributes.find("text");
-			char *data = i->second.data();
-			widget->setProperty("text", QByteArray(data, static_cast<int>(i->second.size())));
-			resource->serialData->attributes.erase(i);
+			//auto i = resource->serialData->attributes.find("text");
+			//char *data = i->second.data();
+			//widget->setProperty("text", QByteArray(data, static_cast<int>(i->second.size())));
+			//resource->serialData->attributes.erase(i);
 		}
 
-		void TextSerializer::write(Editor *widget, Resource *resource) const
+		void TextSerializer::write(Editor *widget, Resource *resource, const SerializerOptions &options) const
 		{
 			if (resource->status & Resource::IsFilename)
 			{
 				QFile file(resource->location);
 				file.open(QIODevice::WriteOnly);
-				file.write(widget->property("text").toByteArray());
+				file.write(widget->property("text").charPtr());
 				file.close();
 				return;
 			}
-			QByteArray text = widget->property("text").toByteArray();
+			QByteArray text = widget->property("text").charPtr();
 			std::vector<int8_t> data;
-			data.emplace_back(text.data(), text.size());
+			//data.emplace_back(text.data(), text.size());
 			//resource->serialData->attributes["text"] = &data;
 		}
 
-		void TextSerializer::structure(Model::ResourceProjectItem *item) const
+		bool TextSerializer::structure(Model::ResourceProjectItem *item, QProgressBar *progressBar) const
 		{
 			if (~item->resource->status & Resource::IsFilename)
 			{
@@ -72,9 +85,10 @@ namespace NGM
 				file.open(QIODevice::WriteOnly);
 				QByteArray text = file.readAll();
 				std::vector<int8_t> data;
-				data.emplace_back(text.data(), text.size());
+				//data.emplace_back(text.data(), text.size());
 				//item->resource->serialData->attributes["text"] = data;
 				file.close();
+				return true;
 			}
 		}
 

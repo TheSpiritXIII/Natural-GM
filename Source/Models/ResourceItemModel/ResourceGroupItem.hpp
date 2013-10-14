@@ -43,6 +43,11 @@ namespace NGM
 			ResourceGroupItem(const QString &name) : ResourceBaseItem(name) {}
 
 			/**************************************************//*!
+			*	@brief	Deallocates and removes all children.
+			******************************************************/
+			~ResourceGroupItem();
+
+			/**************************************************//*!
 			*	@return The number of children this item contains.
 			******************************************************/
 			int count() const;
@@ -92,7 +97,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@return A safe case to a ResourceGroupItem. Returns this.
 			******************************************************/
-			ResourceGroupItem *toResourceGroupItem();
+			ResourceGroupItem *toGroupItem();
 
 		protected:
 

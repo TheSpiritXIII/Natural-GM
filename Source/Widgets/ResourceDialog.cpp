@@ -4,16 +4,11 @@ namespace NGM
 {
 	namespace Widget
 	{
-		ResourceDialog::ResourceDialog(ResourceTab *tab, bool clone)
+		ResourceDialog::ResourceDialog(const int &index, ResourceSplitter *splitter,
+			const uint8_t settings, Manager::WindowManager *windowManager, QWidget *parent)
 		{
-			move(tab, clone);
-		}
-
-		void ResourceDialog::move(ResourceTab *tab, bool clone)
-		{
-			QWidget *widget = tab->currentWidget();
-			tab->removeTab(tab->currentIndex());
-			splitter->addWidget(widget);
+			_splitter = new ResourceSplitter(windowManager, this);
+			splitter->movePage(index, _splitter);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 /**
- *  @file ResourceDialog.hpp
- *	@section License
+ *  @file ResourceProxyModel.hpp
+ *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
@@ -20,64 +20,65 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _NGM_RESOURCEDIALOG__HPP
-#define _NGM_RESOURCEDIALOG__HPP
-#include "ResourceSplitter.hpp"
-#include <QDialog>
+#ifndef _NGM_RESOURCEPROXYMODEL__HPP
+#define _NGM_RESOURCEPROXYMODEL__HPP
+#include <QAbstractProxyModel>
 
 namespace NGM
 {
 	namespace Model
 	{
-		class ResourceBaseItem;
-	}
-	namespace Widget
-	{
-		class ResourceTab;
+		class ResourceProjectItem;
 
 		/**************************************************//*!
-		*	@brief	Displays resources in a single dialog,
-		*			without toolbars or menubars.
+		*	@brief	A proxy model capable of storing the
+		*			current active project and bolds it.
 		******************************************************/
-		class ResourceDialog : public QDialog
+		class ResourceProxyModel : public QAbstractProxyModel
 		{
-			Q_OBJECT
-
 		public:
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by opening the indicated
-			*			item.
+			*	@brief	Required for subclassing.
 			******************************************************/
-			//ResourcDialog(Model::ResourceBaseItem *item);
+			QModelIndex mapFromSource(const QModelIndex & sourceIndex) const;
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by moving the current tab
-			*			of the indicated ResourceTab to here.
+			*	@brief	Required for subclassing.
 			******************************************************/
-			ResourceDialog(const int &index, ResourceSplitter *splitter,
-				const uint8_t settings, Manager::WindowManager *windowManager, QWidget *parent = 0);
+			QModelIndex mapToSource(const QModelIndex & proxyIndex) const;
 
 			/**************************************************//*!
-			*	@brief	Moves the current tab of the indicated
-			*			ResourceTab to this dialog.
+			*	@brief	Returns the data at the specified index.
+			*			This is mostly the same, except the
+			*			active project is bolded.
 			******************************************************/
-			//void move(ResourceTab *tab, bool clone);
+			QVariant data(const QModelIndex & proxyIndex, int role = Qt::DisplayRole) const;
 
 			/**************************************************//*!
-			*	@brief	Opens the indicated item.
+			*	@brief	Sets the current active project item.
 			******************************************************/
-			//open(Model::ResourceBaseItem *item);
+			inline void setActiveProjectItem(const ResourceProjectItem * item)
+			{
+				_activeProjectItem = item;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns the current active project item.
+			******************************************************/
+			inline const ResourceProjectItem *activeProjectItem()
+			{
+				return _activeProjectItem;
+			}
 
 		private:
 
 			/**************************************************//*!
-			*	@brief	Contains all opened resources.
+			*	@brief	The current active project index.
 			******************************************************/
-			ResourceSplitter *_splitter;
-
+			const ResourceProjectItem *_activeProjectItem;
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEDIALOG__HPP
+#endif // _NGM_RESOURCEPROXYMODEL__HPP

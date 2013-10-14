@@ -23,6 +23,11 @@
 #ifndef _NGM_RESOURCEPROJECTITEM__HPP
 #define _NGM_RESOURCEPROJECTITEM__HPP
 #include "ResourceGroupItem.hpp"
+#include "ResourceContentItem.hpp"
+#include <stdint.h>
+#include <set>
+#include <map>
+#include <string>
 
 namespace NGM
 {
@@ -37,11 +42,28 @@ namespace NGM
 		{
 		public:
 
+			enum Settings
+			{
+				isPreloaded		=	0x01,	// Changes the way the serializer works.
+				cacheItems		=	0x02	// Caches added items by type.
+			};
+
 			/**************************************************//*!
 			*	@brief Creates an item with the indicated name.
 			******************************************************/
-			ResourceProjectItem(NGM::Resource::Resource *resource, NGM::Resource::Project *project, const QString &name) :
-				ResourceGroupItem(name), resource(resource), project(project) {}
+			ResourceProjectItem(NGM::Resource::Resource *resource, NGM::Resource::Project *project,
+								const QString &name, const uint8_t &settings) :
+				ResourceGroupItem(name), resource(resource), project(project), settings(settings)
+			{
+				int split = name.lastIndexOf('/');
+				file = name.right(name.size()-split);
+				dir = name.left(split);
+			}
+
+			const QString directory()
+			{
+				return dir;
+			}
 
 			/**************************************************//*!
 			 *	@brief The resource of the item that this item represents.
@@ -54,12 +76,59 @@ namespace NGM
 			Resource::Project *project;
 
 			/**************************************************//*!
+			 *	@brief The project that all resources depend on.
+			******************************************************/
+			const uint8_t settings;
+
+			/**************************************************//*!
 			*	@return A safe case to a ResourceProjectItem. Returns this.
 			******************************************************/
-			ResourceProjectItem *toResourceProjectItem()
+			ResourceProjectItem *toProjectItem()
 			{
 				return this;
 			}
+
+			std::set<ResourceContentItem*> findType(const QString &type)
+			{
+				/*auto compare = [](const ResourceContentItem* left, const ResourceContentItem *right)
+				{
+					return left->resource->type->name < right->resource->type->name;
+				};
+				std::set<ResourceContentItem*, decltype(compare)> types(compare);*/
+
+				std::set<ResourceContentItem*> types;
+
+				/*auto find = [&](ResourceGroupItem *group)
+				{
+					for (auto &i : _children)
+					{
+						ResourceContentItem *content = i->toResourceContentItem();
+						if (content != nullptr)
+						{
+							if (content->resource->type->name == type)
+							{
+								types.insert(content);
+							}
+						}
+						ResourceGroupItem *recursive = i->toResourceGroupItem();
+						if (recursive != nullptr)
+						{
+							//find(recursive);
+						}
+					}
+				};*/
+
+				//find(this);
+				return types;
+			}
+
+		private:
+
+			std::map<std::string, std::set<ResourceContentItem*>> cache;
+
+			QString dir;
+			QString file;
+
 		};
 	}
 }

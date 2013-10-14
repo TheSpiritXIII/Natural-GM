@@ -29,6 +29,7 @@
 #include <QMenu>
 #include <QDebug>
 #include <QMessageBox>
+#include <QMimeData>
 using std::list;
 using std::pair;
 
@@ -36,60 +37,94 @@ namespace NGM
 {
 	namespace Widget
 	{
+		QWidget *ResourceTab::dragWidget = nullptr;
+
 		ResourceTab::ResourceTab(ResourceSplitter *parent) : QTabWidget(parent), splitter(parent)
 		{
 			setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+			setElideMode(Qt::ElideRight);
 			setTabsClosable(true);
 			setContentsMargins(0, 0, 0, 0);
 			setContextMenuPolicy(Qt::CustomContextMenu);
 			setMovable(true);
 			setDocumentMode(true);
+			setAcceptDrops(true);
+
+			connect(this, &ResourceTab::currentChanged, [this](const int&)
+			{
+				Resource::Editor *editor = static_cast<Resource::Editor*>(currentWidget());
+				if (editor != nullptr)
+				{
+					editor->setFocus();
+				}
+			});
 
 			connect(this, &ResourceTab::customContextMenuRequested, [this](const QPoint &point)
 			{
-				int num = tabBar()->tabAt(point);
+				rightClicked = tabBar()->tabAt(point);
 
 				//Do nothing if there was no tab clicked.
-				if (num == -1)
+				if (rightClicked == -1)
+				{
 					return;
+				}
 
-				rightClicked = widget(num);
+				Resource::Editor *editor = static_cast<Resource::Editor*>(currentWidget());
+				if (editor != nullptr)
+				{
+					editor->setFocus();
+				}
 
 				QMenu *menu = new QMenu(this);
-				if (count() != 1)
+				if (splitter->count() == 1)
 				{
-					if (splitter->count() == 1)
+					connect(menu->addAction("Split Next Horizontal"), &QAction::triggered, [this]()
 					{
-						connect(menu->addAction("Split Next Horizontal"), &QAction::triggered, [this]()
-						{
-							this->setCurrentWidget(this->rightClicked);
-							this->splitter->movePage(this->splitter, 0);
-							this->splitter->setOrientation(Qt::Horizontal);
-						});
-						connect(menu->addAction("Split Next Vertical"), &QAction::triggered, [this]()
-						{
-							this->setCurrentWidget(this->rightClicked);
-							this->splitter->movePage(this->splitter, 0);
-							this->splitter->setOrientation(Qt::Vertical);
-						});
-					}
-					else
+						splitter->movePage(rightClicked, splitter, 0);
+						splitter->setOrientation(Qt::Horizontal);
+					});
+					connect(menu->addAction("Split Next Vertical"), &QAction::triggered, [this]()
+					{
+						splitter->movePage(rightClicked, splitter, 0);
+						splitter->setOrientation(Qt::Vertical);
+					});
+					menu->addSeparator();
+					connect(menu->addAction("Clone Next Horizontal"), &QAction::triggered, [this]()
+					{
+						splitter->movePage(rightClicked, splitter, ResourceSplitter::Clone);
+					});
+					//menu->addSeperator();
+					//menu.addAction(tr("Move to Dialog"));
+					//menu->addSeparator()
+					//menu.addAction(tr("Move to Window"));
+				}
+				else
+				{
+					qDebug() << end;
+					qDebug() << count();
+					if (end != Right || count() != 1)
 					{
 						connect(menu->addAction("Move to Next"), &QAction::triggered, [this]()
 						{
-							this->setCurrentWidget(this->rightClicked);
-							this->splitter->movePage(this->splitter, ResourceSplitter::Next);
-						});
-						connect(menu->addAction("Move to Previous"), &QAction::triggered, [this]()
-						{
-							this->setCurrentWidget(this->rightClicked);
-							this->splitter->movePage(this->splitter, ResourceSplitter::Prev);
+							splitter->movePage(rightClicked, splitter);
 						});
 					}
+					if (end != Left || count() != 1)
+					{
+						connect(menu->addAction("Move to Previous"), &QAction::triggered, [this]()
+						{
+							splitter->movePage(rightClicked, splitter, ResourceSplitter::Previous);
+						});
+					}
+					menu->addSeparator();
+					connect(menu->addAction("Clone to Next"), &QAction::triggered, [this]()
+					{
+						splitter->movePage(rightClicked, splitter, ResourceSplitter::Clone);
+					});
 				}
-				menu->addSeparator();
+				/*menu->addSeparator();
 				//menu->addAction("Move Next Dialog");
-				connect(menu->addAction("Move Next Window"), &QAction::triggered, [this]()
+				connect(menu->addAction(tr("Move to Window")), &QAction::triggered, [this]()
 				{
 					MainWindow* win = splitter->windowManager->addWindow();
 					for (auto &i : widgets)
@@ -101,19 +136,19 @@ namespace NGM
 							removeTab(indexOf(rightClicked));
 						}
 					}
-				});
-				menu->popup(this->mapToGlobal(point));
+				});*/
+				menu->popup(mapToGlobal(point));
 			});
 
 			connect(this, &ResourceTab::tabCloseRequested, [this](int index)
 			{
-				QWidget *w = this->widget(index);
+				QWidget *w = widget(index);
 				Resource::Editor *editor = static_cast<Resource::Editor*>(w);
 				if (editor != nullptr)
 				{
-					auto &i = this->widgets.begin();
+					auto i = widgets.begin();
 					Model::ResourceBaseItem *item;
-					for(; i != this->widgets.end(); ++i)
+					for(; i != widgets.end(); ++i)
 					{
 						if (i->second == editor)
 						{
@@ -121,13 +156,14 @@ namespace NGM
 							break;
 						}
 					}
+					qDebug() << (editor->getState());
 					if (editor->getState() & Resource::Editor::IsModified)
 					{
-						Model::ResourceProjectItem *projectItem = item->toResourceProjectItem();
+						Model::ResourceProjectItem *projectItem = item->toProjectItem();
 
 						QMessageBox message;
 						message.setIcon(QMessageBox::Question);
-						message.setText("The resource '" + item->data().toString() + "'' has been modified.");
+						message.setText("The resource \"" + item->name() + "\" has been modified.");
 						message.setInformativeText("Do you want to save your changes?");
 						message.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 						message.setDefaultButton(QMessageBox::Yes);
@@ -141,7 +177,7 @@ namespace NGM
 							}
 							else
 							{
-								Model::ResourceContentItem *contentItem = item->toResourceContentItem();
+								Model::ResourceContentItem *contentItem = item->toContentItem();
 								contentItem->root()->project->serializer->write(editor, contentItem->resource);
 							}
 							break;
@@ -151,9 +187,10 @@ namespace NGM
 							return;
 						}
 					}
-					if (this->count() == 1)
+					if (count() == 1)
 					{
 						splitter->resetState();
+						deleteLater();
 					}
 					widgets.erase(i);
 				}
@@ -162,21 +199,26 @@ namespace NGM
 			});
 		}
 
-		Resource::Editor *ResourceTab::resourceOpen(Model::ResourceBaseItem *resource)
+		Resource::Editor *ResourceTab::resourceOpen(Model::ResourceBaseItem *item)
 		{
-			using NGM::Resource::Editor;
-			Resource::Resource *r = resource->toResourceProjectItem()->resource;
-			Editor *widget = r->type->widget(this);
-			qDebug() << "No Resource found." << widget;
+			Model::ResourceProjectItem *project = item->toProjectItem();
+			Resource::Resource *resource = (project == nullptr ? item->toContentItem()->resource : project->resource);
+
+			if (project == nullptr)
+			{
+				project = item->toContentItem()->root();
+			}
+
+			Resource::Editor *widget = resource->type->widget(project, this);
+
 			if (widget != nullptr)
 			{
-				widget->block(true);
-				resource->root()->project->serializer->read(widget, r);
-				widget->block(false);
-				setCurrentIndex(addTab(widget, resource->data().toString()));
-				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(resource, widget));
+				project->project->serializer->read(widget, resource);
+				widget->initialize();
+
+				setCurrentIndex(addTab(widget, item->name()));
+				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(item, widget));
 				splitter->parentWidget->setWindowFilePath(tabText(currentIndex()));
-				qDebug() << "End.";
 				return widget;
 			}
 			return nullptr;
@@ -188,8 +230,16 @@ namespace NGM
 			{
 				if (i.second == editor)
 				{
-					Model::ResourceProjectItem *r = i.first->toResourceProjectItem();
-					r->project->serializer->write(editor, r->resource);
+					Model::ResourceProjectItem *project = i.first->toProjectItem();
+					if (project == nullptr)
+					{
+						Model::ResourceContentItem *item = i.first->toContentItem();
+						item->root()->project->serializer->write(editor, item->resource);
+					}
+					else
+					{
+						project->project->serializer->write(editor, project->resource);
+					}
 					break;
 				}
 			}
@@ -207,14 +257,14 @@ namespace NGM
 			return false;
 		}
 
-		void ResourceTab::changeEvent(QEvent *event)
+		void ResourceTab::focused(Resource::Editor *editor)
 		{
-			QTabWidget::changeEvent(event);
+			splitter->current = this;
+			splitter->focusWidget(editor);
 		}
 
-		void ResourceTab::modifedWidget(const bool &modified)
+		void ResourceTab::modifiedWidget(const bool &modified)
 		{
-			qDebug() << modified;
 			int i = indexOf(static_cast<QWidget*>(sender()));
 			QString text = tabText(i);
 			if (modified)
@@ -226,7 +276,158 @@ namespace NGM
 				text.chop(1);
 			}
 			setTabText(i, text);
+
 			splitter->parentWidget->setWindowFilePath(tabText(currentIndex()));
+		}
+
+		void ResourceTab::moveWidget(const int &index, ResourceTab *resourceTab)
+		{
+			QWidget *w = widget(index);
+			QString t = tabText(index);
+			removeTab(index);
+			//resourceTab->addTab(w, t);
+
+			Resource::Editor *editor = static_cast<Resource::Editor*>(w);
+			if (editor != nullptr)
+			{
+				editor->resourceTab = resourceTab;
+				for (auto &i : this->widgets)
+				{
+					if (i.second == editor)
+					{
+						resourceTab->widgets.insert(i);
+						widgets.erase(i.first);
+						break;
+					}
+				}
+				resourceTab->setCurrentIndex(resourceTab->addTab(w, t));
+			}
+			else
+			{
+				resourceTab->setCurrentIndex(resourceTab->addTab(w, t));
+			}
+
+			if (count() == 0)
+			{
+				deleteLater();
+			}
+		}
+
+		void ResourceTab::dragEnterEvent(QDragEnterEvent *event)
+		{
+			if (event->mimeData()->hasFormat("natural-gm/tab-detach") &&
+				ResourceSplitter::dragTab == nullptr &&
+				ResourceSplitter::highlightWidget == nullptr)
+			{
+				ResourceSplitter::highlightWidget = new HighlightWidget(splitter->parentWidget);
+				ResourceSplitter::highlightWidget->show();
+				dragMoveEvent(event);
+				event->setDropAction(Qt::MoveAction);
+				event->accept();
+			}
+		}
+
+		void ResourceTab::dragLeaveEvent(QDragLeaveEvent *event)
+		{
+			delete ResourceSplitter::highlightWidget;
+			ResourceSplitter::highlightWidget = nullptr;
+		}
+
+		void ResourceTab::dragMoveEvent(QDragMoveEvent *event)
+		{
+			int halfSize;
+			QPoint mappedPosition = mapTo(splitter->parentWidget, pos());
+
+			// Calculate orientation, if necessary.
+			if (splitter->count() == 1)
+			{
+				Qt::Orientation oldOrientation = splitter->orientation();
+				int distanceX = abs(width()/2-event->pos().x());
+				int distanceY = abs(height()/2-event->pos().y());
+				if (distanceX+distanceY > 64)
+				{
+					if (distanceX > distanceY)
+					{
+						if (oldOrientation != Qt::Horizontal)
+						{
+							halfSize = width()/2;
+
+							// Probably glitch.
+							mappedPosition.setX(mappedPosition.x()-pos().x());
+
+							splitter->setOrientation(Qt::Horizontal);
+							ResourceSplitter::highlightWidget->setGeometry(mappedPosition.x(),
+								mappedPosition.y()+tabBar()->height(), halfSize, height()-tabBar()->height());
+							return;
+						}
+					}
+					else
+					{
+						if (oldOrientation != Qt::Vertical)
+						{
+							halfSize = (height()-tabBar()->height())/2;
+
+							// Probably glitch.
+							mappedPosition.setY(mappedPosition.y()-pos().y());
+
+							splitter->setOrientation(Qt::Vertical);
+							ResourceSplitter::highlightWidget->setGeometry(mappedPosition.x()+halfSize,
+								mappedPosition.y()+tabBar()->height(), halfSize, height()-tabBar()->height());
+							return;
+						}
+					}
+				}
+			}
+
+			if (splitter->orientation() == Qt::Horizontal)
+			{
+				halfSize = width()/2;
+
+				// Probably glitch.
+				mappedPosition.setX(mappedPosition.x()-pos().x());
+
+				if (event->pos().x() < halfSize)
+				{
+					if (ResourceSplitter::highlightWidget->x() != mappedPosition.x())
+					{
+						ResourceSplitter::highlightWidget->setGeometry(mappedPosition.x(),
+							mappedPosition.y()+tabBar()->height(), halfSize, height()-tabBar()->height());
+					}
+				}
+				else if (ResourceSplitter::highlightWidget->x() != mappedPosition.x()+halfSize)
+				{
+					ResourceSplitter::highlightWidget->setGeometry(mappedPosition.x()+halfSize,
+						mappedPosition.y()+tabBar()->height(), halfSize, height()-tabBar()->height());
+				}
+			}
+			else
+			{
+				halfSize = (height()-tabBar()->height())/2;
+
+				// Probably glitch.
+				mappedPosition.setY(mappedPosition.y()-pos().y());
+
+				if (event->pos().y() < halfSize+tabBar()->height())
+				{
+					if (ResourceSplitter::highlightWidget->y() != mappedPosition.y())
+					{
+						ResourceSplitter::highlightWidget->setGeometry(mappedPosition.x(),
+							mappedPosition.y()+tabBar()->height(), width(), halfSize);
+					}
+				}
+				else if (ResourceSplitter::highlightWidget->y() != mappedPosition.y()+halfSize)
+				{
+					ResourceSplitter::highlightWidget->setGeometry(mappedPosition.x(),
+						mappedPosition.y()+halfSize+tabBar()->height(), width(), halfSize);
+				}
+			}
+			event->accept();
+		}
+
+		void ResourceTab::dropEvent(QDropEvent *event)
+		{
+			delete ResourceSplitter::highlightWidget;
+			ResourceSplitter::highlightWidget = nullptr;
 		}
 	}
 }

@@ -130,7 +130,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Contains a list of default generic icons.
 			******************************************************/
-			enum GenericIcon
+			enum Icon
 			{
 				IconOkay		=	0,
 				IconCancel		=	1,
@@ -144,10 +144,10 @@ namespace NGM
 				IconPaintBrush	=	9,
 				IconPaintCan	=	10,
 				IconPalette		=	11,
-				IconUnused0		=	12,
-				IconUnused1		=	13,
-				IconUnused2		=	14,
-				IconUnused3		=	15
+				IconFolder		=	12,
+				IconUnused0		=	13,
+				IconUnused1		=	14,
+				IconUnused2		=	15
 			};
 
 			/**************************************************//*!
@@ -165,10 +165,15 @@ namespace NGM
 			******************************************************/
 			QIcon *dragdrop[192];
 
+			inline QIcon getIcon(Icon icon) const
+			{
+				return icons[icon];
+			}
+
 			/**************************************************//*!
 			*	@brief	Contains generic resource icons.
 			******************************************************/
-			QIcon *icons[16];
+			QIcon icons[16];
 
 			/**************************************************//*!
 			*	@brief	Returns the indicated action.

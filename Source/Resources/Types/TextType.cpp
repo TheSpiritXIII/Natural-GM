@@ -31,9 +31,9 @@ namespace NGM
 {
 	namespace Resource
 	{
-		Editor *TextType::widget(NGM::Widget::ResourceTab *parent) const
+		Editor *TextType::widget(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab) const
 		{
-			return new TextEditor(parent);
+			return new TextEditor(item, tab);
 		}
 
 		TextType::TextType(QString name, QString plural) : Type(name, plural) {}

@@ -1,5 +1,5 @@
 /**
- *  @file ErrorLogger.hpp
+ *  @file HighlightWidget.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -19,21 +19,23 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_ERRORLOGGER__HPP
-#define _NGM_ERRORLOGGER__HPP
-#include <QString>
+#include "HighlightWidget.hpp"
 
 namespace NGM
 {
-	namespace Debug
+	namespace Widget
 	{
-		/**************************************************//*!
-		*	@brief	Handles a message handler function that
-		*			logs to a text file for Qt's error stream.
-		******************************************************/
-		void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+		HighlightWidget::HighlightWidget(QWidget *parent) : QWidget(parent), highlightColor(palette().highlight().color())
+		{
+			highlightColor.setAlpha(128);
+			//setPalette(Qt::transparent);
+			setAttribute(Qt::WA_TransparentForMouseEvents);
+		}
+
+		void HighlightWidget::paintEvent(QPaintEvent *event)
+		{
+			QPainter painter(this);
+			painter.fillRect(0, 0, width(), height(), highlightColor);
+		}
 	}
 }
-
-#endif // _NGM_ERRORLOGGER__HPP

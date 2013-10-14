@@ -50,7 +50,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@return The string name of this item.
 			******************************************************/
-			QVariant data() const;
+			QString name() const;
 
 			/**************************************************//*!
 			*	@return The model index of the item.
@@ -72,17 +72,17 @@ namespace NGM
 			/**************************************************//*!
 			*	@return A safe cast to a ResourceContentItem.
 			******************************************************/
-			virtual ResourceContentItem *toResourceContentItem();
+			virtual ResourceContentItem *toContentItem();
 
 			/**************************************************//*!
 			*	@brief A safe cast to a project item.
 			******************************************************/
-			virtual ResourceProjectItem *toResourceProjectItem();
+			virtual ResourceProjectItem *toProjectItem();
 
 			/**************************************************//*!
 			*	@brief A safe cast to a group item.
 			******************************************************/
-			virtual ResourceGroupItem *toResourceGroupItem();
+			virtual ResourceGroupItem *toGroupItem();
 
 			/**************************************************//*!
 			*	@brief Returns the root project item.
@@ -115,7 +115,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Stores the string name of this item.
 			******************************************************/
-			QVariant _data;
+			QString _name;
 		};
 	}
 }

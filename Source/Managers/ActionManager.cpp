@@ -60,9 +60,17 @@ namespace NGM
 			{
 				actions[ActionNewProject]->setIcon(QIcon(theme+"/main/newproject.png"));
 			}
+			if (QFile::exists(theme+"/main/newfile.png"))
+			{
+				actions[ActionNewFile]->setIcon(QIcon(theme+"/main/newfile.png"));
+			}
 			if (QFile::exists(theme+"/main/openproject.png"))
 			{
 				actions[ActionOpenProject]->setIcon(QIcon(theme+"/main/openproject.png"));
+			}
+			if (QFile::exists(theme+"/main/openfile.png"))
+			{
+				actions[ActionOpenFile]->setIcon(QIcon(theme+"/main/openfile.png"));
 			}
 			if (QFile::exists(theme+"/main/save.png"))
 			{
@@ -104,6 +112,14 @@ namespace NGM
 			{
 				actions[ActionZoom]->setIcon(QIcon(theme+"/main/zoom.png"));
 			}
+			if (QFile::exists(theme+"/main/zoom.png"))
+			{
+				actions[ActionZoom]->setIcon(QIcon(theme+"/main/zoom.png"));
+			}
+			if (QFile::exists(theme+"/main/folder.png"))
+			{
+				icons[IconFolder] = QIcon(theme+"/main/folder.png");
+			}
 			for(auto& i : project->types)
 			{
 				QString path = theme;
@@ -134,7 +150,7 @@ namespace NGM
 			unloadDragDrop();
 			if (QFile::exists(theme+"/dragdrop/actionif.png"))
 			{
-				icons[DNDIf] = new QIcon(theme+"/dragdrop/actionif.png");
+				icons[DNDIf] = QIcon(theme+"/dragdrop/actionif.png");
 			}
 		}
 

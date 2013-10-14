@@ -1,7 +1,5 @@
 /**
  *  @file MainWindow.hpp
- *  @brief Declares a window class which controls properties.
- *
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -38,7 +36,7 @@
 #include <QVBoxLayout>
 #include <QStandardItem>
 #include <QStandardItemModel>
-
+#include <QPlainTextEdit>
 #include "Project.hpp"
 #include "Resource.hpp"
 #include "ResourceSplitter.hpp"
@@ -50,24 +48,34 @@ namespace NGM
 		class WindowManager;
 	}
 
-	using std::vector;
-
+	/**************************************************//*!
+	*	@brief	A visual representation of data.
+	******************************************************/
 	class MainWindow : public QMainWindow
 	{
 		Q_OBJECT
 
 	public:
 
-		/*! Creates the main window. */
+		/**************************************************//*!
+		*	@brief	Creates a window with default settings.
+		******************************************************/
 		MainWindow(NGM::Manager::WindowManager *data, QWidget *parent = 0);
 
-		/*! Removes main winRobdow. */
+		/**************************************************//*!
+		*	@brief	All widgets are destroyed.
+		******************************************************/
 		~MainWindow() {}
 
-		/*! Stores property data. */
+		/**************************************************//*!
+		*	@brief	The manager from which data is obtained
+		*			from before being visually updated.
+		******************************************************/
 		NGM::Manager::WindowManager *data;
 
-		/*! A list of default dock types. */
+		/**************************************************//*!
+		*	@brief	Contains all dock types.
+		******************************************************/
 		enum Docks
 		{
 			DockHeirarchy,
@@ -75,45 +83,136 @@ namespace NGM
 			DockMessages,
 			DockOutput,
 			DockSearch,
-			DockActions
+			DockActions,
+			DockCommand,
+			DockNotes
 		};
 
-		/*! Updates the window title. */
+		/**************************************************//*!
+		*	@brief	Updates the window title by combining
+		*			the current filename and application name.
+		******************************************************/
 		void updateTitle();
 
-		//void heirarchyOpenProject(Model::ResourceProjectItem *item);
+protected:
 
+		/**************************************************//*!
+		*	@brief	A resource splitter contains editors.
+		******************************************************/
 		Widget::ResourceSplitter *resourceSplitter;
 
-	protected:
+		/**************************************************//*!
+		*	@brief	Manages the close event to ask for user
+		*			confirmation.
+		******************************************************/
+		void closeEvent(QCloseEvent *);
 
-		/*! Main dock widgets. */
-		QDockWidget *docks[6];
+		/**************************************************//*!
+		*	@brief	Allocates and shows a status message on
+		*			the window. This is necessary before using
+		*			statusLabel or statusProgressBar;
+		******************************************************/
+		void initStatusMessage();
 
-		/*! Other, registered dock widgets. */
+		/**************************************************//*!
+		*	@brief	Destroys the current status message.
+		******************************************************/
+		void destroyStatusMessage();
+
+		/**************************************************//*!
+		*	@brief	A label in the status bar. Uses only plain
+		*			text (HTML formatting is not default).
+		*	@see	initStatusMessage();
+		******************************************************/
+		QLabel *statusLabel;
+
+		/**************************************************//*!
+		*	@brief	A progress bar in the status bar.
+		*	@see	initStatusMessage()
+		******************************************************/
+		QProgressBar *statusProgressBar;
+
+		/**************************************************//*!
+		*	@brief	Stores all default dock widgets.
+		******************************************************/
+		QDockWidget *docks[8];
+
+		/**************************************************//*!
+		*	@brief	Contains registered dock widgets.
+		******************************************************/
 		std::vector<QDockWidget*> docksRegistered;
 
-		/*! Defines whether or not to update the data. */
-		bool active;
-
-		friend class WindowManager;
-
-		Model::ResourceBaseItem *item;
-		QStandardItem *item2;
+		/**************************************************//*!
+		*	@brief	Displays the main heirarchy.
+		*
+		*	The heirarchy data is stored in the window manager.
+		******************************************************/
 		QTreeView *heirarchyView;
 
 		friend class Manager::WindowManager;
+		friend class Widget::ResourceSplitter;
 
-		QLabel *statusLabel;
-		QProgressBar *statusProgress;
+		// Overestimate window size.
+		uint32_t buff[32];
+
+	private:
+
+		 /**************************************************//*!
+		*	@brief	Creates a context menu when the user
+		*			right clicks on the heirarchy.
+		******************************************************/
+		void heirarchyContextMenuRequested(const QPoint &point);
+
+		/**************************************************//*!
+		*	@brief	A text edit with temporary text.
+		******************************************************/
+		QPlainTextEdit *notesTextEdit;
+
+		/**************************************************//*!
+		*	@brief	Displays text that is output from the
+		*			compiler.
+		******************************************************/
+		QPlainTextEdit *outputTextEdit;
+
+		/**************************************************//*!
+		*	@brief	Displays errors and warnings from the
+		*			compiler.
+		******************************************************/
+		QTableView *messagesTableView;
+
+		/**************************************************//*!
+		*	@brief	Displays the current widget's properties.
+		******************************************************/
+		void *propertyView;
+
+		/**************************************************//*!
+		*	@brief	Displays search options and results.
+		******************************************************/
+		void *searchWidget;
+
+		/**************************************************//*!
+		*	@brief	Displays draggable actions.
+		******************************************************/
+		void *actionsWidget;
+
+		/**************************************************//*!
+		*	@brief	A user based command prompt.
+		******************************************************/
+		void *commandWidget;
 
 	private slots:
 
+		/**************************************************//*!
+		*	@brief	Opens the heirarchy at the indicated index.
+		******************************************************/
 		void heirarchyOpenItem(const QModelIndex & index);
 
+		/**************************************************//*!
+		*	@brief	De/allocates the heirarchy tree when its
+		*			visibility changed.
+		******************************************************/
 		void heirarchyVisibilityChanged(bool visible);
 
-		void heirarchySetItem(const QString &name);
 	};
 }
 

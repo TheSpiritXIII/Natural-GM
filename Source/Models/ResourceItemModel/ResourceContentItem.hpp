@@ -47,6 +47,11 @@ namespace NGM
 			 *	@brief The resource of the item that this item represents.
 			******************************************************/
 			NGM::Resource::Resource *resource;
+
+			ResourceContentItem *toContentItem()
+			{
+				return this;
+			}
 		};
 	}
 }

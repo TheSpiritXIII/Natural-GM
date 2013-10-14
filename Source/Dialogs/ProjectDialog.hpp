@@ -61,7 +61,7 @@ namespace NGM
 			ProjectDialog(Manager::ProjectManager *projectManager,
 						  Manager::SettingManager *settingManager,
 						  Manager::WindowManager *windowManager,
-						  QWidget *parent = 0);
+						  const bool& files, QWidget *parent = 0);
 
 			/**************************************************//*!
 			*	@brief	Removes all associated widget.
@@ -190,9 +190,19 @@ namespace NGM
 			std::map<const QString, Resource::Project*> cache;
 
 			/**************************************************//*!
-			*	@brief	Makes sure the dialog does not fade.
+			*	@brief	Flags that change the functionality.
 			******************************************************/
-			bool wait;
+			enum Settings
+			{
+				Wait		=	0x01,	// Makes sure the dialog does not fade.
+				Files		=	0x02	// Determines whether using files or projects.
+			};
+
+			/**************************************************//*!
+			*	@brief	Settings bits that determine functionality.
+			*	@see	Settings
+			******************************************************/
+			uint8_t settings;
 		};
 	}
 }

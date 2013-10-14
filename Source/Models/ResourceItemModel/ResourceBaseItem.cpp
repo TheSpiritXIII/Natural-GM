@@ -28,14 +28,14 @@ namespace NGM
 {
 	namespace Model
 	{
-		ResourceBaseItem::ResourceBaseItem(const QString &name) : _root(nullptr), _parent(nullptr), _model(nullptr), _data(name)
+		ResourceBaseItem::ResourceBaseItem(const QString &name) : _root(nullptr), _parent(nullptr), _model(nullptr), _name(name)
 		{
 			// Empty.
 		}
 
-		QVariant ResourceBaseItem::data() const
+		QString ResourceBaseItem::name() const
 		{
-			return _data;
+			return _name;
 		}
 
 		const QModelIndex ResourceBaseItem::index()
@@ -52,7 +52,7 @@ namespace NGM
 			// To do.
 			if (_parent)
 			{
-				ResourceGroupItem *p = _parent->toResourceGroupItem();
+				ResourceGroupItem *p = _parent->toGroupItem();
 				for(size_t i = 0; i < p->_children.size(); ++i)
 				{
 					if (p->_children[i] == const_cast<ResourceBaseItem*>(this))
@@ -69,17 +69,17 @@ namespace NGM
 			return _parent;
 		}
 
-		ResourceContentItem *ResourceBaseItem::toResourceContentItem()
+		ResourceContentItem *ResourceBaseItem::toContentItem()
 		{
 			return nullptr;
 		}
 
-		ResourceProjectItem *ResourceBaseItem::toResourceProjectItem()
+		ResourceProjectItem *ResourceBaseItem::toProjectItem()
 		{
 			return nullptr;
 		}
 
-		ResourceGroupItem *ResourceBaseItem::toResourceGroupItem()
+		ResourceGroupItem *ResourceBaseItem::toGroupItem()
 		{
 			return nullptr;
 		}

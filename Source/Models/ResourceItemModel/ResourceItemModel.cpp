@@ -22,6 +22,7 @@
 #include "ResourceItemModel.hpp"
 #include "ResourceProjectItem.hpp"
 #include "ResourceGroupItem.hpp"
+#include "ActionManager.hpp"
 #include "Project.hpp"
 #include "Type.hpp"
 #include <QDebug>
@@ -30,9 +31,10 @@ namespace NGM
 {
 	namespace Model
 	{
-		ResourceItemModel::ResourceItemModel(const QString &data, QObject *parent) : QAbstractItemModel(parent)
+		ResourceItemModel::ResourceItemModel(const Manager::ActionManager *actionManager,
+			QObject *parent) : QAbstractItemModel(parent), actionManager(actionManager)
 		{
-			_root = new ResourceGroupItem(data);
+			_root = new ResourceGroupItem(QString());
 			_root->_model = this;
 		}
 
@@ -56,17 +58,24 @@ namespace NGM
 
 			if (role == Qt::DisplayRole)
 			{
-				return static_cast<ResourceBaseItem*>(index.internalPointer())->data();
+				return static_cast<ResourceBaseItem*>(index.internalPointer())->name();
 			}
 			if (role == Qt::DecorationRole)
 			{
-				ResourceProjectItem *item = static_cast<ResourceBaseItem*>(index.internalPointer())->toResourceProjectItem();
-				if (item != NULL)
+				ResourceBaseItem *item = static_cast<ResourceBaseItem*>(index.internalPointer());
+				if (item->toProjectItem() != nullptr)
 				{
-					qDebug() << "OH!";
-					return item->project->type->icon;
+					return item->toProjectItem()->project->type->getIcon(item->toProjectItem()->resource->serialData);
 				}
-				//return actionManager->icons[ActionManager::Folder];
+				else if (item->toContentItem() != nullptr)
+				{
+					if (item->toContentItem()->resource->type)
+					{
+						return item->toContentItem()->resource->type->getIcon(item->toContentItem()->resource->serialData);
+					}
+					return QIcon();
+				}
+				return (actionManager->icons[Manager::ActionManager::IconFolder]);
 			}
 
 			return QVariant();
@@ -83,11 +92,6 @@ namespace NGM
 
 		QVariant ResourceItemModel::headerData(Qt::Orientation orientation, int role) const
 		{
-			if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-			{
-				return _root->data();
-			}
-
 			return QVariant();
 		}
 
@@ -110,7 +114,7 @@ namespace NGM
 				_parent = static_cast<ResourceBaseItem*>(parent.internalPointer());
 			}
 
-			ResourceBaseItem *_child = _parent->toResourceGroupItem()->child(row);
+			ResourceBaseItem *_child = _parent->toGroupItem()->child(row);
 			if (_child)
 			{
 				return createIndex(row, 0, _child);
@@ -128,7 +132,7 @@ namespace NGM
 			ResourceBaseItem *_child = static_cast<ResourceBaseItem*>(index.internalPointer());
 			ResourceBaseItem *_parent = _child->parent();
 
-			if (_parent->toResourceGroupItem() == _root)
+			if (_parent->toGroupItem() == _root)
 			{
 				return QModelIndex();
 			}
@@ -148,11 +152,11 @@ namespace NGM
 				_parent = static_cast<ResourceBaseItem*>(parent.internalPointer());
 			}
 
-			if (_parent->toResourceGroupItem() == nullptr)
+			if (_parent->toGroupItem() == nullptr)
 			{
 				return 0;
 			}
-			return _parent->toResourceGroupItem()->count();
+			return _parent->toGroupItem()->count();
 		}
 
 		bool ResourceItemModel::removeRows(int row, int count, const QModelIndex &parent)

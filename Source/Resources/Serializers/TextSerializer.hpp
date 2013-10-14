@@ -44,17 +44,17 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Inputs resource data to editor data.
 			******************************************************/
-			void read(Editor *editor, Resource *resource) const;
+			void read(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const;
 
 			/**************************************************//*!
 			*	@brief	Outputs editor data to resource data.
 			******************************************************/
-			void write(Editor *editor, Resource *resource) const;
+			void write(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const;
 
 			/**************************************************//*!
 			*	@brief	Creates the project tree structure.
 			******************************************************/
-			void structure(Model::ResourceProjectItem *item) const;
+			bool structure(Model::ResourceProjectItem *item, QProgressBar *progressBar) const;
 
 			/**************************************************//*!
 			*	@brief	Requests a restructure of the indicated item.

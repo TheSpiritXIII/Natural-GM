@@ -57,7 +57,7 @@ namespace NGM
 
 			connect(button, &QPushButton::pressed, [this]()
 			{
-				this->close();
+				close();
 			});
 		}
 	}

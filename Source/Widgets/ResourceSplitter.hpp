@@ -25,7 +25,9 @@
 #include <QSplitter>
 #include "ResourceTab.hpp"
 #include "ResourceContentItem.hpp"
-#include <list>
+#include "ResourceSplitterHandle.hpp"
+#include "HighlightWidget.hpp"
+#include <deque>
 
 namespace NGM
 {
@@ -45,10 +47,8 @@ namespace NGM
 
 			enum Settings
 			{
-				Move		=	0x00000000,
-				Clone		=	0x00000001,
-				Next		=	0x00000000,
-				Prev		=	0x00000010
+				Previous	=	0x01,
+				Clone		=	0x02
 			};
 
 			/**************************************************//*!
@@ -62,13 +62,13 @@ namespace NGM
 			 *	@param	active True to add to the current tab, or
 			 *	false to add as a new tab.
 			******************************************************/
-			void resourceOpen(Model::ResourceBaseItem *resource, bool active = true);
+			void resourceOpen(Model::ResourceBaseItem *resource, const bool &active = true);
 
 			/**************************************************//*!
 			 *	@brief	Returns the tab index to the indicated
 			 *			resource, if open, otherwise -1.
 			******************************************************/
-			int resourceIsOpen(Model::ResourceBaseItem *resource);
+			int resourceIsOpen(Model::ResourceBaseItem *resource) const;
 
 			/**************************************************//*!
 			 *	@brief	Requests to reset the window manager state.
@@ -82,21 +82,18 @@ namespace NGM
 			void resourceSwitchTo(int index);
 
 			/**************************************************//*!
-			 *	@brief	Adds a widget to the currently open tab.
+			 *	@brief	Moves the currently opened tab to the
+			 *			indicated splitter.
+			 *	@param	index The tab index to move.
+			 *	@param	splitter The splitter to move to.
+			 *	@see	Settings
 			******************************************************/
-			void movePage(ResourceSplitter *move, uint8_t settings);
-
-			/**************************************************//*!
-			 *	@brief	Requests the current widget to cut.
-			******************************************************/
-			void cut();
-
-			void paste();
+			void movePage(const int &index, ResourceSplitter *splitter, const uint8_t settings = false);
 
 			/**************************************************//*!
 			*	@brief	Assigns
 			******************************************************/
-			void focusWidget(Resource::Editor *widget);
+			void focusWidget(Resource::Editor *editor);
 
 			/**************************************************//*!
 			*	@brief	Stores the parent widget.
@@ -108,7 +105,18 @@ namespace NGM
 			******************************************************/
 			Manager::WindowManager *windowManager;
 
-		private:
+		protected:
+
+			/**************************************************//*!
+			*	@brief	Creates a handle with drag/drop capabilities.
+			******************************************************/
+			QSplitterHandle *createHandle();
+
+			void dragEnterEvent(QDragEnterEvent*);
+
+			void dragLeaveEvent(QDragLeaveEvent*);
+
+			void dropEvent(QDropEvent*);
 
 			/**************************************************//*!
 			*	@brief	Stores the current active resource tab.
@@ -116,9 +124,36 @@ namespace NGM
 			ResourceTab *current;
 
 			/**************************************************//*!
+			*	@brief	Caches the currently focused editor.
+			******************************************************/
+			Resource::Editor *focusedEditor;
+
+			/**************************************************//*!
+			*	@brief	The tab being dragged or nullptr.
+			******************************************************/
+			static QTabBar *dragTab;
+
+			/**************************************************//*!
+			*	@brief	Highlights on drag event.
+			******************************************************/
+			static HighlightWidget *highlightWidget;
+
+			friend class ResourceTab;
+
+		private:
+
+			/**************************************************//*!
+			*	@brief	The next consecutive tab relative to the
+			*			indicated tab.
+			*	@param	prev True to return the next consecutive
+			*			tab.
+			******************************************************/
+			ResourceTab *nextResourceTab(const bool &prev);
+
+			/**************************************************//*!
 			*	@brief	Stores all tab widgets for quick access.
 			******************************************************/
-			std::list<ResourceTab*> tabs;
+			std::deque<ResourceTab*> tabs;
 		};
 	}
 }

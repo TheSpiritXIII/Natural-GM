@@ -30,6 +30,7 @@
 #include "../Global.hpp"
 #include "Project.hpp"
 #include "TextSerializer.hpp"
+#include "GMXSerializer.hpp"
 
 namespace NGM
 {
@@ -122,7 +123,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@return A map containing all projects in the
 			*			indicated category.
-			*	@param	category The category you are looking for.
+			*	@param	category The category to search.
 			*	@param	root True if you wish to include
 			*			subcategories, false otherwise
 			******************************************************/
@@ -131,14 +132,26 @@ namespace NGM
 		private:
 
 			/**************************************************//*!
-			*	@brief	A basic serializer for opening text files.
+			*	@brief	A basic serializer for opening text
+			*			files.
 			******************************************************/
 			Resource::TextSerializer textSerializer;
+
+			/**************************************************//*!
+			*	@brief	A serializer that opens GameMaker Studio
+			*			projects.
+			******************************************************/
+			Resource::GMXSerializer gmxSerializer;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered types.
 			******************************************************/
 			std::map<const QString, Resource::Type*> types;
+
+			/**************************************************//*!
+			*	@brief	Stores all registered types.
+			******************************************************/
+			std::map<const QString, std::queue<Resource::Type*>> typesQ;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered projects.

@@ -40,7 +40,8 @@ namespace NGM
 			/**************************************************//*!
 			*	@return	A usable widget for this type.
 			******************************************************/
-			Editor *widget(NGM::Widget::ResourceTab *parent) const;
+			Editor *widget(const Model::ResourceProjectItem * const item,
+						   Widget::ResourceTab * const tab) const;
 
 			/**************************************************//*!
 			*	@brief	Sets up constant metadata.

@@ -32,6 +32,9 @@
 #include "ResourceProjectItem.hpp"
 #include "ResourceItemModel.hpp"
 #include <QStatusBar>
+#include <QItemDelegate>
+#include <QCloseEvent>
+#include <QMenu>
 
 const auto DockMovable = QDockWidget::DockWidgetMovable;
 const auto DockClosable = QDockWidget::DockWidgetClosable;
@@ -39,7 +42,7 @@ const auto DockFeatures = DockMovable | DockClosable;
 namespace NGM
 {
 	MainWindow::MainWindow(Manager::WindowManager *data, QWidget *parent) :
-		QMainWindow(parent), data(data), active(false)
+		QMainWindow(parent), data(data), statusLabel(nullptr), statusProgressBar(nullptr)
 	{
 		setMinimumSize(640, 480);
 		resize(800, 600);
@@ -75,8 +78,6 @@ namespace NGM
 		docks[DockOutput]->hide();
 		docks[DockMessages]->hide();
 
-		active = true;
-
 		resourceSplitter = new Widget::ResourceSplitter(data, this);
 		//resourceSplitter->updateWindowFilePath = &MainWindow::setWindowFilePath;
 		//resourceSplitter->updateWindowModified = &MainWindow::setWindowModified;
@@ -89,14 +90,7 @@ namespace NGM
 
 		QStatusBar *status = new QStatusBar(this);
 		setStatusBar(status);
-		status->showMessage("Ready.");
-
-		statusLabel = new QLabel(this);
-		statusProgress = new QProgressBar(this);
-		statusProgress->setTextVisible(false);
-
-		status->addPermanentWidget(statusLabel, 3);
-		status->addPermanentWidget(statusProgress, 1);
+		//status->showMessage("Ready.");
 	}
 
 	void MainWindow::updateTitle()
@@ -114,7 +108,13 @@ namespace NGM
 	void MainWindow::heirarchyOpenItem(const QModelIndex &index)
 	{
 		Model::ResourceBaseItem *item = reinterpret_cast<Model::ResourceBaseItem*>(index.internalPointer());
-		resourceSplitter->resourceOpen(item);
+		if (!item->toGroupItem())
+		{
+			if (item->toContentItem() && item->toContentItem()->resource->type)
+			{
+				resourceSplitter->resourceOpen(item);
+			}
+		}
 	}
 
 	void MainWindow::heirarchyVisibilityChanged(bool visible)
@@ -123,28 +123,78 @@ namespace NGM
 		{
 			qDebug() << "Visible.";
 			heirarchyView = new QTreeView(this);
-			heirarchyView->setAlternatingRowColors(true);
+			heirarchyView->setUniformRowHeights(true);
 			docks[DockHeirarchy]->setWidget(heirarchyView);
 			heirarchyView->setModel(data->heirarchy);
+
 			heirarchyView->setHeaderHidden(true);
 			heirarchyView->setSelectionBehavior(QAbstractItemView::SelectItems);
 			heirarchyView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 			heirarchyView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 			connect(heirarchyView, &QTreeView::doubleClicked, this, &MainWindow::heirarchyOpenItem);
-			heirarchyView->setUniformRowHeights(true);
+
+			heirarchyView->setContextMenuPolicy(Qt::CustomContextMenu);
+			connect(heirarchyView, &QTreeView::customContextMenuRequested,
+				this, &MainWindow::heirarchyContextMenuRequested);
 		}
 		else
 		{
 			if (heirarchyView)
 			{
 				heirarchyView->deleteLater();
-				heirarchyView = NULL;
+				heirarchyView = nullptr;
 			}
 		}
 	}
 
-	void MainWindow::heirarchySetItem(const QString &name)
+	void MainWindow::closeEvent(QCloseEvent *event)
 	{
+		// Destroys this window, if possible.
+		data->closeWindow(this);
 
+		// Event is ignored. Only the Window Manager can destroy.
+		event->ignore();
+	}
+
+	void MainWindow::heirarchyContextMenuRequested(const QPoint &point)
+	{
+		if (data->heirarchy->hasChildren() != 0)
+		{
+			QModelIndex index = heirarchyView->indexAt(point);
+			if (index.isValid())
+			{
+				QMenu menu;
+				Model::ResourceBaseItem *baseItem = reinterpret_cast<Model::ResourceBaseItem*>(index.internalPointer());
+				Model::ResourceProjectItem *projectItem = baseItem->toProjectItem();
+				if (projectItem != nullptr)
+				{
+					menu.addAction("Set as Active");
+					menu.addAction("Close Project");
+				}
+				else
+				{
+					menu.addAction("Not implemented");
+				}
+				menu.exec(heirarchyView->mapToGlobal(point));
+			}
+		}
+	}
+
+	void MainWindow::initStatusMessage()
+	{
+		if (statusLabel == nullptr)
+		{
+			statusLabel = new QLabel(this);
+			statusLabel->setTextFormat(Qt::PlainText);
+			statusProgressBar = new QProgressBar(this);
+		}
+	}
+
+	void MainWindow::destroyStatusMessage()
+	{
+		delete statusLabel;
+		statusLabel = nullptr;
+		delete statusProgressBar;
+		statusProgressBar = nullptr;
 	}
 }

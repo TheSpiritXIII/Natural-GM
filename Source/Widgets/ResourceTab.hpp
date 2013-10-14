@@ -34,6 +34,10 @@ namespace NGM
 		class Editor;
 		struct Resource;
 	}
+	namespace Manager
+	{
+		class WindowManager;
+	}
 	namespace Widget
 	{
 		class ResourceSplitter;
@@ -54,9 +58,9 @@ namespace NGM
 
 			/**************************************************//*!
 			 *	@brief	Opens the indicated resource.
-			 *	@param	resource The resource to open.
+			 *	@param	item The resource to open.
 			******************************************************/
-			Resource::Editor *resourceOpen(Model::ResourceBaseItem *resource);
+			Resource::Editor *resourceOpen(Model::ResourceBaseItem *item);
 
 			/**************************************************//*!
 			 *	@brief	Save the indicated resource.
@@ -71,52 +75,112 @@ namespace NGM
 			int resourceIsOpen(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief	Closes the resource if it is open.
+			*	@brief	Closes the resource if it is open.
 			******************************************************/
 			void resourceClose(Model::ResourceBaseItem *resource);
 
 			/**************************************************//*!
-			 *	@brief	Set the tab index to the indicated index.
-			 *	@see	resourceIsOpen
+			*	@brief	Set the tab index to the indicated index.
+			*	@see	resourceIsOpen
 			******************************************************/
 			void resourceSwitchTo(int index);
 
 			/**************************************************//*!
-			 *	@return	Whether the indicated ResourceBaseItem is
-			 *			open as a page on this tab.
+			*	@return	Whether the indicated ResourceBaseItem is
+			*			open as a page on this tab.
 			******************************************************/
 			bool contains(Model::ResourceBaseItem *item);
+
+			/**************************************************//*!
+			*	@brief	Moves the current tab to resourceTab.
+			******************************************************/
+			void moveWidget(const int &index, ResourceTab *resourceTab);
+
+			/**************************************************//*!
+			*	@brief	Indicates if a tab is being dragged.
+			*
+			*	A tab might be being dragged by another instance
+			*	of this application. This function makes confirms
+			*	that it is coming from this one.
+			******************************************************/
+			static inline bool isDragging()
+			{
+				return dragWidget == nullptr;
+			}
 
 		public slots:
 
 			/**************************************************//*!
 			*	@brief	Updates the tab name.
 			******************************************************/
-			void modifedWidget(const bool &modified);
-
-		protected:
+			void modifiedWidget(const bool &modified);
 
 			/**************************************************//*!
 			*	@brief	Updates the parent on focus.
 			******************************************************/
-			void changeEvent(QEvent *event);
+			void focused(Resource::Editor *editor);
+
+		protected:
+
+			/**************************************************//*!
+			*	@see	end
+			******************************************************/
+			enum End : uint8_t
+			{
+				None		=	0,
+				Right		=	1,
+				Left		=	2
+			};
+
+			/**************************************************//*!
+			*	@brief	Indicates which items to show on the
+			*			context menu.
+			******************************************************/
+			End end;
+
+			/**************************************************//*!
+			*	@brief	Contains the widget currently being
+			*			dragged or nullptr is there is none.
+			******************************************************/
+			static QWidget *dragWidget;
+
+			/**************************************************//*!
+			*	@brief	Creates a highlight widget.
+			******************************************************/
+			void dragEnterEvent(QDragEnterEvent*);
+
+			/**************************************************//*!
+			*	@brief	Destroys the highlight widget.
+			******************************************************/
+			void dragLeaveEvent(QDragLeaveEvent*);
+
+			/**************************************************//*!
+			*	@brief	Moves the highlight widget.
+			******************************************************/
+			void dragMoveEvent(QDragMoveEvent*);
+
+			void dropEvent(QDropEvent *);
+
+			friend class ResourceSplitter;
 
 		private:
 
 			/**************************************************//*!
-			 *	@brief	Maps a resource item to its open widget.
+			*	@brief	Maps a resource item to its open widget.
 			******************************************************/
 			std::map<Model::ResourceBaseItem*, Resource::Editor*> widgets;
 
 			/**************************************************//*!
-			 *	@brief	The parent of this widget.
+			*	@brief	The parent of this widget.
 			******************************************************/
 			ResourceSplitter *splitter;
 
 			/**************************************************//*!
-			 *	@brief	Holds the widget of the last clicked page.
+			*	@brief	Stores the index of the last clicked page.
 			******************************************************/
-			QWidget *rightClicked;
+			int rightClicked;
+
+			friend class NGM::Manager::WindowManager;
 		};
 	}
 }

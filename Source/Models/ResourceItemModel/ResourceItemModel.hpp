@@ -29,12 +29,11 @@ namespace NGM
 {
 	namespace Manager
 	{
-		class ProjectManager;
+		class ActionManager;
 	}
 	namespace Model
 	{
 		class ResourceGroupItem;
-
 		class ResourceProjectItem;
 
 		/**************************************************//*!
@@ -49,7 +48,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Initializers the model with a root item.
 			******************************************************/
-			ResourceItemModel(const QString &data = 0, QObject *parent = 0);
+			ResourceItemModel(const Manager::ActionManager *actionManager, QObject *parent = 0);
 
 			/**************************************************//*!
 			*	@brief	Destroys the root item and its children.
@@ -164,6 +163,11 @@ namespace NGM
 			*	@brief	The internal root item.
 			******************************************************/
 			NGM::Model::ResourceGroupItem *_root;
+
+			/**************************************************//*!
+			*	@brief	Manages generic icons.
+			******************************************************/
+			const Manager::ActionManager *actionManager;
 		};
 	}
 }

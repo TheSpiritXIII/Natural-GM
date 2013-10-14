@@ -24,11 +24,12 @@
  *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *		THE SOFTWARE.
 **/
+#include "Type.hpp"
+#include "Editor.hpp"
 #include "Project.hpp"
 #include "Resource.hpp"
 #include "Serializer.hpp"
-#include "Editor.hpp"
-#include "Type.hpp"
+#include "ResourceTab.hpp"
 
 namespace NGM
 {
@@ -42,16 +43,28 @@ namespace NGM
 		Resource::Resource(const Type * const type, QString location, uint8_t status) :
 			status(status), type(type), location(location) {}
 
-		Serializer::Serializer(const uint8_t &settings) : settings(settings) {}
+		Serializer::Serializer(const SerializerSettings &settings) : settings(settings) {}
 
 		Type::Type(const QString &name, const QString &plural) : name(name), plural(plural) {}
 
-		Editor::Editor(NGM::Widget::ResourceTab * const parent) :
-			QWidget(parent), resourceTab(parent), state(0) {}
+		const QIcon &Type::getIcon(SerialObject *data) const
+		{
+			if (data)
+			{
+				if (data->children.find("icon") != data->children.end())
+				{
+					//return data->children.at("icon").toVariant().toIconPtr();
+				}
+			}
+			return icon;
+		}
+
+		Editor::Editor(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab) :
+			QWidget(tab), projectItem(item), resourceTab(resourceTab), state(0) {}
 
 		bool Editor::event(QEvent *event)
 		{
-			if (event->type() == QEvent::FocusIn || event->type() == QEvent::Show)
+			if (event->type() == QEvent::FocusIn || event->type() == QEvent::Show || event->type() == QEvent::MouseButtonPress)
 			{
 				emit isFocused(this);
 				return true;
@@ -59,14 +72,23 @@ namespace NGM
 			return QWidget::event(event);
 		}
 
-		const uint8_t Editor::getState()
+		bool Editor::eventFilter(QObject *, QEvent *event)
 		{
-			return state;
+			if (event->type() == QEvent::FocusIn)
+			{
+				emit isFocused(this);
+			}
+			return false;
 		}
 
-		const NGM::Widget::ResourceTab * const Editor::getResourceTabWidget()
+		QMenu *Editor::menu() const
 		{
-			return resourceTab;
+			return nullptr;
+		}
+
+		QWidget *Editor::preferences() const
+		{
+			return nullptr;
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /**
- *  @file ResourceDialog.hpp
+ *	@file ResourceSpliterHandle.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -19,65 +19,55 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_RESOURCEDIALOG__HPP
-#define _NGM_RESOURCEDIALOG__HPP
-#include "ResourceSplitter.hpp"
-#include <QDialog>
+#ifndef _NGM_RESOURCESPLITTERHANDLE_HPP__
+#define _NGM_RESOURCESPLITTERHANDLE_HPP__
+#include <QSplitterHandle>
 
 namespace NGM
 {
-	namespace Model
-	{
-		class ResourceBaseItem;
-	}
 	namespace Widget
 	{
-		class ResourceTab;
+		class ResourceSplitter;
 
 		/**************************************************//*!
-		*	@brief	Displays resources in a single dialog,
-		*			without toolbars or menubars.
+		*	@brief	A splitter handle type for ResourceSplitter.
+		*
+		*	Provides drag/drop based capabilities. Displays a
+		*	highlight when can drop and sends its splitter a
+		*	message when a drop is completed.
 		******************************************************/
-		class ResourceDialog : public QDialog
+		class ResourceSplitterHandle : public QSplitterHandle
 		{
-			Q_OBJECT
-
 		public:
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by opening the indicated
-			*			item.
+			*	@brief	Creates a splitter handle with the given
+			*			orientation and parent.
 			******************************************************/
-			//ResourcDialog(Model::ResourceBaseItem *item);
+			ResourceSplitterHandle(Qt::Orientation, ResourceSplitter *parent);
+
+		protected:
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by moving the current tab
-			*			of the indicated ResourceTab to here.
+			*	@brief	Highlights the widget when a preferrable
+			*			drop is given.
 			******************************************************/
-			ResourceDialog(const int &index, ResourceSplitter *splitter,
-				const uint8_t settings, Manager::WindowManager *windowManager, QWidget *parent = 0);
+			void dragEnterEvent(QDragEnterEvent*);
 
 			/**************************************************//*!
-			*	@brief	Moves the current tab of the indicated
-			*			ResourceTab to this dialog.
+			*	@brief	Dehighlights the widget.
+			*	@see dragEnterEvent
 			******************************************************/
-			//void move(ResourceTab *tab, bool clone);
+			void dragLeaveEvent(QDragLeaveEvent*);
 
 			/**************************************************//*!
-			*	@brief	Opens the indicated item.
+			*	@brief	Tells the splitter parent to create a new
+			*			tab widget at the current position.
 			******************************************************/
-			//open(Model::ResourceBaseItem *item);
-
-		private:
-
-			/**************************************************//*!
-			*	@brief	Contains all opened resources.
-			******************************************************/
-			ResourceSplitter *_splitter;
+			void dropEvent(QDropEvent*);
 
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEDIALOG__HPP
+#endif // _NGM_RESOURCESPLITTERHANDLE_HPP__

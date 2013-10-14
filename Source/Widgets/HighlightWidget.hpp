@@ -1,5 +1,5 @@
 /**
- *  @file ResourceDialog.hpp
+ *  @file HighlightWidget.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -20,64 +20,44 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _NGM_RESOURCEDIALOG__HPP
-#define _NGM_RESOURCEDIALOG__HPP
-#include "ResourceSplitter.hpp"
-#include <QDialog>
+#ifndef _NGM_HIGHLIGHTWIDGET__HPP
+#define _NGM_HIGHLIGHTWIDGET__HPP
+#include <QWidget>
+#include <QPaintEvent>
+#include <QPainter>
 
 namespace NGM
 {
-	namespace Model
-	{
-		class ResourceBaseItem;
-	}
 	namespace Widget
 	{
-		class ResourceTab;
-
 		/**************************************************//*!
-		*	@brief	Displays resources in a single dialog,
-		*			without toolbars or menubars.
+		*	@brief	A widget that has a highlight opacity.
 		******************************************************/
-		class ResourceDialog : public QDialog
+		class HighlightWidget : public QWidget
 		{
-			Q_OBJECT
-
 		public:
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by opening the indicated
-			*			item.
+			*	@brief	Creates a highlight widget. Caches the
+			*			application's highlight color.
 			******************************************************/
-			//ResourcDialog(Model::ResourceBaseItem *item);
+			HighlightWidget(QWidget *parent = 0);
+
+		protected:
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by moving the current tab
-			*			of the indicated ResourceTab to here.
+			*	@brief	Paints the highlight color.
 			******************************************************/
-			ResourceDialog(const int &index, ResourceSplitter *splitter,
-				const uint8_t settings, Manager::WindowManager *windowManager, QWidget *parent = 0);
-
-			/**************************************************//*!
-			*	@brief	Moves the current tab of the indicated
-			*			ResourceTab to this dialog.
-			******************************************************/
-			//void move(ResourceTab *tab, bool clone);
-
-			/**************************************************//*!
-			*	@brief	Opens the indicated item.
-			******************************************************/
-			//open(Model::ResourceBaseItem *item);
+			void paintEvent(QPaintEvent *event);
 
 		private:
 
 			/**************************************************//*!
-			*	@brief	Contains all opened resources.
+			*	@brief	Stores the highlight color.
 			******************************************************/
-			ResourceSplitter *_splitter;
-
+			QColor highlightColor;
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEDIALOG__HPP
+#endif // _NGM_HIGHLIGHTWIDGET__HPP

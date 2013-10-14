@@ -36,13 +36,15 @@ using namespace NGM::Definition;
 namespace NGM
 {
 	using namespace Resource;
+	typedef std::pair<const QString, Resource::Project*> ProjectPair;
 	namespace Manager
 	{
 		ProjectManager::ProjectManager()
 		{
-			types.insert(pair<const char*, NGM::Resource::Type*>("Plain Text", new NGM::Resource::TextType(QObject::tr("ngm_PlainText"), QObject::tr("Plain Text"))));
-			projects.insert(pair<QString, NGM::Resource::Project*>(GMLScript, new NGM::Resource::Project(&textSerializer, types.begin()->second, GMOther, GMLScriptDesc, QStringList("*.gml"))));
-			projects.insert(pair<QString, NGM::Resource::Project*>(PlainText, new NGM::Resource::Project(&textSerializer, types.begin()->second, General, PlainTextDesc, QStringList("*.txt") << "*.*")));
+			types["text/text"] = new NGM::Resource::TextType(QObject::tr("Plain Text"), QObject::tr("Plain Text"));
+			projects.insert(ProjectPair("GML Script", new NGM::Resource::Project(&textSerializer, types.begin()->second, GMOther, GMLScriptDesc, QStringList("*.gml"))));
+			files.insert(ProjectPair("Plain Text", new NGM::Resource::Project(&textSerializer, types.begin()->second, General, PlainTextDesc, QStringList("*.txt") << "*.*")));
+			projects.insert(ProjectPair(GMStudioProj, new NGM::Resource::Project(&gmxSerializer, types.begin()->second, GMStudio, GMStudioProjDesc, QStringList("*.project.gmx"))));
 		}
 
 		ProjectManager::~ProjectManager()
@@ -114,7 +116,7 @@ namespace NGM
 		map<const QString, Project*> ProjectManager::getFileProjectCategory(const QString category, bool root) const
 		{
 			map<const QString, NGM::Resource::Project*> p;
-			for (auto& i : projects)
+			for (auto& i : files)
 			{
 				if (root)
 				{

@@ -1,6 +1,6 @@
 /**
- *  @file ResourceDialog.hpp
- *	@section License
+ *  @file ProgressManager.hpp
+ *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
@@ -20,64 +20,56 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _NGM_RESOURCEDIALOG__HPP
-#define _NGM_RESOURCEDIALOG__HPP
-#include "ResourceSplitter.hpp"
-#include <QDialog>
+#ifndef _NGM_PROGRESSMANAGER__HPP
+#define _NGM_PROGRESSMANAGER__HPP
+#include "WindowManager.hpp"
 
 namespace NGM
 {
-	namespace Model
+	namespace Manager
 	{
-		class ResourceBaseItem;
-	}
-	namespace Widget
-	{
-		class ResourceTab;
-
 		/**************************************************//*!
-		*	@brief	Displays resources in a single dialog,
-		*			without toolbars or menubars.
+		*	@brief	A useful class for modifying application
+		*			wide progress labels and bars.
 		******************************************************/
-		class ResourceDialog : public QDialog
+		class ProgressManager
 		{
-			Q_OBJECT
-
 		public:
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by opening the indicated
-			*			item.
+			*	@brief	Sets the window manager.
 			******************************************************/
-			//ResourcDialog(Model::ResourceBaseItem *item);
+			ProgressManager(WindowManager *manager);
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by moving the current tab
-			*			of the indicated ResourceTab to here.
+			*	@brief	Updates all progress bar maximums.
 			******************************************************/
-			ResourceDialog(const int &index, ResourceSplitter *splitter,
-				const uint8_t settings, Manager::WindowManager *windowManager, QWidget *parent = 0);
+			void setMaximum(const int &maximum);
 
 			/**************************************************//*!
-			*	@brief	Moves the current tab of the indicated
-			*			ResourceTab to this dialog.
+			*	@brief	Increments the progress bar by 1.
 			******************************************************/
-			//void move(ResourceTab *tab, bool clone);
+			void incrementValue();
 
 			/**************************************************//*!
-			*	@brief	Opens the indicated item.
+			*	@brief	Sets the progress bar's value.
 			******************************************************/
-			//open(Model::ResourceBaseItem *item);
+			void setValue(const int &value);
+
+			/**************************************************//*!
+			*	@brief	Sets the label text.
+			******************************************************/
+			void setText(const QString &text);
 
 		private:
 
 			/**************************************************//*!
-			*	@brief	Contains all opened resources.
+			*	@brief	The window manager knows all labels.
 			******************************************************/
-			ResourceSplitter *_splitter;
+			WindowManager *manager;
 
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEDIALOG__HPP
+#endif // _NGM_PROGRESSMANAGER__HPP

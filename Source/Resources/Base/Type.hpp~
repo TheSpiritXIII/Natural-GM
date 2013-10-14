@@ -1,5 +1,5 @@
 /**
- *  @file ResourceDialog.hpp
+ *  @file Type.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -20,64 +20,74 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _NGM_RESOURCEDIALOG__HPP
-#define _NGM_RESOURCEDIALOG__HPP
-#include "ResourceSplitter.hpp"
-#include <QDialog>
+#ifndef _NGM_TYPE__HPP
+#define _NGM_TYPE__HPP
+#include <QString>
+#include <QAction>
 
 namespace NGM
 {
-	namespace Model
-	{
-		class ResourceBaseItem;
-	}
 	namespace Widget
 	{
 		class ResourceTab;
+	}
+	namespace Model
+	{
+		class ResourceProjectItem;
+	}
+	namespace Resource
+	{
+		class Editor;
 
 		/**************************************************//*!
-		*	@brief	Displays resources in a single dialog,
-		*			without toolbars or menubars.
+		*	@brief	Metadata for resource types.
 		******************************************************/
-		class ResourceDialog : public QDialog
+		class Type
 		{
-			Q_OBJECT
-
 		public:
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by opening the indicated
-			*			item.
+			*	@brief	The human readable name for menus. This
+			*			value is also used for loading the icon.
 			******************************************************/
-			//ResourcDialog(Model::ResourceBaseItem *item);
+			const QString name;
 
 			/**************************************************//*!
-			*	@brief	Creates a dialog by moving the current tab
-			*			of the indicated ResourceTab to here.
+			*	@brief	The plural name. This is used in tabs
+			*			and groups.
 			******************************************************/
-			ResourceDialog(const int &index, ResourceSplitter *splitter,
-				const uint8_t settings, Manager::WindowManager *windowManager, QWidget *parent = 0);
+			const QString plural;
 
 			/**************************************************//*!
-			*	@brief	Moves the current tab of the indicated
-			*			ResourceTab to this dialog.
+			*	@brief	A visual representation of the type.
+			*	@see	name
+			*
+			*	The icon is loaded from the ./ folder. The filename is set as the human readable name.
 			******************************************************/
-			//void move(ResourceTab *tab, bool clone);
+			QIcon icon;
 
 			/**************************************************//*!
-			*	@brief	Opens the indicated item.
+			*	@brief	The Qt based action for this creating
+			*			a resource of this type.
+			*
+			*	This is stored here for simplicity. No class
+			*	should really have a need to use this.
 			******************************************************/
-			//open(Model::ResourceBaseItem *item);
-
-		private:
+			QAction *action;
 
 			/**************************************************//*!
-			*	@brief	Contains all opened resources.
+			*	@brief	Returns a widget for editing this type.
 			******************************************************/
-			ResourceSplitter *_splitter;
+			virtual Editor *widget(const Model::ResourceProjectItem * const item,
+								   Widget::ResourceTab * const tab) const = 0;
+
+			/**************************************************//*!
+			*	@brief	Sets up constant metadata.
+			******************************************************/
+			Type(const QString &name, const QString &plural);
 
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEDIALOG__HPP
+#endif // _NGM_Type__HPP

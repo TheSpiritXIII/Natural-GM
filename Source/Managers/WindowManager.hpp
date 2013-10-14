@@ -24,11 +24,14 @@
 #define _NGM_WINDOWMANAGER__HPP
 #include <QApplication>
 #include <QSharedMemory>
+#include <QItemSelectionModel>
 #include "ActionManager.hpp"
 #include "ProjectManager.hpp"
 #include "SettingManager.hpp"
 #include "../Global.hpp"
+#include <QStatusBar>
 #include <QAction>
+#include <queue>
 #include <list>
 
 namespace NGM
@@ -37,7 +40,7 @@ namespace NGM
 
 	namespace Model
 	{
-		class ResourceItemModel;
+		class ResourceBaseItem;
 		class ResourceProjectItem;
 	}
 
@@ -108,22 +111,47 @@ namespace NGM
 			******************************************************/
 			void addProject(NGM::Model::ResourceProjectItem *project);
 
+			/**************************************************//*!
+			*	@return	True if the current window's status bar
+			*			is currently busy or the currently active
+			*			widget is not a window, false otherwise.
+			******************************************************/
+			bool statusBarBusy();
+
+			/**************************************************//*!
+			*	@return	Adds a widget to the current window's
+			*			status widget.
+			*	@see	statusBarBusy
+			******************************************************/
+			void addStatusWidget(QWidget *widget, const int &size);
+
+			/**************************************************//*!
+			*	@return	Hides the current window's status
+			*			widgets.
+			******************************************************/
+			void clearStatusWidgets();
+
 		protected:
 
 			/**************************************************//*!
 			*	@brief	Contains all loaded projects and resources.
+			******************************************************/
+			QItemSelectionModel *selectionModel;//heirarchy;
+
+			/**************************************************//*!
+			*	@brief	Contains all loaded project items.
 			******************************************************/
 			Model::ResourceItemModel *heirarchy;
 
 			/**************************************************//*!
 			*	@brief	Creates a new project with user input.
 			******************************************************/
-			void createProjectDialog();
+			void createProjectDialog(const bool &files);
 
 			/**************************************************//*!
 			*	@brief	Opens an existing project with user input.
 			******************************************************/
-			void openProjectDialog();
+			void openProjectDialog(const bool &files);
 
 			/**************************************************//*!
 			*	@brief	Filters keyboard shortcuts.
@@ -210,6 +238,13 @@ namespace NGM
 			Resource::Editor *resourceWidget;
 
 			/**************************************************//*!
+			*	@brief	Decides whether a window or dialog is the
+			*			current active type. Active type is true
+			*			if it is a window, false otherwise.
+			******************************************************/
+			bool activeType;
+
+			/**************************************************//*!
 			*	@brief	Stores a message for statusbars.
 			******************************************************/
 			QString message;
@@ -228,6 +263,59 @@ namespace NGM
 			*	@brief	Stores a message for statusbars.
 			******************************************************/
 			int progressCurrent;
+
+			/**************************************************//*!
+			*	@return	Stores all current status bar widgets.
+			******************************************************/
+			std::queue<QWidget*> statusBarWidgets;
+
+			/**************************************************//*!
+			*	@brief	Asks user confirmation to close an indicated window.
+			******************************************************/
+			void closeWindow(MainWindow *window);
+
+			/**************************************************//*!
+			*	@brief	Forcefully destroys the indicated window.
+			******************************************************/
+			void destroyWindow(MainWindow *window);
+
+			/**************************************************//*!
+			*	@brief	Asks the user if they want to save any items.
+			*	@param	list A detailed list of modified items.
+			*	@see	Choice
+			******************************************************/
+			int saveRequest(const QString &list);
+
+			/**************************************************//*!
+			*	@brief	Asks the user if they want to quit the
+			*			application.
+			******************************************************/
+			void exitRequest();
+
+			/**************************************************//*!
+			*	@brief	Gathers all modified editors in the
+			*			indicated window and adds it to a list.
+			******************************************************/
+			void findModifiedFiles(MainWindow *window, QString &list);
+
+			/**************************************************//*!
+			*	@brief	Returns a viable project type for the
+			*			indicated filename. This is determined
+			*			by the file extension and/or name.
+			******************************************************/
+			Resource::Project *projectType(const QString &filename);
+
+			void saveResource(Resource::Editor *editor, Model::ResourceBaseItem *item);
+			Model::ResourceBaseItem *createProject(const QString &filename, Resource::Project *project);
+
+			/**************************************************//*!
+			*	@brief	Basic user dialog choices.
+			******************************************************/
+			enum Choice
+			{
+				Yes		=	1,
+				No		=	2
+			};
 		};
 	}
 }

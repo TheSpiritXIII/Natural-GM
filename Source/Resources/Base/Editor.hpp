@@ -4,48 +4,53 @@
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE. MIT License.
+ *      This file is a part of the Natural GM IDE.
  *
- *      Permission is hereby granted, free of charge, to any person obtaining a copy
- *		of this software and associated documentation files (the "Software"), to deal
- *		in the Software without restriction, including without limitation the rights
- *		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *		copies of the Software, and to permit persons to whom the Software is
- *		furnished to do so, subject to the following conditions:
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      (at your option) any later version.
  *
- *		The above copyright notice and this permission notice shall be included in
- *		all copies or substantial portions of the Software.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
  *
- *		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *		FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *		THE SOFTWARE.
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
 #ifndef _NGM_RESOURCE_EDITOR__HPP
 #define _NGM_RESOURCE_EDITOR__HPP
 #include "../Global.hpp"
-#include <string>
+#include "WindowManager.hpp"
+#include "ResourceTab.hpp"
 #include <QString>
 #include <QAction>
-#include <QEvent>
 #include <QWidget>
-#include <QMessageBox>
-#include <QProgressBar>
-#include "ResourceContentItem.hpp"
-#include "Project.hpp"
-#include "Serializer.hpp"
-#include "ResourceTab.hpp"
+#include <QEvent>
+#include <QMenu>
 
 namespace NGM
 {
 	namespace Resource
 	{
+		class Variant;
+	}
+	namespace Widget
+	{
+		class ResourceTab;
+	}
+	namespace Model
+	{
+		class ResourceProjectItem;
+	}
+	namespace Resource
+	{
+		using Widget::ResourceTab;
+
 		/**************************************************//*!
-		*	@brief	An editable widget for a specific resource.
+		*	@brief	An editable widget for resource types.
 		******************************************************/
 		class Editor : public QWidget
 		{
@@ -58,138 +63,201 @@ namespace NGM
 			******************************************************/
 			enum Status
 			{
-				CanCopy		=	0x01,
-				CanPaste	=	0x02,
-				CanSelect	=	0x04,
-				CanUndo		=	0x08,
-				CanRedo		=	0x10,
-				CanZoomIn	=	0x20,
-				CanZoomOut	=	0x40,
-				IsModified	=	0x80
+				CanCopy		=	0x001,
+				CanPaste	=	0x002,
+				CanSelect	=	0x004,
+				CanUndo		=	0x008,
+				CanRedo		=	0x010,
+				CanZoomIn	=	0x020,
+				CanZoomOut	=	0x040,
+				CanPrint	=	0x080,
+				IsModified	=	0x100
 			};
 
 			/**************************************************//*!
-			*	@brief	Creates a widget with the indicated parent.
+			*	@brief	Creates an editor.
+			*	@param	resourceTab This should be the parent of
+			*			this editor widget.
+			*	@param	item The parent root of the item that is
+			*			currently being edited.
 			******************************************************/
-			Editor(NGM::Widget::ResourceTab * const parent);
+			Editor(const Model::ResourceProjectItem * const projectItem, Widget::ResourceTab * const tab);
 
 			/**************************************************//*!
-			*	@brief	Destroys the widget and all of its children.
+			*	@brief	Destroys the widget and all children.
 			******************************************************/
 			~Editor() {}
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to cut.
 			******************************************************/
-			virtual void cutRequest() = 0;
+			virtual void cut() = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to copy.
 			******************************************************/
-			virtual void copyRequest() = 0;
+			virtual void copy() = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to paste.
 			******************************************************/
-			virtual void pasteRequest() = 0;
+			virtual void paste() = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to undo.
 			******************************************************/
-			virtual void undoRequest() = 0;
+			virtual void undo() = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to redo its data.
 			******************************************************/
-			virtual void redoRequest() = 0;
+			virtual void redo() = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to zoom in.
 			******************************************************/
-			virtual void zoomInRequest() = 0;
+			virtual void zoomIn() = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to zoom out.
 			******************************************************/
-			virtual void zoomOutRequest() = 0;
+			virtual void zoomOut() = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests the widget to normalize zoom.
 			******************************************************/
-			virtual void zoomRequest() = 0;
+			virtual void zoom() = 0;
 
 			/**************************************************//*!
-			*	@brief	Searches the widget for the indicated data.
+			*	@brief	Clones the widget into another view.
 			******************************************************/
-			virtual void searchRequest(unsigned char s, QByteArray *data) = 0;
+			virtual Editor *clone(NGM::Widget::ResourceTab *tab) const = 0;
+
+			/**************************************************//*!
+			*	@brief	Searches the widget for the indicated
+			*			string name.
+			******************************************************/
+			virtual void search(unsigned char s, QString search) const = 0;
 
 			/**************************************************//*!
 			*	@brief	Sets the window's status contents.
 			******************************************************/
-			virtual void statusRequest(QLabel *label, QProgressBar *progress) = 0;
+			virtual void status(Manager::WindowManager *const windowManager) const = 0;
 
 			/**************************************************//*!
-			*	@return	The value of the indicated property.
+			*	@brief	Creates a usable menu for this widget,
+			*			or nullptr if this widget has no menu.
 			******************************************************/
-			virtual QVariant property(const char* property) const = 0;
+			virtual QMenu *menu() const;
 
 			/**************************************************//*!
-			*	@return	A list of all possible properties.
+			*	@brief	Returns a widget that can edit this
+			*			editor's settings or nullptr if the settings has
+			*			no preferences widget.
 			******************************************************/
-			virtual QStringList	getPropertyList() = 0;
+			virtual QWidget *preferences() const;
+
+			/**************************************************//*!
+			*	@brief	Returns the value of the indicated property.
+			******************************************************/
+			virtual Variant property(const char* property) const = 0;
+
+			/**************************************************//*!
+			*	@brief	Returns a list of all possible properties.
+			*
+			*	Some editors feature extendible properties. If
+			*	it does, then you can add any property regardless
+			*	of what is listed. In that case, this list is
+			*	simply a hint.
+			******************************************************/
+			virtual QStringList getPropertyList() const = 0;
 
 			/**************************************************//*!
 			*	@brief	Sets the indicated property to the
 			*			indicated value.
+			*
+			*	All variant data must be copied at this step,
+			*	as they may go out of scope.
 			******************************************************/
-			virtual void setProperty(const char* property, QVariant value) = 0;
+			virtual void setProperty(const char* property, Variant &value) = 0;
 
 			/**************************************************//*!
-			*	@brief	Block's the widget's signals.
+			*	@brief	Called after setting default properties.
+			*			Metadata should be updated here.
 			******************************************************/
-			virtual void block(const bool &blocked) = 0;
+			virtual void initialize() = 0;
 
 			/**************************************************//*!
 			*	@return	Tells the widget that it was saved. The
 			*			state should remove its modified flag.
 			******************************************************/
-			virtual void isSaved() = 0;
+			virtual void saved() = 0;
 
 			/**************************************************//*!
-			*	@return	Processes a focus event for signals.
+			*	@brief	Saves this widget's current session
 			******************************************************/
-			bool event(QEvent *event);
+			virtual void saveSession(const QString &filename) const = 0;
 
 			/**************************************************//*!
-			*	@return	The widget's current state.
+			*	@brief	Saves this widget's current session.
 			******************************************************/
-			const uint8_t getState();
+			virtual void loadSession(const QString &filename) = 0;
 
 			/**************************************************//*!
-			*	@return	The parent ResourceTabWidget.
+			*	@brief	Returns the widget's current state.
 			******************************************************/
-			const NGM::Widget::ResourceTab * const getResourceTabWidget();
+			inline const uint8_t getState() const
+			{
+				return state;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns the parent ResourceTabWidget.
+			******************************************************/
+			inline const Widget::ResourceTab *getResourceTab() const
+			{
+				return resourceTab;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns the root of the edited item.
+			*			Useful for loading other resource types.
+			******************************************************/
+			const Model::ResourceProjectItem * const projectItem;
 
 		protected:
 
 			/**************************************************//*!
+			*	@brief	Processes the event for a focus signal.
+			******************************************************/
+			bool event(QEvent *event);
+
+			/**************************************************//*!
+			*	@brief	Processes the event for a focus signal.
+			*			All editors should install an event
+			*			filter on their children.
+			******************************************************/
+			bool eventFilter(QObject *, QEvent *event);
+
+			/**************************************************//*!
 			 *	@brief Stores the current state.
 			******************************************************/
-			uint8_t state;
+			uint16_t state;
 
 		private:
 
 			/**************************************************//*!
-			*	@return	The parent ResourceTabWidget.
+			*	@brief	The parent of this editor.
 			******************************************************/
-			NGM::Widget::ResourceTab * const resourceTab;
-
-		signals:
+			const Widget::ResourceTab *resourceTab;
 
 			/**************************************************//*!
-			*	@brief	Requests to update the status bar.
+			*	@brief	When a widget is moved, the parent tab
+			*			is required to be updated.
 			******************************************************/
-			void updateStatus();
+			friend void ResourceTab::moveWidget(const int &index, ResourceTab *resourceTab);
+
+		signals:
 
 			/**************************************************//*!
 			*	@brief	Signals if a copy is available or not.
@@ -227,7 +295,8 @@ namespace NGM
 			void canZoomOut(bool);
 
 			/**************************************************//*!
-			*	@brief	Signals when the widget was modified.
+			*	@brief	Signals when the widget modification
+			*			flag changed.
 			******************************************************/
 			void isModified(bool);
 

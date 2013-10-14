@@ -45,7 +45,7 @@ namespace NGM
 		ProjectDialog::ProjectDialog(Manager::ProjectManager *projectManager,
 									 Manager::SettingManager *settingManager,
 									 Manager::WindowManager *windowManager,
-									 QWidget *parent) :
+									 const bool& files, QWidget *parent) :
 			QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint),
 			windowManager(windowManager), projectManager(projectManager),
 			settingManager(settingManager)
@@ -76,9 +76,12 @@ namespace NGM
 			projectTree = new QTreeWidget(this);
 			projectTree->setHeaderLabel(tr("Project"));
 
-			// Populate the project category tree.
 			bool exists;
-			for(auto& i : projectManager->getProjectList())
+			settings |= files ? Files : 0;
+			const std::multimap<const QString, Resource::Project*> l = files ? projectManager->getFileProjectList() : projectManager->getProjectList();
+
+			// Populate the project category tree.
+			for(auto& i : l)
 			{
 				exists = 0;
 				QString root = i.second->category.left(i.second->category.indexOf('-'));
@@ -176,35 +179,45 @@ namespace NGM
 			dirUseCheck = new QCheckBox(tr("Use as default"), this);
 			dirUseCheck->setChecked(settingManager->settings & Manager::SettingManager::UseDirectory);
 			dirUseCheck->setToolTip(tr("If checked, then this directory is stored "
-			"and set as the default next time you create a project."));
+			"and set as the default next time you create a project/file."));
 			fileLayout->addWidget(dirUseCheck);
 
 			QWidget *nameWidget = new QWidget(this);
 			QHBoxLayout *nameLayout = new QHBoxLayout(nameWidget);
 			nameLayout->setMargin(0);
 
-			nameLayout->addWidget(new QLabel(tr("Project Name: "), this));
+			if (~settings & Files)
+			{
+				nameLayout->addWidget(new QLabel(tr("Project Name: "), this));
+			}
+			else
+			{
+				nameLayout->addWidget(new QLabel(tr("File Name: "), this));
+			}
 
 			projectEdit = new QLineEdit("Project", this);
 			nameLayout->addWidget(projectEdit);
 
-			dirAddCheck = new QCheckBox(tr("Add new directory"), this);
-			dirAddCheck->setChecked(settingManager->settings & Manager::SettingManager::AddDirectory);
-			dirAddCheck->setToolTip(tr("If checked, then an extra directory is created "
-			"before the project directory and named the same as the project."));
-			nameLayout->addWidget(dirAddCheck);
+			if (~settings & Files)
+			{
+				dirAddCheck = new QCheckBox(tr("Add new directory"), this);
+				dirAddCheck->setChecked(settingManager->settings & Manager::SettingManager::AddDirectory);
+				dirAddCheck->setToolTip(tr("If checked, then an extra directory is created "
+				"before the project directory and named the same as the project."));
+				nameLayout->addWidget(dirAddCheck);
+			}
 
-			dirTempCheck = new QCheckBox(tr("Create temporary project"));
+			dirTempCheck = new QCheckBox(tr("Create as temporary"));
 			dirTempCheck->setToolTip(tr("Allows you to create a temporary project "
 			"that allows you to work but doesn't require a save."));
 			nameLayout->addWidget(dirTempCheck);
 			connect(dirTempCheck, &QCheckBox::toggled, [this](bool checked)
 			{
-				this->projectEdit->setEnabled(!checked);
-				this->directoryEdit->setEnabled(!checked);
-				this->dirAddCheck->setEnabled(!checked);
-				this->dirUseCheck->setEnabled(!checked);
-				this->browseButton->setEnabled(!checked);
+				projectEdit->setEnabled(!checked);
+				directoryEdit->setEnabled(!checked);
+				dirAddCheck->setEnabled(!checked);
+				dirUseCheck->setEnabled(!checked);
+				browseButton->setEnabled(!checked);
 			});
 
 			QPushButton *choose = new QPushButton(tr("Choose..."), this);
@@ -246,7 +259,7 @@ namespace NGM
 				full = current->parent()->text(0)+"-"+full;
 			}
 
-			cache = projectManager->getProjectCategory(full, root);
+			cache = settings & Files ? projectManager->getFileProjectCategory(full, root) : projectManager->getProjectCategory(full, root);
 			for (auto& i : cache)
 			{
 				projectList->addItem(new QListWidgetItem(i.first, projectList));
@@ -272,12 +285,14 @@ namespace NGM
 
 		void ProjectDialog::browseRequest()
 		{
+			settings |= Wait;
 			QString dir = QFileDialog::getExistingDirectory(this, tr("Choose Directory"),
 				QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 			if (dir != "")
 			{
 				directoryEdit->setText(dir);
 			}
+			settings &= ~Wait;
 		}
 
 		void ProjectDialog::chooseRequest()
@@ -290,7 +305,9 @@ namespace NGM
 			QDir dir(proj);
 			if (dir.exists(proj))
 			{
-				wait = true;
+				settings |= Wait;
+				qDebug() << settings;
+				qDebug() << (settings & Wait);
 				QMessageBox message(this);
 				message.setText(tr("The selected project directory already exists. "
 				"Contents may be overwritten. Would you like to continue?"));
@@ -300,24 +317,25 @@ namespace NGM
 				message.setDefaultButton(QMessageBox::Ok);
 				if (message.exec() == QMessageBox::Cancel)
 				{
-					wait = false;
+					settings &= ~Wait;
 					return;
 				}
 			}
 			bool made = dir.mkpath(proj);
 			if (!made)
 			{
-				wait = true;
+				settings |= Wait;
 				QMessageBox message(this);
 				message.setText(tr("Error creating directory. Directory is invalid."));
 				message.addButton(QMessageBox::Ok);
 				message.exec();
+				settings &= ~Wait;
 				return;
 			}
 			Resource::Project *project = cache.find(projectList->currentItem()->text())->second;
 			QString location = dir.absolutePath()+QChar('/')+projectEdit->text();
 			Resource::Resource *resource = new Resource::Resource(project->type, location, Resource::Resource::IsFilename);
-			Model::ResourceProjectItem *item = new Model::ResourceProjectItem(resource, project, projectEdit->text());
+			Model::ResourceProjectItem *item = new Model::ResourceProjectItem(resource, project, projectEdit->text(), 0);
 			windowManager->addProject(item);
 			close();
 
@@ -332,7 +350,8 @@ namespace NGM
 		{
 			if (event->type() == QEvent::ActivationChange)
 			{
-				if (isActiveWindow() || wait)
+				qDebug() << settings;
+				if (isActiveWindow() || settings & Wait)
 				{
 					setWindowOpacity(1.0);
 				}

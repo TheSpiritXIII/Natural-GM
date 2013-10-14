@@ -25,87 +25,156 @@
  *		THE SOFTWARE.
 **/
 #include "TextEditor.hpp"
-#include <QLabel>
 #include <QHBoxLayout>
-#include <QDebug>
 #include <QFontMetrics>
+#include <QTextStream>
+#include <QLabel>
+#include <QFile>
+#include <QDebug>
 
 namespace NGM
 {
 	namespace Resource
 	{
-		TextEditor::TextEditor(NGM::Widget::ResourceTab *parent) : Editor(parent)
+		TextEditor::TextEditor(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab) : Editor(item, tab)
 		{
 			state = CanPaste | CanZoomIn | CanZoomOut;
-
 			textEdit = new QsciScintilla(this);
 
+			blockSignals(true);
+			textEdit->blockSignals(true);
+
+			//textEdit->SendScintilla(QsciScintilla::SCI_SETLEXER, QsciScintillaBase::SCLEX_CPP);
+
+
+			int mask = textEdit->SendScintilla(QsciScintilla::SCI_GETMODEVENTMASK);
+				/*textEdit->SendScintilla(QsciScintilla::SCI_SETMODEVENTMASK, mask | QsciScintilla::SC_MOD_CHANGEFOLD);*/
+
+				textEdit->SendScintilla(QsciScintilla::SCI_SETFOLDFLAGS, QsciScintilla::SC_FOLDFLAG_LINEAFTER_CONTRACTED);
+
+				//textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINTYPEN, 2, (long)QsciScintilla::SC_MARGIN_SYMBOL);*/
+				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINMASKN, 2, QsciScintilla::SC_MASK_FOLDERS);
+				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINSENSITIVEN, 2, 1);
+
+
+			textEdit->SendScintilla(QsciScintilla::SCI_SETMULTIPLESELECTION, 1);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETMULTIPASTE, QsciScintilla::SC_MULTIPASTE_EACH);
+
 #ifdef Q_OS_WIN32
-			QFont font("Consolas", 10);
+			setFont(0, "Consolas", 10, 0, false, false);
+			setFont(QsciScintilla::STYLE_LINENUMBER, "Consolas", 10, 0, false, false);
 #else
-			QFont font("Courier", 10);
+			setFont(0, "Courier", 10, 0, false, false);
+			setFont(QsciScintilla::STYLE_LINENUMBER, "Courier", 10, 0, false, false);
 #endif
-			textEdit->setFont(font);
-			textEdit->setMarginsFont(font);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 0, 30);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINTYPEN, 0, QsciScintilla::SC_MARGIN_NUMBER);
 
-			textEdit->setMarginWidth(0, QFontMetrics(font).width("__") + 8);
-			textEdit->setMarginLineNumbers(0, true);
-			textEdit->setMarginsBackgroundColor(QColor("#cccccc"));
+			textEdit->SendScintilla(QsciScintilla::SCI_STYLESETBACK, QsciScintilla::STYLE_LINENUMBER, QColor("#cccccc"));
 
-			textEdit->setCaretLineVisible(true);
-			textEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
+			textEdit->SendScintilla(QsciScintilla::SCI_SETCARETLINEVISIBLE, true);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETCARETLINEBACK, QColor("#ffe4e4"));
 
-			textEdit->setFolding(QsciScintilla::BoxedTreeFoldStyle);
-			textEdit->setBraceMatching(QsciScintilla::StrictBraceMatch);
-			textEdit->setModified(false);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETPROPERTY, "fold", "1");
+			textEdit->SendScintilla(QsciScintilla::SCI_MARKERDEFINE, QsciScintilla::SC_MARKNUM_FOLDEROPEN, QsciScintillaBase::SC_MARK_BOXMINUS);
+			textEdit->SendScintilla(QsciScintilla::SCI_MARKERDEFINE, QsciScintilla::SC_MARKNUM_FOLDER, QsciScintillaBase::SC_MARK_BOXPLUS);
+			textEdit->SendScintilla(QsciScintilla::SCI_MARKERDEFINE, QsciScintilla::SC_MARKNUM_FOLDERSUB, QsciScintillaBase::SC_MARK_VLINE);
+			textEdit->SendScintilla(QsciScintilla::SCI_MARKERDEFINE, QsciScintilla::SC_MARKNUM_FOLDERTAIL, QsciScintillaBase::SC_MARK_LCORNER);
+			textEdit->SendScintilla(QsciScintilla::SCI_MARKERDEFINE, QsciScintilla::SC_MARKNUM_FOLDEREND, QsciScintillaBase::SC_MARK_BOXPLUSCONNECTED);
+			textEdit->SendScintilla(QsciScintilla::SCI_MARKERDEFINE, QsciScintilla::SC_MARKNUM_FOLDEROPENMID, QsciScintillaBase::SC_MARK_BOXMINUSCONNECTED);
+			textEdit->SendScintilla(QsciScintilla::SCI_MARKERDEFINE, QsciScintilla::SC_MARKNUM_FOLDERMIDTAIL, QsciScintillaBase::SC_MARK_TCORNER);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 2, 14);
+			//textEdit->setBraceMatching(QsciScintilla::StrictBraceMatch);
 
-			textEdit->setMatchedBraceBackgroundColor(QColor(200, 200, 255));
-			textEdit->setMatchedBraceForegroundColor(Qt::black);
-			textEdit->setUnmatchedBraceBackgroundColor(Qt::red);
-			textEdit->setUnmatchedBraceForegroundColor(Qt::black);
-			textEdit->setSelectionBackgroundColor(QColor(51, 153, 255));
-			textEdit->setCaretLineBackgroundColor(QColor(232, 232, 255));
+			textEdit->SendScintilla(QsciScintilla::SCI_STYLESETBACK, QsciScintilla::STYLE_BRACELIGHT, QColor(200, 200, 255));
+			textEdit->SendScintilla(QsciScintilla::SCI_STYLESETFORE, QsciScintilla::STYLE_BRACELIGHT, Qt::black);
+			textEdit->SendScintilla(QsciScintilla::SCI_STYLESETBACK, QsciScintilla::STYLE_BRACEBAD, Qt::red);
+			textEdit->SendScintilla(QsciScintilla::SCI_STYLESETFORE, QsciScintilla::STYLE_BRACEBAD, Qt::black);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETSELBACK, 1, QColor(51, 153, 255));
+			textEdit->SendScintilla(QsciScintilla::SCI_SETCARETLINEBACK, QColor(232, 232, 255));
 
 			QHBoxLayout *layout = new QHBoxLayout(this);
 			layout->setMargin(0);
 			layout->addWidget(textEdit);
 
-			connect(textEdit, &QsciScintilla::copyAvailable, [this](const bool &value)
-			{
-				state ^= value ? CanCopy : 0;
-				emit canCopy(value);
-			});
 			connect(this, &TextEditor::canPaste, [this](const bool &value)
 			{
 				state ^= value ? CanPaste : 0;
-			});
-			connect(this, &TextEditor::canUndo, [this](const bool &)
-			{
-				state ^= CanUndo;
 			});
 			connect(this, &TextEditor::canSelect, [this](const bool &value)
 			{
 				state ^= value ? CanSelect : 0;
 			});
-			connect(textEdit, &QsciScintilla::modificationChanged, [this](const bool &value)
+			connect(textEdit, &QsciScintillaBase::SCN_MODIFIED, [this](int, int type, const char*, int, int, int, int, int, int, int)
 			{
-				qDebug() << state;
-				qDebug() << "Mofied?" << value << ":" << static_cast<bool>(state & IsModified);
-				if (value != static_cast<bool>(state & IsModified))
+				if (type == QsciScintilla::SC_MOD_INSERTTEXT || QsciScintilla::SC_MOD_DELETETEXT)
 				{
-					state ^= IsModified;
-					emit isModified(value);
-				}
-				if (textEdit->isUndoAvailable() != static_cast<bool>(state & CanUndo))
-				{
-					emit canUndo(textEdit->isUndoAvailable());
-				}
-				if (textEdit->isRedoAvailable() != static_cast<bool>(state & CanRedo))
-				{
-					emit canRedo(textEdit->isRedoAvailable());
+					qDebug() << "!Modified: " << !textEdit->SendScintilla(QsciScintilla::SCI_GETMODIFY);
+					qDebug() << "!State" << !(state & IsModified);
+					if (!textEdit->SendScintilla(QsciScintilla::SCI_GETMODIFY) != !(state & IsModified))
+					{
+						state ^= IsModified;
+						emit isModified(textEdit->SendScintilla(QsciScintilla::SCI_CANUNDO));
+					}
+					if (!textEdit->SendScintilla(QsciScintilla::SCI_CANUNDO) != !(state & CanUndo))
+					{
+						state ^= CanUndo;
+						emit canUndo(textEdit->SendScintilla(QsciScintilla::SCI_CANUNDO));
+					}
+					if (!textEdit->SendScintilla(QsciScintilla::SCI_CANREDO) != !(state & CanRedo))
+					{
+						state ^= CanRedo;
+						emit canRedo(textEdit->SendScintilla(QsciScintilla::SCI_CANUNDO));
+					}
+					lengthLabel->setText("Len: "+QString::number(textEdit->SendScintilla(QsciScintilla::SCI_GETLENGTH)));
+					updateLineLength();
 				}
 			});
-			connect(textEdit, &QsciScintilla::linesChanged, this, &TextEditor::updateLineLength);
+			connect(textEdit, &QsciScintillaBase::SCN_UPDATEUI, [this]()
+			{
+				int position = textEdit->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
+				if (lastPosition != position)
+				{
+					lastPosition = position;
+					const int line = textEdit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, lastPosition);
+					const int index = textEdit->SendScintilla(QsciScintilla::SCI_GETCOLUMN, lastPosition);
+					positionLabel->setText("Ln: "+QString::number(line)+"  Col: "+QString::number(index));
+				}
+			});
+			connect(textEdit, &QsciScintillaBase::QSCN_SELCHANGED, [this](const bool& value)
+			{
+				// NOTE: QScintilla keeps emitting this signal while holding mouse.
+				if (!value != !(state & CanCopy))
+				{
+					state ^= CanCopy;
+					emit canCopy(value);
+				}
+				if (value)
+				{
+					if (!textEdit->SendScintilla(QsciScintilla::SCI_SELECTIONISRECTANGLE))
+					{
+						const int selStart = textEdit->SendScintilla(QsciScintilla::SCI_GETSELECTIONSTART);
+						const int selEnd = textEdit->SendScintilla(QsciScintilla::SCI_GETSELECTIONEND);
+						const int count = selEnd - selStart;
+						if (count != 0)
+						{
+							const int line = 1+textEdit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, selEnd)-
+								textEdit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, selStart);
+							selectLabel->setText("Sel: "+QString::number(count)+":"+QString::number(line));
+						}
+					}
+				}
+				else
+				{
+					selectLabel->setText("Sel: N/A");
+				}
+			});
+
+			lengthLabel = new QLabel(this);
+			positionLabel = new QLabel("Ln: 0  Col: 0", this);
+			selectLabel = new QLabel("Sel: N/A", this);
+			typeComboBox = new QComboBox(this);
+			typeComboBox->addItem("Plain Text");
 		}
 
 		TextEditor::~TextEditor()
@@ -113,34 +182,39 @@ namespace NGM
 
 		}
 
-		void TextEditor::cutRequest()
+		Editor *TextEditor::create(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab)
 		{
-			textEdit->cut();
+			return new TextEditor(item, tab);
 		}
 
-		void TextEditor::copyRequest()
+		void TextEditor::cut()
 		{
-			textEdit->copy();
+			textEdit->SendScintilla(QsciScintilla::SCI_CUT);
 		}
 
-		void TextEditor::pasteRequest()
+		void TextEditor::copy()
 		{
-			textEdit->paste();
+			textEdit->SendScintilla(QsciScintilla::SCI_COPY);
 		}
 
-		void TextEditor::undoRequest()
+		void TextEditor::paste()
 		{
-			textEdit->undo();
+			textEdit->SendScintilla(QsciScintilla::SCI_PASTE);
 		}
 
-		void TextEditor::redoRequest()
+		void TextEditor::undo()
 		{
-			textEdit->redo();
+			textEdit->SendScintilla(QsciScintilla::SCI_UNDO);
 		}
 
-		void TextEditor::zoomInRequest()
+		void TextEditor::redo()
 		{
-			textEdit->zoomIn();
+			textEdit->SendScintilla(QsciScintilla::SCI_REDO);
+		}
+
+		void TextEditor::zoomIn()
+		{
+			textEdit->SendScintilla(QsciScintilla::SCI_ZOOMIN);
 			if (textEdit->SendScintilla(QsciScintilla::SCI_GETZOOM, 0) == 20)
 			{
 				state &= ~CanZoomIn;
@@ -152,10 +226,10 @@ namespace NGM
 			}
 		}
 
-		void TextEditor::zoomOutRequest()
+		void TextEditor::zoomOut()
 		{
-			textEdit->zoomOut();
-			int smallest = -textEdit->font().pointSize()+2;
+			textEdit->SendScintilla(QsciScintilla::SCI_ZOOMOUT);
+			int smallest = -textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)+2;
 			int current = textEdit->SendScintilla(QsciScintilla::SCI_GETZOOM, 0);
 			if (smallest > -10 ? current == smallest : current)
 			{
@@ -169,9 +243,9 @@ namespace NGM
 			}
 		}
 
-		void TextEditor::zoomRequest()
+		void TextEditor::zoom()
 		{
-			textEdit->zoomTo(0);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETZOOM, 0);
 			if (~state & CanZoomIn)
 			{
 				emit canZoomIn(true);
@@ -182,73 +256,122 @@ namespace NGM
 			}
 		}
 
-		void TextEditor::searchRequest(uint8_t settings, QByteArray *data)
+		void TextEditor::search(uint8_t settings, QString data) const
 		{
 
 		}
 
-		void TextEditor::statusRequest(QLabel *label, QProgressBar *progress)
+		void TextEditor::status(Manager::WindowManager * const windowManager) const
 		{
-			progress->setVisible(false);
-			label->setVisible(true);
-			label->setText("Hello World.");
+			windowManager->addStatusWidget(typeComboBox, 2);
+			windowManager->addStatusWidget(positionLabel, 1);
+			windowManager->addStatusWidget(selectLabel, 1);
+			windowManager->addStatusWidget(lengthLabel, 1);
+			typeComboBox->show();
+			positionLabel->show();
+			selectLabel->show();
+			lengthLabel->show();
 		}
 
-		QVariant TextEditor::property(const char *property) const
+		Variant TextEditor::property(const char *property) const
 		{
 			if (strcmp(property, "text") == 0)
 			{
-				return textEdit->text();
+				return Variant(reinterpret_cast<char*>(textEdit->SendScintilla(QsciScintilla::SCI_GETCHARACTERPOINTER)));
 			}
 #ifdef NGM_DEBUG
 			qDebug() << "Widget: Unknown property '" << property << "'";
 #endif
-			return QVariant();
+			return Variant();
 		}
 
-		void TextEditor::setProperty(const char *property, QVariant value)
+		void TextEditor::setProperty(const char *property, Variant &value)
 		{
 			if (strcmp(property, "text") == 0)
 			{
-				textEdit->setText(value.toString());
+				textEdit->SendScintilla(QsciScintilla::SCI_SETTEXT, 0, reinterpret_cast<long>(value.charPtr()));
 			}
 		}
 
-		QStringList TextEditor::getPropertyList()
+		QStringList TextEditor::getPropertyList() const
 		{
 			return QStringList("text");
 		}
 
-		void TextEditor::block(const bool &blocked)
+		void TextEditor::initialize()
 		{
-			blockSignals(blocked);
-			textEdit->blockSignals(blocked);
+			blockSignals(false);
+			textEdit->blockSignals(false);
+			textEdit->SendScintilla(QsciScintilla::SCI_SETSAVEPOINT);
+			textEdit->SendScintilla(QsciScintilla::SCI_EMPTYUNDOBUFFER);
+			lengthLabel->setText("Len: "+QString::number(textEdit->SendScintilla(QsciScintilla::SCI_GETLENGTH)));
 			updateLineLength();
+			textEdit->installEventFilter(this);
 		}
 
-		void TextEditor::isSaved()
+		Editor *TextEditor::clone(Widget::ResourceTab *tab) const
 		{
-			textEdit->setModified(false);
+			TextEditor *editor = new TextEditor(projectItem, tab);
+			editor->textEdit->SendScintilla(QsciScintilla::SCI_SETDOCPOINTER, textEdit->SendScintilla(QsciScintilla::SCI_GETDOCPOINTER));
+			editor->initialize();
+			return editor;
+		}
+
+		void TextEditor::saveSession(const QString &filename) const
+		{
+			QFile file(filename);
+			file.open(QFile::WriteOnly);
+			QTextStream stream(&file);
+			stream << textEdit->SendScintilla(QsciScintilla::SCI_GETFIRSTVISIBLELINE);
+			long position = textEdit->SendScintilla(QsciScintilla::SCI_CONTRACTEDFOLDNEXT, 0);
+			while (position != -1)
+			{
+				stream << position;
+				position = textEdit->SendScintilla(QsciScintilla::SCI_CONTRACTEDFOLDNEXT, 0);
+			}
+			file.close();
+		}
+
+		void TextEditor::loadSession(const QString &filename)
+		{
+			QFile file(filename);
+			file.open(QFile::ReadOnly);
+			QTextStream stream(&file);
+			long value;
+			stream >> value;
+			textEdit->SendScintilla(QsciScintilla::SCI_SETFIRSTVISIBLELINE, value);
+			while (!stream.atEnd())
+			{
+				stream >> value;
+				textEdit->SendScintilla(QsciScintilla::SCI_TOGGLEFOLD, value);
+			}
+			file.close();
+		}
+
+		void TextEditor::saved()
+		{
+			textEdit->SendScintilla(QsciScintilla::SCI_SETSAVEPOINT);
 			state &= ~IsModified;
 		}
 
 		void TextEditor::updateLineLength()
 		{
-			if (this->textEdit->lines() > 9999)
+			int lines = textEdit->SendScintilla(QsciScintilla::SCI_GETLINECOUNT);
+			if (lines > 9999)
 			{
-				this->textEdit->setMarginWidth(0, QFontMetrics(this->textEdit->font()).width("_____")+8);
+				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 0, textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)*6);
 			}
-			else if (this->textEdit->lines() > 999)
+			else if (lines > 999)
 			{
-				this->textEdit->setMarginWidth(0, QFontMetrics(this->textEdit->font()).width("____")+8);
+				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 0, textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)*5);
 			}
-			else if (this->textEdit->lines() > 99)
+			else if (lines > 99)
 			{
-				this->textEdit->setMarginWidth(0, QFontMetrics(this->textEdit->font()).width("___")+8);
+				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 0, textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)*4);
 			}
 			else
 			{
-				this->textEdit->setMarginWidth(0, QFontMetrics(this->textEdit->font()).width("__")+8);
+				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 0, textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)*3);
 			}
 		}
 	}

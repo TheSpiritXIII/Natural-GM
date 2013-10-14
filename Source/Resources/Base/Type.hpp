@@ -4,31 +4,29 @@
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE. MIT License.
+ *      This file is a part of the Natural GM IDE.
  *
- *      Permission is hereby granted, free of charge, to any person obtaining a copy
- *		of this software and associated documentation files (the "Software"), to deal
- *		in the Software without restriction, including without limitation the rights
- *		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *		copies of the Software, and to permit persons to whom the Software is
- *		furnished to do so, subject to the following conditions:
+ *      This program is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      (at your option) any later version.
  *
- *		The above copyright notice and this permission notice shall be included in
- *		all copies or substantial portions of the Software.
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
  *
- *		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *		FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *		THE SOFTWARE.
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _NGM_TYPE__HPP
-#define _NGM_TYPE__HPP
+#ifndef _NGM_RESOURCE_TYPE__HPP
+#define _NGM_RESOURCE_TYPE__HPP
 #include <QString>
 #include <QAction>
+#include "Map.hpp"
+#include "String.hpp"
+#include "Vector.hpp"
 
 namespace NGM
 {
@@ -36,9 +34,17 @@ namespace NGM
 	{
 		class ResourceTab;
 	}
+	namespace Model
+	{
+		class ResourceProjectItem;
+	}
 	namespace Resource
 	{
 		class Editor;
+		class SerialObject;
+
+		typedef Editor *(*EditorPointer)(const Model::ResourceProjectItem * const,
+									 Widget::ResourceTab * const);
 
 		/**************************************************//*!
 		*	@brief	Metadata for resource types.
@@ -48,31 +54,53 @@ namespace NGM
 		public:
 
 			/**************************************************//*!
-			*	@brief	The human readable name for menus. This
-			*			value is also used for loading the icon.
+			*	@brief	The editor type name.
 			******************************************************/
 			const QString name;
 
 			/**************************************************//*!
-			*	@brief	The plural name. This is used in tabs and groups.
+			*	@brief	The plural name. This is used in tabs
+			*			and groups.
 			******************************************************/
 			const QString plural;
 
 			/**************************************************//*!
 			*	@brief	A visual representation of the type.
 			*	@see	name
+			*
+			*	The icon is loaded from the icons/[theme]/types
+			*	folder. The filepath is set as the human
+			*	readable name.
 			******************************************************/
 			QIcon icon;
 
 			/**************************************************//*!
-			*	@brief	The Qt based action for this type.
+			*	@brief	The Qt based action for this creating
+			*			a resource of this type.
+			*
+			*	This is stored here for simplicity. No class
+			*	should really have a need to use this.
 			******************************************************/
 			QAction *action;
 
 			/**************************************************//*!
-			*	@return	A usable widget for this type.
+			*	@brief	Returns a widget for editing this type.
 			******************************************************/
-			virtual Editor *widget(NGM::Widget::ResourceTab *parent = 0) const = 0;
+			virtual Editor *widget(const Model::ResourceProjectItem * const item,
+								   Widget::ResourceTab * const tab) const = 0;
+
+			/**************************************************//*!
+			*	@brief	Returns an icon representative of the
+			*			type. Types should specify which part
+			*			of the data is searched for the icon.
+			******************************************************/
+			virtual const QIcon &getIcon(SerialObject *data) const;
+
+			/**************************************************//*!
+			*	@brief	Function pointers to create editors of
+			*			this resource type.
+			******************************************************/
+			Vector<Pair<String, EditorPointer>> editors;
 
 			/**************************************************//*!
 			*	@brief	Sets up constant metadata.
@@ -83,4 +111,4 @@ namespace NGM
 	}
 }
 
-#endif // _NGM_Type__HPP
+#endif // _NGM_RESOURCE_Type__HPP

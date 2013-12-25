@@ -3,19 +3,20 @@
 #----------------------------------------------
 #   Qt specific options.
 #----------------------------------------------
-greaterThan(QT_MAJOR_VERSION, 5)
-QT			+=	widgets network
 TEMPLATE	 =	app
-TARGET		 =	"Natural-GM"
+QT			+=	core gui widgets network
 CONFIG		+=	c++11
 LIBS		+=	-L$$[QT_INSTALL_LIBS]
-debug
-{
-	LIBS	+=	-lqscintilla2d
-}
-release
-{
+
+CONFIG(debug, release|debug) {
 	LIBS	+=	-lqscintilla2
+	TARGET	=	"Natural GM Debug"
+	CONFIG	+=	debug
+	CONFIG	-=	release
+} else {
+	LIBS	+=	-lqscintilla2
+	TARGET	=	"Natural GM"
+	CONFIG	+=	release
 }
 DEFINES		+=	QSCINTILLA_DLL
 #----------------------------------------------
@@ -43,17 +44,12 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Classes/ErrorLogger/ErrorLogger.hpp \
 	Managers/WindowManager.hpp \
 	Managers/ActionManager.hpp \
-	Models/BasicItem.hpp \
-	Models/ColumnItem.hpp \
-	Models/BasicModel.hpp \
-	Models/ColumnModel.hpp \
 	Dialogs/ProjectDialog.hpp \
 	Global.hpp \
 	Managers/ProjectManager.hpp \
 	Resources/Serializers/TextSerializer.hpp \
 	Widgets/ResourceTab.hpp \
 	Widgets/ResourceSplitter.hpp \
-	Resources/Types/TextType.hpp \
 	Models/ResourceItemModel/ResourceBaseItem.hpp \
 	Models/ResourceItemModel/ResourceContentItem.hpp \
 	Models/ResourceItemModel/ResourceGroupItem.hpp \
@@ -84,7 +80,13 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Managers/ProgressManager.hpp \
 	Containers/List.hpp \
 	Containers/Set.hpp \
-	Containers/Queue.hpp
+	Containers/Queue.hpp \
+	Resources/Base/Factory.hpp \
+	Containers/Deque.hpp \
+	Containers/Stack.hpp \
+	Managers/Plugin.hpp \
+	Managers/PluginManager.hpp \
+	Managers/GlobalManager.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -93,8 +95,6 @@ SOURCES		+= \
 	Classes/ErrorLogger/ErrorLogger.cpp \
 	Windows/MainWindow.cpp \
 	Managers/WindowManager.cpp \
-	Models/BasicItem.cpp \
-	Models/BasicModel.cpp \
 	Dialogs/ProjectDialog.cpp \
 	Managers/ActionManager.cpp \
 	Managers/ProjectManager.cpp \
@@ -108,13 +108,14 @@ SOURCES		+= \
 	Widgets/ResourceDialog.cpp \
 	Resources/Base/SerialData.cpp \
 	Resources/Base/Base.cpp \
-	Resources/Types/TextType.cpp \
 	Resources/Editors/TextEditor.cpp \
 	Widgets/ResourceSplitterHandle.cpp \
 	Widgets/HighlightWidget.cpp \
 	Widgets/ResourceTabBar.cpp \
 	Resources/Serializers/GMXSerializer.cpp \
-    Models/ResourceItemModel/ResourceProxyModel.cpp
+	Models/ResourceItemModel/ResourceProxyModel.cpp \
+	Managers/PluginManager.cpp \
+	Managers/GlobalManager.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------

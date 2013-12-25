@@ -31,6 +31,10 @@
 
 namespace NGM
 {
+	namespace Resource
+	{
+		class Serializer;
+	}
 	namespace Manager
 	{
 		class WindowManager;
@@ -63,6 +67,15 @@ namespace NGM
 			 *	false to add as a new tab.
 			******************************************************/
 			void resourceOpen(Model::ResourceBaseItem *resource, const bool &active = true);
+
+			/**************************************************//*!
+			*	@brief	Adds the editor to the current tab,
+			*			if the resource is not already open.
+			******************************************************/
+			void resourceAddEditor(Model::ResourceBaseItem *item,
+								   const Resource::Factory *factory,
+								   Resource::Serializer *serializer,
+								   const bool &active);
 
 			/**************************************************//*!
 			 *	@brief	Returns the tab index to the indicated

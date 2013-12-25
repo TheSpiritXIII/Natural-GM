@@ -62,18 +62,25 @@ namespace NGM
 			}
 			if (role == Qt::DecorationRole)
 			{
+				qDebug() << "Reload bro.";
 				ResourceBaseItem *item = static_cast<ResourceBaseItem*>(index.internalPointer());
 				if (item->toProjectItem() != nullptr)
 				{
-					return item->toProjectItem()->project->type->getIcon(item->toProjectItem()->resource->serialData);
+					if (item->toProjectItem()->project->type)
+					{
+						return item->toProjectItem()->project->type->getIcon(item->toProjectItem()->resource->serialData);
+					}
 				}
 				else if (item->toContentItem() != nullptr)
 				{
 					if (item->toContentItem()->resource->type)
 					{
-						return item->toContentItem()->resource->type->getIcon(item->toContentItem()->resource->serialData);
+						qDebug() << item->toContentItem()->resource->icon.isNull();
+
+						//qDebug() << item->toContentItem()->resource->type;
+						//return item->toContentItem()->resource->type->getIcon(item->toContentItem()->resource->serialData);
 					}
-					return QIcon();
+					return item->toContentItem()->resource->icon;
 				}
 				return (actionManager->icons[Manager::ActionManager::IconFolder]);
 			}
@@ -90,7 +97,7 @@ namespace NGM
 			return Qt::ItemIsEnabled;
 		}
 
-		QVariant ResourceItemModel::headerData(Qt::Orientation orientation, int role) const
+		QVariant ResourceItemModel::headerData(Qt::Orientation, int) const
 		{
 			return QVariant();
 		}

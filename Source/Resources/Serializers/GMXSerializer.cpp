@@ -24,8 +24,13 @@
  *		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *		THE SOFTWARE.
 **/
+#include <QFileInfo>
+#include <QMessageBox>
 #include "GMXSerializer.hpp"
+#include "ProjectManager.hpp"
+#include "Editor.hpp"
 #include "String.hpp"
+#include "Stack.hpp"
 #include "Set.hpp"
 #include "Map.hpp"
 #include <QDebug>
@@ -37,11 +42,22 @@ namespace NGM
 	{
 		using namespace rapidxml;
 
-		GMXSerializer::GMXSerializer() : Serializer() {}
+		GMXSerializer::GMXSerializer() : Serializer(SetWorkingDir) {}
 
 		void GMXSerializer::read(Editor *editor, Resource *resource, const SerializerOptions &options) const
 		{
+			if (resource->type->name == QStringLiteral("image"))
+			{
+				SerialData *data = resource->serialData->children["image"];
+				if (data && data->asVariant())
+				{
+					editor->setProperty("image", data->asVariant()->variant);
+				}
+			}
+			else if (resource->type->name == QStringLiteral("file"))
+			{
 
+			}
 		}
 
 		void GMXSerializer::write(Editor *editor, Resource *resource, const SerializerOptions &options) const
@@ -155,13 +171,17 @@ namespace NGM
 			rootNode->append_node(node);
 		}
 
-		bool GMXSerializer::structure(Model::ResourceProjectItem *item, QProgressBar *progressBar) const
+		bool GMXSerializer::structure(Model::ResourceProjectItem *item,
+			const Manager::ProjectManager *projectManager,
+			QProgressBar *progressBar) const
 		{
 			xml_document<> document;
 			QFile file(item->resource->location);
 			file.open(QFile::ReadOnly);
 			QByteArray data = file.readAll();
 			document.parse<0>(&data.data()[0]);
+
+			QDir::setCurrent(item->directory());
 
 			xml_node<> *node, *rootNode = document.first_node("assets");
 			xml_attribute<> *attr = rootNode->first_attribute();
@@ -219,7 +239,7 @@ namespace NGM
 			constantsResource->serialData = constantsData;
 			group[Constant]->append(constantsItem);
 
-			Map<String, Resource*> spriteMap, backgroundMap, objectMap, roomMap;
+			Map<String, Resource*> spriteMap, backgroundMap, objectMap, roomMap, pathMap;
 
 			int count = 0;
 			for (node = rootNode->first_node(); node != NULL; node = node->next_sibling())
@@ -238,20 +258,25 @@ namespace NGM
 					}
 					else if (strncmp("sprites", node->name(), 7) == 0)
 					{
-						Queue<Type*> q;
-						addSprite(group[Sprite], node, q);
+						addResourceM(group[Sprite], node, projectManager->getType("image"),
+									 "sprite", sizeof("sprite")-1, QStringLiteral(".sprite.gmx"),
+									 spriteMap);
+						//addSprite(group[Sprite], node, projectManager->getType("image"), item->resource->location.left(item->resource->location.lastIndexOf('/')));
 					}
 					else if (strncmp("scripts", node->name(), 7) == 0)
 					{
-						addScript(group[Script], node);
+						addResource(group[Script], node, projectManager->getType("file"),
+									"script", 0);
 					}
 					else if (strncmp("shaders", node->name(), 7) == 0)
 					{
-						addShader(group[Shader], node);
+						addResource(group[Shader], node, projectManager->getType("file"),
+									"shader", 0);
 					}
 					else if (strncmp("objects", node->name(), 9) == 0)
 					{
-						addObject(group[Object], node);
+						addResource(group[Object], node, projectManager->getType("gmobject"),
+									"object", QStringLiteral(".object.gmx"));
 					}
 				}
 				else if (node->name_size() == 9)
@@ -262,7 +287,8 @@ namespace NGM
 					}
 					else if (strncmp("timelines", node->name(), 9) == 0)
 					{
-						addTimeline(group[Timeline], node);
+						addResource(group[Timeline], node, projectManager->getType("timeline"),
+									"timeline", QStringLiteral(".timeline.gmx"));
 					}
 					else if (strncmp("constants", node->name(), 9) == 0)
 					{
@@ -295,15 +321,18 @@ namespace NGM
 				{
 					if (strncmp("paths", node->name(), 5) == 0)
 					{
-						addPath(group[Path], node);
+						addResource(group[Path], node, projectManager->getType("gmpath"),
+									"path", QStringLiteral(".path.gmx"));
 					}
 					else if (strncmp("fonts", node->name(), 5) == 0)
 					{
-						addFont(group[Font], node);
+						addResource(group[Font], node, projectManager->getType("fontgroup"),
+									"font", QStringLiteral(".font.gmx"));
 					}
 					else if (strncmp("rooms", node->name(), 5) == 0)
 					{
-						addRoom(group[Room], node);
+						addResource(group[Room], node, projectManager->getType("gmroom"),
+									"room", QStringLiteral(".room.gmx"));
 					}
 				}
 				else if (node->name_size() == 13 && strncmp("NewExtensions", node->name(), 13) == 0)
@@ -312,7 +341,8 @@ namespace NGM
 				}
 				else if (node->name_size() == 6 && strncmp("sounds", node->name(), 6) == 0)
 				{
-					addSound(group[Sound], node);
+					addResource(group[Sound], node, projectManager->getType("audio"),
+								"sound", QStringLiteral(".sound.gmx"));
 				}
 				else if (node->name_size() == 11 && strncmp("backgrounds", node->name(), 11) == 0)
 				{
@@ -378,7 +408,7 @@ namespace NGM
 				i.second->serialData->children["object_cache"] = serialResource;
 				i.second->serialData->children["background_cache"] = serialResource;
 
-				if (~item->settings & IsPreloaded)
+				//if (~item->settings & IsPreloaded)
 				{
 					QFile room(directory+i.second->location);
 					room.open(QFile::ReadOnly);
@@ -416,7 +446,7 @@ namespace NGM
 		}
 
 		void GMXSerializer::addSprite(Model::ResourceGroupItem *item, xml_node<> *node,
-			const Queue<Type*> &type, const SerializerOptions &options) const
+			const Type *type, QString path, const SerializerOptions &options) const
 		{
 			for (node = node->first_node(); node; node = node->next_sibling())
 			{
@@ -424,7 +454,13 @@ namespace NGM
 				{
 					if (node->name()[6] != 's')
 					{
-						Resource *resource = new Resource(0, 0, 0);
+						//path.append("/sprites/");
+						//path.append(QString::fromUtf8(&node->value()[8], node->value_size()-8));
+						//path.append(QStringLiteral(".sprite.gmx"));
+						path = QString::fromUtf8(&node->value()[0], node->value_size());
+						path.append(".sprite.gmx");
+						qDebug() << path;
+						Resource *resource = new Resource(type, path, Resource::IsFilename);
 						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[8]));
 						item->append(content);
 
@@ -501,6 +537,7 @@ namespace NGM
 						{
 							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
 							{
+								//if (ErrorMessageBox::abort(QStringLiteral("GMX Serializer: ")%
 								qWarning() << "GMX Serializer: background: Unknown group attribute found.";
 							}
 							name = attr->value();
@@ -522,338 +559,285 @@ namespace NGM
 			}
 		}
 
-		void GMXSerializer::addSound(Model::ResourceGroupItem *item, xml_node<> *node) const
+		// Sprite, Background, Path, Object, Room
+		bool GMXSerializer::addResourceM(Model::ResourceGroupItem *item,
+			xml_node<> *node, const Type *type, const char *literal,
+			const size_t &len, const QString &extension,
+			Map<String, Resource*> &map) const
 		{
-			for (node = node->first_node(); node; node = node->next_sibling())
+			QString name;
+			Resource *resource;
+			Model::ResourceGroupItem *group;
+			Model::ResourceContentItem *content;
+			xml_attribute<> *attr;
+			xml_document<> document;
+			SerialObject *serialObject;
+
+			Stack<Pair<Model::ResourceGroupItem*, xml_node<>*>> stack;
+			stack.push(Pair<Model::ResourceGroupItem*, xml_node<>*>(item, node));
+
+			while (!stack.empty())
 			{
-				if (strncmp("sound", node->name(), 5) == 0)
+				item = stack.top().first;
+				node = stack.top().second;
+				stack.pop();
+
+				for (node = node->first_node(); node; node = node->next_sibling())
 				{
-					if (node->name()[5] != 's')
+					if (strncmp(literal, node->name(), len) == 0)
 					{
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[6]));
-						item->append(content);
+						if (node->name()[strlen(literal)] != 's' && node->name_size() == len)
+						{
+							name = QString::fromUtf8(&node->value()[0], node->value_size());
+							resource = new Resource(type, name+extension, Resource::IsFilename);
+							name = name.right(len+1);
+							content = new Model::ResourceContentItem(resource, name);
+							map.insert(Pair<String, Resource*>(String(&node->value()[len+1],
+								node->value_size()-len-1), resource));
+
+							serialObject = new SerialObject();
+							resource->serialData = serialObject;
+
+							if (literal == (char*)"sprite")
+							{
+								QString projectDir = QDir::currentPath();
+								QFile file(resource->location);
+								file.open(QFile::ReadOnly);
+								QByteArray data = file.readAll();
+								document.parse<0>(&data.data()[0]);
+
+								xml_node<> *sprite = document.first_node("sprite");
+								sprite = sprite->first_node("frames");
+								sprite = sprite->first_node();
+
+								name = QDir::cleanPath(resource->location);
+								QDir::setCurrent(name.left(name.lastIndexOf('/')));
+								qDebug() << QDir::currentPath();
+								QPixmap *pixmap = new QPixmap(QString::fromUtf8(&sprite->value()[0], sprite->value_size()));
+
+								Vector<QPixmap*> *imagesVector = new Vector<QPixmap*>;
+								imagesVector->push_back(pixmap);
+								SerialVariant *imagesVariant = new SerialVariant();
+								imagesVariant->variant.setPixmapVec(imagesVector);
+								serialObject->children["images"] = imagesVariant;
+
+								resource->icon = QIcon(pixmap->scaled(16, 16));
+								QDir::setCurrent(projectDir);
+
+								serialObject->children["object_cache"] = new SerialResource();
+							}
+							else if (literal == "object")
+							{
+
+							}
+							else if (literal == "background")
+							{
+								QString projectDir = QDir::currentPath();
+								QFile file(resource->location);
+								file.open(QFile::ReadOnly);
+								QByteArray data = file.readAll();
+								document.parse<0>(&data.data()[0]);
+
+								xml_node<> *image = document.first_node("background");
+								image = image->first_node("data");
+
+								name = QDir::cleanPath(resource->location);
+								QDir::setCurrent(name.left(name.lastIndexOf('/')));
+								QPixmap *pixmap = new QPixmap(QString::fromUtf8(&image->value()[0], image->value_size()));
+
+								SerialVariant *imagesVariant = new SerialVariant();
+								imagesVariant->variant.setPixmap(pixmap);
+								serialObject->children["image"] = imagesVariant;
+
+								resource->icon = QIcon(pixmap->scaled(16, 16));
+								QDir::setCurrent(projectDir);
+							}
+							else if (literal == "room")
+							{
+
+							}
+							else if (literal =="path")
+							{
+
+							}
+							else
+							{
+								if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: "
+										"Unsupported resource reference literal loading found: ") +
+										QString::fromUtf8(literal, len-1),
+										QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
+									{
+
+									}
+							}
+							item->append(content);
+						}
+						else if (node->name_size() == len+1)
+						{
+							attr = node->first_attribute();
+							while(attr != nullptr)
+							{
+								if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
+								{
+									if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+											QString::fromUtf8(literal, len-1) +
+											QStringLiteral(": Unknown group attribute found: ") +
+											QString::fromUtf8(attr->name(), attr->name_size()),
+											QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
+									{
+										return false;
+									}
+								}
+								name = attr->value();
+								attr = attr->next_attribute();
+							}
+							if (name.isEmpty())
+							{
+								if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+									QString::fromUtf8(literal, len-1) +
+									QStringLiteral(": Required attribute \"name\" not found."),
+									QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
+								{
+									return false;
+								}
+							}
+							group = new Model::ResourceGroupItem(name);
+							item->append(group);
+							stack.push(Pair<Model::ResourceGroupItem*, xml_node<>*>(group, node));
+						}
+						else
+						{
+							if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+								QString::fromUtf8(literal, len-1) +
+								QStringLiteral(": Unknown node type found: ") +
+								QString::fromUtf8(node->name(), node->name_size()),
+								QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
+							{
+								return false;
+							}
+						}
 					}
 					else
 					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
+						if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+							QString::fromUtf8(literal, len-1) +
+							QStringLiteral(": Unknown node type found: ") +
+							QString::fromUtf8(node->name(), node->name_size()),
+							QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
 						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: sound: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
+							return false;
 						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: sound: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
 					}
 				}
-				else
-				{
-					qWarning() << "GMX Serializer: sound: Unknown child type: " << node->name();
-				}
 			}
+			return true;
 		}
 
-		void GMXSerializer::addPath(Model::ResourceGroupItem *item, xml_node<> *node) const
+		bool GMXSerializer::addResource(Model::ResourceGroupItem *item,
+			xml_node<> *node, const Type *type, const char literal[],
+			const QString &extension) const
 		{
-			for (node = node->first_node(); node; node = node->next_sibling())
-			{
-				if (strncmp("path", node->name(), 4) == 0)
-				{
-					if (node->name()[4] != 's')
-					{
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[6]));
-						item->append(content);
-					}
-					else
-					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
-						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: path: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
-						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: path: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
-					}
-				}
-				else
-				{
-					qWarning() << "GMX Serializer: path: Unknown child type: " << node->name();
-				}
-			}
-		}
+			size_t position	= (literal != "sound" ? 1 : 2);
+			size_t len = strlen(literal);
+			QString name;
+			Resource *resource;
+			Model::ResourceGroupItem *group;
+			Model::ResourceContentItem *content;
+			xml_attribute<> *attr;
 
-		void GMXSerializer::addScript(Model::ResourceGroupItem *item, xml_node<> *node) const
-		{
-			QString str;
-			for (node = node->first_node(); node; node = node->next_sibling())
-			{
-				if (strncmp("script", node->name(), 6) == 0)
-				{
-					if (node->name()[6] != 's')
-					{
-						str = QString(&node->value()[8]);
-						str.chop(4);
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, str);
-						item->append(content);
-					}
-					else
-					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
-						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: script: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
-						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: script: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
-					}
-				}
-				else
-				{
-					qWarning() << "GMX Serializer: script: Unknown child type: " << node->name();
-				}
-			}
-		}
+			Stack<Pair<Model::ResourceGroupItem*, xml_node<>*>> stack;
+			stack.push(Pair<Model::ResourceGroupItem*, xml_node<>*>(item, node));
 
-		void GMXSerializer::addShader(Model::ResourceGroupItem *item, xml_node<> *node) const
-		{
-			QString str;
-			for (node = node->first_node(); node; node = node->next_sibling())
+			while (!stack.empty())
 			{
-				if (strncmp("shader", node->name(), 6) == 0)
-				{
-					if (node->name()[6] != 's')
-					{
-						str = QString(&node->value()[8]);
-						str.chop(7);
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, str);
-						item->append(content);
-					}
-					else
-					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
-						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: shader: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
-						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: shader: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
-					}
-				}
-				else
-				{
-					qWarning() << "GMX Serializer: shader: Unknown child type: " << node->name();
-				}
-			}
-		}
+				item = stack.top().first;
+				node = stack.top().second;
+				stack.pop();
 
-		void GMXSerializer::addTimeline(Model::ResourceGroupItem *item, xml_node<> *node) const
-		{
-			for (node = node->first_node(); node; node = node->next_sibling())
-			{
-				if (strncmp("timeline", node->name(), 8) == 0)
+				for (node = node->first_node(); node; node = node->next_sibling())
 				{
-					if (node->name()[8] != 's')
+					if (strncmp(literal, node->name(), len) == 0)
 					{
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[10]));
-						item->append(content);
+						if (node->name()[strlen(literal)] != 's' && node->name_size() == len)
+						{
+							name = QString::fromUtf8(&node->value()[0], node->value_size());
+							resource = new Resource(type, name+extension, Resource::IsFilename);
+							if (literal == "script")
+							{
+								content = new Model::ResourceContentItem(resource, name.mid(len+2, name.size()-len-6));
+							}
+							else if (literal == "shader")
+							{
+								content = new Model::ResourceContentItem(resource, name.mid(len+2, name.size()-len-9));
+								SerialObject *serialData = new SerialObject();
+								serialData->attributes.insert(Pair<String, String>("type", "GLSL"));
+								resource->serialData = serialData;
+							}
+							else
+							{
+								content = new Model::ResourceContentItem(resource, name.right(len+position));
+							}
+							item->append(content);
+						}
+						else if (node->name_size() == len+1)
+						{
+							attr = node->first_attribute();
+							while(attr != nullptr)
+							{
+								if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
+								{
+									if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+										QString::fromUtf8(literal, len-1) +
+										QStringLiteral(": Unknown group attribute found: ") +
+										QString::fromUtf8(attr->name(), attr->name_size()),
+										QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
+									{
+										return false;
+									}
+								}
+								name = attr->value();
+								attr = attr->next_attribute();
+							}
+							if (name.isEmpty())
+							{
+								if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+									QString::fromUtf8(literal, len-1) +
+									QStringLiteral(": Required attribute \"name\" not found."),
+									QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
+								{
+									return false;
+								}
+							}
+							group = new Model::ResourceGroupItem(name);
+							item->append(group);
+							stack.push(Pair<Model::ResourceGroupItem*, xml_node<>*>(group, node));
+						}
+						else
+						{
+							if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+								QString::fromUtf8(literal, len-1) +
+								QStringLiteral(": Unknown node type found: ") +
+								QString::fromUtf8(node->name(), node->name_size()),
+								QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
+							{
+								return false;
+							}
+						}
 					}
 					else
 					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
+						if (QMessageBox::critical(0, "Error", QStringLiteral("GMX Serializer: ") +
+							QString::fromUtf8(literal, len-1) +
+							QStringLiteral(": Unknown node type found: ") +
+							QString::fromUtf8(node->name(), node->name_size()),
+							QMessageBox::Abort | QMessageBox::Ignore) == QMessageBox::Abort)
 						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: timeline: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
+							return false;
 						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: timeline: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
 					}
-				}
-				else
-				{
-					qWarning() << "GMX Serializer: timeline: Unknown child type: " << node->name();
 				}
 			}
-		}
-
-		void GMXSerializer::addFont(Model::ResourceGroupItem *item, xml_node<> *node) const
-		{
-			for (node = node->first_node(); node; node = node->next_sibling())
-			{
-				if (strncmp("font", node->name(), 4) == 0)
-				{
-					if (node->name()[4] != 's')
-					{
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[6]));
-						item->append(content);
-					}
-					else
-					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
-						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: font: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
-						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: font: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
-					}
-				}
-				else
-				{
-					qWarning() << "GMX Serializer: font: Unknown child type: " << node->name();
-				}
-			}
-		}
-
-		void GMXSerializer::addObject(Model::ResourceGroupItem *item, xml_node<> *node) const
-		{
-			for (node = node->first_node(); node; node = node->next_sibling())
-			{
-				if (strncmp("object", node->name(), 6) == 0)
-				{
-					if (node->name()[6] != 's')
-					{
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[8]));
-						item->append(content);
-					}
-					else
-					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
-						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: object: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
-						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: object: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
-					}
-				}
-				else
-				{
-					qWarning() << "GMX Serializer: object: Unknown child type: " << node->name();
-				}
-			}
-		}
-
-		void GMXSerializer::addRoom(Model::ResourceGroupItem *item, xml_node<> *node) const
-		{
-			for (node = node->first_node(); node; node = node->next_sibling())
-			{
-				if (strncmp("room", node->name(), 4) == 0)
-				{
-					if (node->name()[4] != 's')
-					{
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[6]));
-						item->append(content);
-					}
-					else
-					{
-						QString name;
-						xml_attribute<> *attr = node->first_attribute();
-						while(attr != nullptr)
-						{
-							if (strncmp("name", attr->name(), 4) != 0 && attr->value_size() != 4)
-							{
-								qWarning() << "GMX Serializer: room: Unknown group attribute found.";
-							}
-							name = attr->value();
-							attr = attr->next_attribute();
-						}
-						if (name.isEmpty())
-						{
-							qWarning() << "GMX Serializer: room: Group name undefined.";
-						}
-						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
-						addBackground(group, node);
-					}
-				}
-				else
-				{
-					qWarning() << "GMX Serializer: room: Unknown child type: " << node->name();
-				}
-			}
+			return true;
 		}
 
 		void GMXSerializer::addDatafile(Model::ResourceGroupItem *item, xml_node<> *node) const

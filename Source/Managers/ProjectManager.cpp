@@ -23,9 +23,10 @@
 **/
 #include "../Global.hpp"
 #include "ProjectManager.hpp"
+#include "Factory.hpp"
 #include <QMessageBox>
-#include "../Resources/Types/TextType.hpp"
 #include <QDebug>
+#include "TextEditor.hpp"
 #include "../Defines.hpp"
 using std::map;
 using std::pair;
@@ -39,12 +40,18 @@ namespace NGM
 	typedef std::pair<const QString, Resource::Project*> ProjectPair;
 	namespace Manager
 	{
+		bool operator<(NGM::Resource::Type* type, const QString &string)
+		{
+			return type->name < string;
+		}
+
 		ProjectManager::ProjectManager()
 		{
-			types["text/text"] = new NGM::Resource::TextType(QObject::tr("Plain Text"), QObject::tr("Plain Text"));
-			projects.insert(ProjectPair("GML Script", new NGM::Resource::Project(&textSerializer, types.begin()->second, GMOther, GMLScriptDesc, QStringList("*.gml"))));
-			files.insert(ProjectPair("Plain Text", new NGM::Resource::Project(&textSerializer, types.begin()->second, General, PlainTextDesc, QStringList("*.txt") << "*.*")));
-			projects.insert(ProjectPair(GMStudioProj, new NGM::Resource::Project(&gmxSerializer, types.begin()->second, GMStudio, GMStudioProjDesc, QStringList("*.project.gmx"))));
+			typeFile = new NGM::Resource::Type(QStringLiteral("file"), new Factory(QStringLiteral("Default Text Editor"), &TextEditor::create));
+			types.insert(typeFile);
+			projects.insert(ProjectPair("GML Script", new Resource::Project(&textSerializer, typeFile, GMOther, GMLScriptDesc, QStringList("*.gml"))));
+			files.insert(ProjectPair("Plain Text", new Resource::Project(&textSerializer, typeFile, General, PlainTextDesc, QStringList("*.txt") << "*.*")));
+			projects.insert(ProjectPair(GMStudioProj, new Resource::Project(&gmxSerializer, nullptr, GMStudio, GMStudioProjDesc, QStringList("*.project.gmx"))));
 		}
 
 		ProjectManager::~ProjectManager()
@@ -53,34 +60,62 @@ namespace NGM
 			{
 				delete i.second;
 			}
-			for (auto& i : types)
+			for (auto i : types)
 			{
-				delete i.second;
+				delete i;
 			}
 		}
 
-		void ProjectManager::registerProject(NGM::Resource::Serializer *serializer,
-			const QString &name, const QString &category, const QString &description,
-			const QStringList extensions, NGM::Resource::Type *type)
+		void ProjectManager::registerProject(Resource::Serializer *serializer,
+			const QString &name, const QString &category,
+			const QString &description, const QStringList extensions,
+			Resource::Type *type)
 		{
-			projects.insert(pair<QString, NGM::Resource::Project*>(name, new NGM::Resource::Project(serializer, type, category, description, extensions)));
+			projects.insert(pair<QString, Resource::Project*>(name,
+				new Resource::Project(serializer, type, category, description,
+				extensions)));
 		}
 
-		void ProjectManager::registerFileProject(NGM::Resource::Serializer *serializer,
-			const QString &name, const QString &category, const QString &description,
-			const QStringList extensions, NGM::Resource::Type *type)
+		void ProjectManager::registerFile(Resource::Serializer *serializer,
+			const QString &name, const QString &category,
+			const QString &description, const QStringList extensions,
+			Resource::Type *type)
 		{
-			files.insert(pair<QString, NGM::Resource::Project*>(name, new NGM::Resource::Project(serializer, type, category, description, extensions)));
+			files.insert(pair<QString, Resource::Project*>(name,
+				new Resource::Project(serializer, type, category, description,
+				extensions)));
 		}
 
-		void ProjectManager::registerType(const QString &name, Type *type)
+		void ProjectManager::registerType(const QString &name, Factory *factory, size_t size)
 		{
-			types.insert(pair<QString, NGM::Resource::Type*>(name, type));
+			Resource::Type *type = new Type(name);
+			if (types.find(type) != types.end())
+			{
+				type->addFactory(++factory);
+				while (size != 1)
+				{
+					type->addFactory(++factory);
+					--size;
+				}
+				types.insert(type);
+				delete type;
+			}
+			else
+			{
+				type->addFactory(factory);
+			}
 		}
 
 		const NGM::Resource::Type *ProjectManager::getType(const QString &name) const
 		{
-			return types.find(name)->second;
+			Resource::Type *type = new Type(name);
+			auto i = types.find(type);
+			delete type;
+			if (i != types.end())
+			{
+				return (*i);
+			}
+			return nullptr;
 		}
 
 		const multimap<const QString, Project*> &ProjectManager::getProjectList() const

@@ -1,10 +1,10 @@
 /**
- *  @file ResourceGroupItem.hpp
- *  @section License
+ *  @file GlobalManager.hpp
+ *	@section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *      This file is part of the Natural GM IDE.
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,96 +19,117 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_RESOURCEGROUPITEM__HPP
-#define _NGM_RESOURCEGROUPITEM__HPP
-#include "ResourceBaseItem.hpp"
-#include <vector>
+#ifndef NGM__GLOBALMANAGER__HPP
+#define NGM__GLOBALMANAGER__HPP
+#include <QApplication>
+#include <QLocalServer>
 
 namespace NGM
 {
-	namespace Model
+	namespace Manager
 	{
 		/**************************************************//*!
-		*	@brief An item that store children. This class can
-		*		   only be used with ResourceItemModel.
+		*	@brief	Contains all managers.
 		******************************************************/
-		class ResourceGroupItem : public ResourceBaseItem
+		class GlobalManager : public QApplication
 		{
 		public:
 
 			/**************************************************//*!
-			*	@brief Creates an item with the indicated name.
+			*	@brief	Application command flags.
 			******************************************************/
-			ResourceGroupItem(const QString &name) : ResourceBaseItem(name) {}
+			enum Flags
+			{
+				Close			=	0x01,	// Reqests to close the window.
+				MultiWindow		=	0x02,	// -m: Ignores shared memory.
+				SafeMode		=	0x04	// -s: Disables plugins.
+			};
 
 			/**************************************************//*!
-			*	@brief	Deallocates and removes all children.
+			*	@brief	Creates all other managers.
 			******************************************************/
-			virtual ~ResourceGroupItem();
+			GlobalManager(int &argc, char *argv[]);
 
 			/**************************************************//*!
-			*	@return The number of children this item contains.
+			*	@brief	Checks whether or not it has been
+			*			requested for this application to close.
 			******************************************************/
-			int count() const;
+			inline bool close()
+			{
+				return _flags & Close;
+			}
 
 			/**************************************************//*!
-			*	@return The child at the indicated row.
+			*	@brief	Returns the current active instance.
+			*			There should only be a single instance at
+			*			a time.
 			******************************************************/
-			ResourceBaseItem *child(int row);
-
-			std::vector<ResourceBaseItem*> take(int row, int count);
+			inline static GlobalManager *instance()
+			{
+				return _instance;
+			}
 
 			/**************************************************//*!
-			*	@return Appends an item to this item as a child. This is fast.
+			*	@brief	Returns the window manager instance.
 			******************************************************/
-			void append(ResourceBaseItem *item);
+			inline void *windowManager()
+			{
+				nullptr;
+			}
 
 			/**************************************************//*!
-			*	@return Appends multiple children at once. This is fast.
+			*	@brief	Returns the plugin manager instance.
 			******************************************************/
-			void append(std::vector<ResourceBaseItem*> items);
+			inline void *pluginManager()
+			{
+				nullptr;
+			}
 
 			/**************************************************//*!
-			*	@return Removes the indicated number of children from the back.
+			*	@brief	Returns the project manager instance.
 			******************************************************/
-			void pop(int count  = 1);
+			inline void *projectManager()
+			{
+				nullptr;
+			}
+
+		private slots:
 
 			/**************************************************//*!
-			*	@return Removes the children at the indicated rows.
+			*	@brief	Checks the message from another process.
 			******************************************************/
-			void remove(int row, int count = 1);
+			void getProcessMessage();
+
+		private:
 
 			/**************************************************//*!
-			*	@return Removes and returns the children at the indicated rows.
+			*	@brief	Returns false if the given flag is
+			*			invalid. If valid, the flag is applied.
+			*
+			* The command checker is NOT strict. It always
+			* depends on single character commands.
 			******************************************************/
-			//std::vector<ResourceBaseItem*> take(int row, int count = 1);
+			bool isValidFlag(const QString &flag);
 
 			/**************************************************//*!
-			*	@return Inserts a children at the indicated row.
+			*	@brief	Stores the current instance.
 			******************************************************/
-			void insert(ResourceBaseItem *item, int row);
+			static GlobalManager *_instance;
 
 			/**************************************************//*!
-			*	@return Inserts multiple children to the indicated row.
+			*	@brief	Stores a server, used for checking when
+			*			other processes are created.
 			******************************************************/
-			void insert(std::vector<ResourceBaseItem*> items, int row);
+			QLocalServer *server;
 
 			/**************************************************//*!
-			*	@return A safe case to a ResourceGroupItem. Returns this.
+			*	@brief	Stores all flags.
+			*	@see	Flags
 			******************************************************/
-			ResourceGroupItem *toGroupItem();
+			uint8_t _flags;
 
-		protected:
-
-			friend class ResourceBaseItem;
-
-			/**************************************************//*!
-			*	@brief Contains all of its children.
-			******************************************************/
-			std::vector<ResourceBaseItem*> _children;
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEGROUPITEM__HPP
+#endif // NGM__GLOBALMANAGER__HPP

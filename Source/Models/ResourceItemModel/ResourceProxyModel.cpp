@@ -20,12 +20,16 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ResourceProxyModel.hpp"
+#include "ResourceGroupItem.hpp"
+#include "ActionManager.hpp"
 #include <QFont>
 
 namespace NGM
 {
 	namespace Model
 	{
+		ResourceProxyModel::ResourceProxyModel(QTreeView *treeView) : _treeView(treeView) {}
+
 		QModelIndex ResourceProxyModel::mapFromSource(const QModelIndex & sourceIndex) const
 		{
 			return sourceIndex;
@@ -36,15 +40,27 @@ namespace NGM
 			return proxyIndex;
 		}
 
-		QVariant ResourceProxyModel::data(const QModelIndex & proxyIndex, int role = Qt::DisplayRole) const
+		QVariant ResourceProxyModel::data(const QModelIndex & proxyIndex, int role) const
 		{
+			if (role == Qt::DisplayRole && static_cast<ResourceGroupItem*>(
+					proxyIndex.internalPointer()) != nullptr)
+			{
+				if (_treeView->isExpanded(proxyIndex))
+				{
+					return QIcon();
+				}
+				else
+				{
+					//return (actionManager->icons[Manager::ActionManager::IconFolder]);
+				}
+			}
 			if (role == Qt::FontRole && proxyIndex.internalPointer() == _activeProjectItem)
 			{
 				QFont font;
 				font.setBold(true);
 				return font;
 			}
-			//return
+			return sourceModel()->data(proxyIndex, role);
 		}
 	}
 }

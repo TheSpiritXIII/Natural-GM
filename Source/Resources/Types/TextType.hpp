@@ -28,11 +28,29 @@
 #ifndef _NGM_TEXTTYPE__HPP
 #define _NGM_TEXTTYPE__HPP
 #include "Type.hpp"
+#include "Factory.hpp"
 
 namespace NGM
 {
 	namespace Resource
 	{
+		class TextFactory : public Factory
+		{
+		public:
+
+			/**************************************************//*!
+			*	@brief	Creates a factory with the indicated
+			*			name.
+			******************************************************/
+			TextFactory();
+
+			/**************************************************//*!
+			*	@brief	Creates the editor.
+			******************************************************/
+			Editor *create(const Model::ResourceProjectItem * const item,
+						   Widget::ResourceTab * const tab) const;
+		};
+
 		class TextType : public Type
 		{
 		public:
@@ -46,7 +64,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Sets up constant metadata.
 			******************************************************/
-			TextType(QString name, QString plural);
+			TextType();
 		};
 	}
 }

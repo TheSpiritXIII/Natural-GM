@@ -54,7 +54,9 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Creates the project tree structure.
 			******************************************************/
-			bool structure(Model::ResourceProjectItem *item, QProgressBar *progressBar) const;
+			bool structure(Model::ResourceProjectItem *item,
+				const Manager::ProjectManager *projectManager,
+				QProgressBar *progressBar) const;
 
 			/**************************************************//*!
 			*	@brief	Requests a restructure of the indicated item.

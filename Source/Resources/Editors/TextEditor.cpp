@@ -36,8 +36,10 @@ namespace NGM
 {
 	namespace Resource
 	{
+
 		TextEditor::TextEditor(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab) : Editor(item, tab)
 		{
+			qDebug() << "TAB INIT:" << tab;
 			state = CanPaste | CanZoomIn | CanZoomOut;
 			textEdit = new QsciScintilla(this);
 
@@ -107,10 +109,11 @@ namespace NGM
 			});
 			connect(textEdit, &QsciScintillaBase::SCN_MODIFIED, [this](int, int type, const char*, int, int, int, int, int, int, int)
 			{
+				qDebug() << "SCINTILLA TYPE:" << type;
 				if (type == QsciScintilla::SC_MOD_INSERTTEXT || QsciScintilla::SC_MOD_DELETETEXT)
 				{
-					qDebug() << "!Modified: " << !textEdit->SendScintilla(QsciScintilla::SCI_GETMODIFY);
-					qDebug() << "!State" << !(state & IsModified);
+					//qDebug() << "!Modified: " << !textEdit->SendScintilla(QsciScintilla::SCI_GETMODIFY);
+					//qDebug() << "!State" << !(state & IsModified);
 					if (!textEdit->SendScintilla(QsciScintilla::SCI_GETMODIFY) != !(state & IsModified))
 					{
 						state ^= IsModified;
@@ -182,8 +185,10 @@ namespace NGM
 
 		}
 
-		Editor *TextEditor::create(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab)
+		Editor *TextEditor::create(const Model::ResourceProjectItem * const item,
+								   Widget::ResourceTab * const tab)
 		{
+			qDebug() << "TAB CREATE:" << tab;
 			return new TextEditor(item, tab);
 		}
 
@@ -352,6 +357,7 @@ namespace NGM
 		{
 			textEdit->SendScintilla(QsciScintilla::SCI_SETSAVEPOINT);
 			state &= ~IsModified;
+			emit isModified(false);
 		}
 
 		void TextEditor::updateLineLength()

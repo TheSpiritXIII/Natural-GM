@@ -1,5 +1,5 @@
 /**
- *  @file Resource.hpp
+ *  @file ErrorMessageBox.hpp
  *	@section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
@@ -20,81 +20,65 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _NGM_RESOURCE_RESOURCE__HPP
-#define _NGM_RESOURCE_RESOURCE__HPP
-#include "../Global.hpp"
-#include "SerialData.hpp"
-#include <QByteArray>
-#include "Type.hpp"
-#include <QString>
-#include <string>
-#include <map>
-#include "Queue.hpp"
+#ifndef _NGM_ERRORMESSAGEBOX__HPP
+#define _NGM_ERRORMESSAGEBOX__HPP
+#include <QDialog>
 
 namespace NGM
 {
-	namespace Resource
+	namespace Widget
 	{
 		/**************************************************//*!
-		*	@brief	Holds status flags for resources.
-		*	@see	Resource::Status
+		*	@brief	An error box with with an abort and
+		*		ignore button.
+		*
+		*	Unlike QMessageBox, the user can add widgets.
 		******************************************************/
-		typedef uint8_t ResourceStatus;
-
-		/**************************************************//*!
-		*	@brief	Contains resource data.
-		******************************************************/
-		struct Resource
+		class ErrorMessageBox : public QDialog
 		{
-
+		public:
+		
 			/**************************************************//*!
-			*	@brief	Flags that describe the resources's status.
-			*
-			*	IsFilename is probably the most important flag.
-			*	If set, resources can be opened by general
-			*	editors (hex/text editors). The file is also
-			*	added to the file watcher when being opened.
+			*	@brief	Creates a generic error with the
+			*		indicated message displayed framed.
 			******************************************************/
-			enum Status
-			{
-				// Decides whether the resource's location is a true path.
-				IsFilename	=	0x01
-			};
-
-			/**************************************************//*!
-			*	@brief	Contains the status of the resource.
-			* 	@see	StatusFlags
-			******************************************************/
-			ResourceStatus status;
-
-			/**************************************************//*!
-			*	@brief	The type identifier of the resource.
-			******************************************************/
-			const Type * const type;
-
-			/**************************************************//*!
-			*	@brief	Holds all resource data.
-			******************************************************/
-			SerialObject *serialData;
-
-			/**************************************************//*!
-			*	@brief	Stores the file location of the
-			*			resource. The status should have an
-			* 			IsModified flag set if the location
-			*			is set.
-			******************************************************/
-			QString location;
+			ErrorMessageBox(const QString *message, QWidget *parent = 0);
 			
-			QIcon icon;
-
 			/**************************************************//*!
-			*	@brief	Initializes the resource.
+			*	@brief	Creates the message box and returns
+			*		whether there the abort button was pressed.
 			******************************************************/
-			Resource(const Type * const type, QString location,
-				const ResourceStatus status = 0);
-
-		};
+			static bool abort(const QString *message);
+			
+			/**************************************************//*!
+			*	@brief	Sets the current added widget's
+			*			layout.
+			******************************************************/
+			void setLayout(QLayout *)
+			
+		private:
+		
+			/**************************************************//*!
+			*	@brief	The widget that added items are added to.
+			******************************************************/
+			QWidget *widget;
+			
+		signals:
+		
+			/**************************************************//*!
+			*	@brief		Indicates that the abort button was
+			*			pressed.
+			******************************************************/
+			abort();
+			
+			/**************************************************//*!
+			*	@brief	Indicates that either the ignore
+			*			button or the window was closed.
+			******************************************************/
+			ignore();
+			
+		}
 	}
 }
 
-#endif // _NGM_RESOURCE_RESOURCE__HPP
+#endif // _NGM_ERRORMESSAGEBOX_HPP 

@@ -23,20 +23,34 @@
 #ifndef _NGM_RESOURCEPROXYMODEL__HPP
 #define _NGM_RESOURCEPROXYMODEL__HPP
 #include <QAbstractProxyModel>
+#include <QTreeView>
 
 namespace NGM
 {
+	namespace Manager
+	{
+		class ActionManager;
+		class WindowManager;
+	}
 	namespace Model
 	{
 		class ResourceProjectItem;
 
 		/**************************************************//*!
 		*	@brief	A proxy model capable of storing the
-		*			current active project and bolds it.
+		*			current active project and bolds it. It
+		*			is also capable of switching the folder
+		*			icon on opened groups.
 		******************************************************/
 		class ResourceProxyModel : public QAbstractProxyModel
 		{
 		public:
+
+			/**************************************************//*!
+			*	@brief	Stores The current view. Only one view
+			*			is allowed per proxy model instance.
+			******************************************************/
+			ResourceProxyModel(QTreeView *treeView);
 
 			/**************************************************//*!
 			*	@brief	Required for subclassing.
@@ -71,12 +85,28 @@ namespace NGM
 				return _activeProjectItem;
 			}
 
+		protected:
+
+			/**************************************************//*!
+			*	@brief	The action manager for icons.
+			******************************************************/
+			static Manager::ActionManager *actionManager;
+
+			friend class WindowManager;
+
 		private:
 
 			/**************************************************//*!
 			*	@brief	The current active project index.
 			******************************************************/
 			const ResourceProjectItem *_activeProjectItem;
+
+			/**************************************************//*!
+			*	@brief	The current view. Only one view is
+			*			allowed per proxy model instance.
+			******************************************************/
+			const QTreeView *_treeView;
+
 		};
 	}
 }

@@ -30,6 +30,10 @@
 
 namespace NGM
 {
+	namespace Manager
+	{
+		class ProjectManager;
+	}
 	namespace Resource
 	{
 		class Editor;
@@ -48,12 +52,16 @@ namespace NGM
 			******************************************************/
 			enum Settings
 			{
+				// Requests the serializer to call save after write.
 				ResaveAll	=	0x01,
-				CanPreload		=	0x02,
-				CanMoveRoots	=	0x04,
-				CanRenameRoots	=	0x08,
-				PathResources	=	0x10,
-				CanBeTemporary	=	0x20
+				// Allows the user to move and rename root structures.
+				CanModifyRoots	=	0x02,
+				// Sorts items except roots automatically. They cannot be moved.
+				AutoSortItems	=	0x04,
+				// Does not let the user move items, even if not sorted.
+				NonMovableItems	=	0x08,
+				// Requests the serializer to set the working directory before read.
+				SetWorkingDir	=	0x10
 			};
 
 			/**************************************************//*!
@@ -61,8 +69,7 @@ namespace NGM
 			******************************************************/
 			enum Options
 			{
-				IsPreloaded		=	0x01,
-				DynamicIcons	=	0x02
+				DynamicIcons	=	0x01
 			};
 
 			/**************************************************//*!
@@ -83,7 +90,9 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Creates the project tree structure.
 			******************************************************/
-			virtual bool structure(Model::ResourceProjectItem *item, QProgressBar *progressBar) const = 0;
+			virtual bool structure(Model::ResourceProjectItem *item,
+				const Manager::ProjectManager *projectManager,
+				QProgressBar *progressBar) const = 0;
 
 			/**************************************************//*!
 			*	@brief	Requests a restructure of the indicated item.

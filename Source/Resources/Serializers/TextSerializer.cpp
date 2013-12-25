@@ -29,15 +29,18 @@ namespace NGM
 {
 	namespace Resource
 	{
-		TextSerializer::TextSerializer() : Serializer(CanPreload | CanBeTemporary)
+		TextSerializer::TextSerializer() : Serializer(0)
 		{
 			// Intentionally empty.
 		}
 
 		void TextSerializer::read(Editor *widget, Resource *resource, const SerializerOptions &options) const
 		{
+			qDebug() << "READ";
 			if (resource->status & Resource::IsFilename)
 			{
+				qDebug() << "READ2";
+				qDebug() << resource->location;
 				std::ifstream file;
 				file.open(resource->location.toLatin1(), std::ios::in);
 				std::string data;
@@ -51,7 +54,9 @@ namespace NGM
 				file.close();
 				/*QFile file(resource->location);
 				file.open(QIODevice::ReadOnly);
-				widget->setProperty("text", file.readAll());
+				QByteArray file.readAll();
+				Variant var(&.data()[0]);
+				widget->setProperty("text", var);
 				file.close();*/
 				return;
 			}
@@ -63,6 +68,7 @@ namespace NGM
 
 		void TextSerializer::write(Editor *widget, Resource *resource, const SerializerOptions &options) const
 		{
+			qDebug() << "WRITE";
 			if (resource->status & Resource::IsFilename)
 			{
 				QFile file(resource->location);
@@ -77,9 +83,12 @@ namespace NGM
 			//resource->serialData->attributes["text"] = &data;
 		}
 
-		bool TextSerializer::structure(Model::ResourceProjectItem *item, QProgressBar *progressBar) const
+		bool TextSerializer::structure(Model::ResourceProjectItem *item,
+			const Manager::ProjectManager *projectManager,
+			QProgressBar *progressBar) const
 		{
-			if (~item->resource->status & Resource::IsFilename)
+			qDebug() << "RESTRUCTURE" << item->resource->status;
+			if (!(item->resource->status & Resource::IsFilename))
 			{
 				QFile file(item->resource->location);
 				file.open(QIODevice::WriteOnly);

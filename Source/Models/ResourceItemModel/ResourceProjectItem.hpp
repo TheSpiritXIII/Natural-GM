@@ -28,6 +28,7 @@
 #include <set>
 #include <map>
 #include <string>
+#include <QDebug>
 
 namespace NGM
 {
@@ -52,12 +53,13 @@ namespace NGM
 			*	@brief Creates an item with the indicated name.
 			******************************************************/
 			ResourceProjectItem(NGM::Resource::Resource *resource, NGM::Resource::Project *project,
-								const QString &name, const uint8_t &settings) :
-				ResourceGroupItem(name), resource(resource), project(project), settings(settings)
+								const QString &filepath, const uint8_t &settings) :
+				ResourceGroupItem("Yes"), resource(resource), project(project), settings(settings)
 			{
-				int split = name.lastIndexOf('/');
-				file = name.right(name.size()-split);
-				dir = name.left(split);
+				int split = filepath.lastIndexOf('/')+1;
+				_name = filepath.right(filepath.size()-split);
+				dir = filepath.left(split);
+				qDebug() << dir;
 			}
 
 			const QString directory()
@@ -86,40 +88,6 @@ namespace NGM
 			ResourceProjectItem *toProjectItem()
 			{
 				return this;
-			}
-
-			std::set<ResourceContentItem*> findType(const QString &type)
-			{
-				/*auto compare = [](const ResourceContentItem* left, const ResourceContentItem *right)
-				{
-					return left->resource->type->name < right->resource->type->name;
-				};
-				std::set<ResourceContentItem*, decltype(compare)> types(compare);*/
-
-				std::set<ResourceContentItem*> types;
-
-				/*auto find = [&](ResourceGroupItem *group)
-				{
-					for (auto &i : _children)
-					{
-						ResourceContentItem *content = i->toResourceContentItem();
-						if (content != nullptr)
-						{
-							if (content->resource->type->name == type)
-							{
-								types.insert(content);
-							}
-						}
-						ResourceGroupItem *recursive = i->toResourceGroupItem();
-						if (recursive != nullptr)
-						{
-							//find(recursive);
-						}
-					}
-				};*/
-
-				//find(this);
-				return types;
 			}
 
 		private:

@@ -43,36 +43,24 @@ Natural GM supports custom icons. To create an icon theme, create a
 directory containing all of your icons and place them inside the
 _icons_ directory. If you do not supply certain icons, your users will
 only see text instead. Icons must be in .png format. Please see the
-default icon packages for examples of naming.
+default icon packages for examples of correct naming.
 
 
-Plugins
+Addons
 -------
 
-__NOTE:__ PLUGINS ARE NOT CURRENTLY FUNCTIONAL.
+__NOTE:__ Addons ARE NOT CURRENTLY FUNCTIONAL.
 
-Plugins are essentially libraries compiled in C++. If you would like
-it to interact with Qt, you must include the Qt library. A plugin must
-have at least one _getPluginInfo_ implemented or else it will not be
-laoded. Plugins are provided access with classes in NGM, to be able to
-add custom resource types, widgets, etc. The following are available
-functions that the plugin loader searches for:
+Addons are essentially libraries compiled in C++. There are two
+different types of addons that NGM is able to use: Tool Addons and
+Widget Addons. Tool Addons are addons that simply request a menu
+a tool button and can be compiled with any compiler. Widget Addons,
+on the other hand, are able to do more such as creating an entirely
+new editor, with the restriction that the addons must be compiled in
+the same compiler that NGM was compiled in.
 
 ```c++
-namespace NGM
-{
-	enum class Plugin
-	{
-		NAME			=	0,
-		AUTHOR			=	1,
-		DESCRIPTION		=	2
-	};
-}
-bool actionManager(NGM::Manager::ActionManager *manager);
-bool windowManager(NGM::Manager::WindowManager *manager);
-bool resourceManager(NGM::Manager::ResourceManager *manager);
-bool windowCreated(QMainWindow *window);
-const char* getPluginInfo(NGM::Plugin type);
+// To do.
 ```
 
 If you create a new resource or project type, icons will automatically
@@ -83,4 +71,4 @@ Translations
 ------------
 
 Translations will be available in the future via Qt Linguist. A
-basic translation file is provided in 
+basic translation file is provided as Untranslated.ts.

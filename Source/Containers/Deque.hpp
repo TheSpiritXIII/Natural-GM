@@ -1,5 +1,5 @@
 /**
- *  @file Queue.hpp
+ *  @file Deque.hpp
  *	@section License
  *
  *      Copyright (C) 2013-2014 Daniel Hrabovcak
@@ -19,11 +19,11 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef NGM__QUEUE__HPP
-#define NGM__QUEUE__HPP
-#include <queue>
+#ifndef NGM__DEQUE__HPP
+#define NGM__DEQUE__HPP
+#include <deque>
 namespace NGM
 {
-	template <class T> using Queue = std::queue<T>;
+	template <class T> using Deque = std::deque<T>;
 }
-#endif // NGM__QUEUE__HPP
+#endif // NGM__DEQUE__HPP

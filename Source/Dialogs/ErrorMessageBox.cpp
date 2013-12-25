@@ -1,10 +1,10 @@
 /**
- *  @file Queue.hpp
+ *  @file ErrorMessageBox.cpp
  *	@section License
  *
- *      Copyright (C) 2013-2014 Daniel Hrabovcak
+ *      Copyright (C) 2013 Daniel Hrabovcak
  *
- *      This file is part of the Natural GM IDE.
+ *      This file is a part of the Natural GM IDE.
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,11 +19,19 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef NGM__QUEUE__HPP
-#define NGM__QUEUE__HPP
-#include <queue>
+#include "ErrorMessageBox.hpp"
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+
 namespace NGM
 {
-	template <class T> using Queue = std::queue<T>;
+	namespace Widget
+	{
+		ErrorMessageBox(const QString *message, QWidget *parent = 0) : QDialog(parent)
+		{
+			QVBoxLayout *layout = new QVBoxLayout(this);
+			layout->addWidget(new QLabel(tr("Critical error detected:"));
+		}
+	}
 }
-#endif // NGM__QUEUE__HPP

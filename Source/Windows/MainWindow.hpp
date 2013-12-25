@@ -200,6 +200,11 @@ protected:
 		******************************************************/
 		void *commandWidget;
 
+		/**************************************************//*!
+		*	@brief	The current right clicked/selected item.
+		******************************************************/
+		Model::ResourceBaseItem *selectedItem;
+
 	private slots:
 
 		/**************************************************//*!
@@ -212,6 +217,13 @@ protected:
 		*			visibility changed.
 		******************************************************/
 		void heirarchyVisibilityChanged(bool visible);
+
+		/**************************************************//*!
+		*	@brief	Opens the current selected item using
+		*			the file editor from the specified
+		*			factory index.
+		******************************************************/
+		void openFileEditor(int index);
 
 	};
 }

@@ -81,7 +81,8 @@ namespace NGM
 			*	@param	item The parent root of the item that is
 			*			currently being edited.
 			******************************************************/
-			Editor(const Model::ResourceProjectItem * const projectItem, Widget::ResourceTab * const tab);
+			Editor(const Model::ResourceProjectItem * const projectItem,
+				   Widget::ResourceTab * const tab);
 
 			/**************************************************//*!
 			*	@brief	Destroys the widget and all children.
@@ -206,7 +207,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Returns the widget's current state.
 			******************************************************/
-			inline const uint8_t getState() const
+			inline const uint16_t &getState() const
 			{
 				return state;
 			}
@@ -255,7 +256,8 @@ namespace NGM
 			*	@brief	When a widget is moved, the parent tab
 			*			is required to be updated.
 			******************************************************/
-			friend void ResourceTab::moveWidget(const int &index, ResourceTab *resourceTab);
+			friend void ResourceTab::moveWidget(const int &index,
+												ResourceTab *resourceTab);
 
 		signals:
 

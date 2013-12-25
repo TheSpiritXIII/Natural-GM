@@ -29,9 +29,17 @@
 #include "ErrorLogger.hpp"
 #endif
 #include "WindowManager.hpp"
+#include "GlobalManager.hpp"
 
 int main(int argc, char *argv[])
 {
+	/* -- Future -- //
+	NGM::Manager::GlobalManager application(argc, argv);
+	if (application.close())
+	{
+		return false;
+	}
+	return application.exec();*/
 #ifdef NGM_LOG_TO_FILE
 	qInstallMessageHandler(NGM::Debug::messageHandler);
 #endif

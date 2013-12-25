@@ -27,14 +27,15 @@
 #include <QDebug>
 #include <QStandardItem>
 #include <QStandardItemModel>
-#include "../Models/BasicModel.hpp"
-#include "../Models/BasicItem.hpp"
 #include "ResourceProjectItem.hpp"
 #include "ResourceItemModel.hpp"
 #include <QStatusBar>
 #include <QItemDelegate>
 #include <QCloseEvent>
 #include <QMenu>
+#include "Factory.hpp"
+#include <QSignalMapper>
+#include "Editor.hpp"
 
 const auto DockMovable = QDockWidget::DockWidgetMovable;
 const auto DockClosable = QDockWidget::DockWidgetClosable;
@@ -164,18 +165,38 @@ namespace NGM
 			if (index.isValid())
 			{
 				QMenu menu;
-				Model::ResourceBaseItem *baseItem = reinterpret_cast<Model::ResourceBaseItem*>(index.internalPointer());
-				Model::ResourceProjectItem *projectItem = baseItem->toProjectItem();
+				Map<QAction*, int> actionFile, actionType;
+				selectedItem = reinterpret_cast<Model::ResourceBaseItem*>(heirarchyView->currentIndex().internalPointer());
+				Model::ResourceProjectItem *projectItem = selectedItem->toProjectItem();
 				if (projectItem != nullptr)
 				{
-					menu.addAction("Set as Active");
+					//menu.addAction("Set as Active");
 					menu.addAction("Close Project");
 				}
-				else
+				else if (selectedItem->toContentItem())
 				{
-					menu.addAction("Not implemented");
+					const Resource::Type *type = selectedItem->toContentItem()->resource->type;
+					qDebug() << "MADE IT THIS FAR";
+					qDebug() << (selectedItem->toContentItem()->resource->status & Resource::Resource::IsFilename);
+					qDebug() << (!type || (type && type->name != QStringLiteral("file")));
+					if ((selectedItem->toContentItem()->resource->status & Resource::Resource::IsFilename) &&
+						(!type || (type && type->name != QStringLiteral("file"))))
+					{
+						int c = 0;
+						for (auto &i : data->projectManager.fileType()->queue())
+						{
+							actionFile.insert(Pair<QAction*, int>(menu.addAction("Open with "+i->name), c++));
+						}
+					}
 				}
-				menu.exec(heirarchyView->mapToGlobal(point));
+				QAction *result = menu.exec(heirarchyView->mapToGlobal(point));
+				Map<QAction*, int>::iterator i = actionFile.find(result);
+				qDebug() << result;
+				if (i != actionFile.end())
+				{
+					qDebug() << "FOUND";
+					openFileEditor(i->second);
+				}
 			}
 		}
 	}
@@ -196,5 +217,19 @@ namespace NGM
 		statusLabel = nullptr;
 		delete statusProgressBar;
 		statusProgressBar = nullptr;
+	}
+
+	void MainWindow::openFileEditor(int index)
+	{
+		int c = 0;
+		for (auto &i : data->projectManager.fileType()->queue())
+		{
+			if (c++ == index)
+			{
+				resourceSplitter->resourceAddEditor(selectedItem, i,
+					data->projectManager.fileSerializer(), true);
+				break;
+			}
+		}
 	}
 }

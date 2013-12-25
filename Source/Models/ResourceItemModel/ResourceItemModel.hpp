@@ -66,9 +66,9 @@ namespace NGM
 			Qt::ItemFlags flags(const QModelIndex &index) const;
 
 			/**************************************************//*!
-			*	@return	The header data. (Required)
+			*	@return	The header data. Always empty. (Required)
 			******************************************************/
-			QVariant headerData(Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+			QVariant headerData(Qt::Orientation, int = Qt::DisplayRole) const;
 
 			/**************************************************//*!
 			*	@return	The item index of the indicated row and

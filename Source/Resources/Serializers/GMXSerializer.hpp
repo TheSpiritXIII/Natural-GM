@@ -29,6 +29,7 @@
 #define _NGM_GMXSERIALIZER__HPP
 #include "Serializer.hpp"
 #include "RapidXML.hpp"
+#include "Type.hpp"
 
 namespace NGM
 {
@@ -58,7 +59,9 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Creates the project tree structure.
 			******************************************************/
-			bool structure(Model::ResourceProjectItem *item, QProgressBar *progressBar) const;
+			bool structure(Model::ResourceProjectItem *item,
+				const Manager::ProjectManager *projectManager,
+				QProgressBar *progressBar) const;
 
 			/**************************************************//*!
 			*	@brief	Requests a restructure of the indicated item.
@@ -94,7 +97,7 @@ namespace NGM
 			*	@brief	Adds sprite items recrusively.
 			******************************************************/
 			void addSprite(Model::ResourceGroupItem *item, rapidxml::xml_node<> *node,
-				const Queue<Type*> &type, const SerializerOptions &options = 0) const;
+				const Type *type, QString path, const SerializerOptions &options = 0) const;
 
 			/**************************************************//*!
 			*	@brief	Adds background items recrusively.
@@ -102,9 +105,20 @@ namespace NGM
 			void addBackground(Model::ResourceGroupItem *item, rapidxml::xml_node<> *node) const;
 
 			/**************************************************//*!
-			*	@brief	Adds sound items recrusively.
+			*	@brief	Adds generic resource items recrusively.
+			*
+			*	A generic resource item is one who does not
+			*	require any default serial data (or one that
+			*	does not have the ability to use dynamic icon.
 			******************************************************/
-			void addSound(Model::ResourceGroupItem *item, rapidxml::xml_node<> *node) const;
+			bool addResource(Model::ResourceGroupItem *item,
+				rapidxml::xml_node<> *node, const Type *type,
+				const char literal[], const QString &extension) const;
+
+			bool addResourceM(Model::ResourceGroupItem *item,
+				rapidxml::xml_node<> *node, const Type *type,
+				const char *literal, const size_t &len,
+				const QString &extension, Map<String, Resource *> &map) const;
 
 			/**************************************************//*!
 			*	@brief	Adds path items recrusively.

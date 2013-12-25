@@ -22,6 +22,7 @@
 #pragma once
 #ifndef _NGM_WINDOWMANAGER_HPP
 #define _NGM_WINDOWMANAGER__HPP
+#include "PluginManager.hpp"
 #include <QApplication>
 #include <QSharedMemory>
 #include <QItemSelectionModel>
@@ -216,6 +217,8 @@ namespace NGM
 			friend class Widget::ResourceSplitter;
 
 		private:
+
+			PluginManager pluginManager;
 
 			/**************************************************//*!
 			*	@brief	Stores all created windows.

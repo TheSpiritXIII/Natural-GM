@@ -2,9 +2,9 @@
  *  @file ErrorLogger.hpp
  *	@section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *      This file is part of the Natural GM IDE.
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,9 +19,8 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_ERRORLOGGER__HPP
-#define _NGM_ERRORLOGGER__HPP
+#ifndef NGM__ERRORLOGGER__HPP
+#define NGM__ERRORLOGGER__HPP
 #include <QString>
 
 namespace NGM
@@ -36,4 +35,4 @@ namespace NGM
 	}
 }
 
-#endif // _NGM_ERRORLOGGER__HPP
+#endif // NGM__ERRORLOGGER__HPP

@@ -23,8 +23,9 @@
 #ifndef _NGM_RESOURCE_VARIANT__HPP
 #define _NGM_RESOURCE_VARIANT__HPP
 #include <cstdint>
-#include <QPixmap>
+#include <QIcon>
 #include <QImage>
+#include <QPixmap>
 #include "Vector.hpp"
 
 namespace NGM
@@ -60,7 +61,8 @@ namespace NGM
 				Pixmap		=	8,
 				Image		=	9,
 				PixmapVec	=	10,
-				ImageVec	=	11
+				ImageVec	=	11,
+				Icon		=	12
 			};
 
 			/**************************************************//*!
@@ -118,9 +120,20 @@ namespace NGM
 				imagevec_ = value;
 			}
 
+			inline void setIcon(QIcon *value)
+			{
+				_type = Icon;
+				icon_ = value;
+			}
+
 			inline char *charPtr()
 			{
 				return charptr_;
+			}
+
+			inline QIcon *icon()
+			{
+				return icon_;
 			}
 
 		private:
@@ -144,6 +157,7 @@ namespace NGM
 				QImage*				image_;
 				Vector<QPixmap*>*	pixmapvec_;
 				Vector<QImage*>*	imagevec_;
+				QIcon*				icon_;
 			};
 		};
 	}

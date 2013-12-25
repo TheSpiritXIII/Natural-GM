@@ -39,7 +39,8 @@ namespace NGM
 #ifdef NGM_CPP_SUPPORT_GOOD
 #error When C++11 support is good everywhere, optimizations must be made.
 #endif
-	const QString APPLICATION	=	"Natural GM 0.1.0";
+	const QString		NGM_APPLICATION_NAME		=	"Natural GM 0.1.0";
+	const QString		NGM_APPLICATION_KEY			=	QStringLiteral("Natural-GM-Application");
 }
 
 // Useful function pointer macro.

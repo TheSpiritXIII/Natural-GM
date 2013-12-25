@@ -125,6 +125,8 @@ namespace NGM
 					createProject(filename, projectType(filename));
 				}
 			}
+
+			pluginManager.load();
 		}
 
 		WindowManager::~WindowManager()
@@ -568,11 +570,13 @@ namespace NGM
 		{
 			if (QFile::exists(filename))
 			{
+				qDebug() << "Created normally.";
 				Resource::Resource *r = new Resource::Resource(project->type, filename, Resource::Resource::IsFilename);
-				Model::ResourceProjectItem *item = new Model::ResourceProjectItem(r, project, filename.right(filename.size()-filename.lastIndexOf('/')-1), 0);
+				qDebug() << "STATUS NOW:" << r->status;
+				Model::ResourceProjectItem *item = new Model::ResourceProjectItem(r, project, filename, 0);
 				heirarchy->append(item);
 				QProgressBar p;
-				project->serializer->structure(item, &p);
+				project->serializer->structure(item, &projectManager, &p);
 				return item;
 			}
 			return nullptr;
@@ -607,6 +611,7 @@ namespace NGM
 					return i.second;
 				}
 			}
+			return nullptr;
 		}
 	}
 }

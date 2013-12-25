@@ -123,12 +123,13 @@ namespace NGM
 			for(auto& i : project->types)
 			{
 				QString path = theme;
+				path.reserve(13+theme.size()+i->name.size());
 				path.append("/project/");
-				path.append(i.first);
+				path.append(i->name);
 				path.append(".png");
 				if (QFile::exists(path))
 				{
-					i.second->icon = QIcon(path);
+					i->icon = QIcon(path);
 				}
 			}
 		}

@@ -2,9 +2,9 @@
  *  @file AboutDialog.hpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *      This file is part of the Natural GM IDE.
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,9 +19,8 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_ABOUTDIALOG__HPP
-#define _NGM_ABOUTDIALOG__HPP
+#ifndef NGM__ABOUTDIALOG__HPP
+#define NGM__ABOUTDIALOG__HPP
 #include <QDialog>
 
 namespace NGM
@@ -39,8 +38,9 @@ namespace NGM
 			*	@brief	Creates the dialog with text.
 			******************************************************/
 			AboutDialog(QWidget *parent);
+
 		};
 	}
 }
 
-#endif // _NGM_ABOUTDIALOG__HPP
+#endif // NGM__ABOUTDIALOG__HPP

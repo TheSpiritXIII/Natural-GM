@@ -144,6 +144,7 @@ namespace NGM
 			{
 				QWidget *w = widget(index);
 				Resource::Editor *editor = static_cast<Resource::Editor*>(w);
+				qDebug() << editor;
 				if (editor != nullptr)
 				{
 					auto i = widgets.begin();
@@ -209,16 +210,20 @@ namespace NGM
 				project = item->toContentItem()->root();
 			}
 
-			Resource::Editor *widget = resource->type->widget(project, this);
+			Resource::Editor *widget = resource->type->create(project, this);
 
 			if (widget != nullptr)
 			{
-				project->project->serializer->read(widget, resource);
+				const Resource::Serializer *serializer = project->project->serializer;
+				if (serializer->settings & Resource::Serializer::SetWorkingDir)
+				{
+					QDir::setCurrent(project->directory());
+				}
+				serializer->read(widget, resource);
 				widget->initialize();
 
 				setCurrentIndex(addTab(widget, item->name()));
 				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(item, widget));
-				splitter->parentWidget->setWindowFilePath(tabText(currentIndex()));
 				return widget;
 			}
 			return nullptr;
@@ -226,6 +231,8 @@ namespace NGM
 
 		void ResourceTab::resourceSave(Resource::Editor *editor) const
 		{
+			qDebug() << "TEST 1";
+			qDebug() << widgets.size();
 			for (auto &i : widgets)
 			{
 				if (i.second == editor)
@@ -319,6 +326,7 @@ namespace NGM
 				ResourceSplitter::dragTab == nullptr &&
 				ResourceSplitter::highlightWidget == nullptr)
 			{
+				qDebug() << "ENTERED";
 				ResourceSplitter::highlightWidget = new HighlightWidget(splitter->parentWidget);
 				ResourceSplitter::highlightWidget->show();
 				dragMoveEvent(event);

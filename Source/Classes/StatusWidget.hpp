@@ -1,3 +1,4 @@
+// I don't know what this is for.
 #ifndef STATUSWIDGET_HPP
 #define STATUSWIDGET_HPP
 #include <QStatusBar>

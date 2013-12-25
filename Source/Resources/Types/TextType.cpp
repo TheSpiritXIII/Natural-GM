@@ -31,11 +31,17 @@ namespace NGM
 {
 	namespace Resource
 	{
-		Editor *TextType::widget(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab) const
+		TextFactory::TextFactory() : Factory(QObject::tr("Plain Text")) {}
+
+		Editor *TextFactory::create(const Model::ResourceProjectItem * const
+			item, Widget::ResourceTab * const tab) const
 		{
 			return new TextEditor(item, tab);
 		}
 
-		TextType::TextType(QString name, QString plural) : Type(name, plural) {}
+		TextType::TextType() : Type()
+		{
+			factories.push(new TextFactory());
+		}
 	}
 }

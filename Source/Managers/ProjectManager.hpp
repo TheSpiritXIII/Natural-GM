@@ -31,12 +31,14 @@
 #include "Project.hpp"
 #include "TextSerializer.hpp"
 #include "GMXSerializer.hpp"
+#include "Set.hpp"
 
 namespace NGM
 {
 	namespace Resource
 	{
 		class Type;
+		class Factory;
 	}
 	namespace Manager
 	{
@@ -72,8 +74,9 @@ namespace NGM
 			*	@param	extensions	A list of supported extensions.
 			******************************************************/
 			void registerProject(Resource::Serializer *serializer,
-				const QString &name, const QString &category, const QString &description,
-				const QStringList extensions, Resource::Type *type);
+				const QString &name, const QString &category,
+				const QString &description, const QStringList extensions,
+				Resource::Type *type);
 
 			/**************************************************//*!
 			*	@brief	Registers a file project type with the
@@ -86,15 +89,16 @@ namespace NGM
 			*			project type.
 			*	@param	extensions	A list of supported extensions.
 			******************************************************/
-			void registerFileProject(Resource::Serializer *serializer,
-				const QString &name, const QString &category, const QString &description,
-				const QStringList extensions, Resource::Type *type);
-
+			void registerFile(Resource::Serializer *serializer,
+				const QString &name, const QString &category,
+				const QString &description, const QStringList extensions,
+				Resource::Type *type);
 
 			/**************************************************//*!
 			*	@brief	Stores and adds a resource type.
 			******************************************************/
 			void registerType(const QString &name, Resource::Type *type);
+			void registerType(const QString &name, Resource::Factory *factory, size_t size = 0);
 
 			/**************************************************//*!
 			*	@brief	Returns the type with the specified name.
@@ -104,12 +108,15 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Returns a list of all registered projects.
 			******************************************************/
-			const std::multimap<const QString, Resource::Project*>& getProjectList() const;
+			const std::multimap<const QString, Resource::Project*>&
+				getProjectList() const;
 
 			/**************************************************//*!
-			*	@brief	Returns a list of all registered file projects.
+			*	@brief	Returns a list of all registered file
+			*			projects.
 			******************************************************/
-			const std::multimap<const QString, Resource::Project*>& getFileProjectList() const;
+			const std::multimap<const QString, Resource::Project*>&
+				getFileProjectList() const;
 
 			/**************************************************//*!
 			*	@return A map containing all projects in the
@@ -129,6 +136,25 @@ namespace NGM
 			******************************************************/
 			std::map<const QString, Resource::Project*> getFileProjectCategory(QString category, bool root) const;
 
+			/**************************************************//*!
+			*	@brief	Returns a type for editing file. These
+			*			types are useful for editing any files.
+			*			Ideally, this should contain text and
+			*			hex editors.
+			******************************************************/
+			Resource::Type *fileType()
+			{
+				return typeFile;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns a serializer that opens files.
+			******************************************************/
+			Resource::Serializer *fileSerializer()
+			{
+				return &textSerializer;
+			}
+
 		private:
 
 			/**************************************************//*!
@@ -146,12 +172,12 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Stores all registered types.
 			******************************************************/
-			std::map<const QString, Resource::Type*> types;
+			Set<Resource::Type*> types;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered types.
 			******************************************************/
-			std::map<const QString, std::queue<Resource::Type*>> typesQ;
+			Resource::Type *typeFile;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered projects.

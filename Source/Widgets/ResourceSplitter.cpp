@@ -27,6 +27,7 @@
 #include "Editor.hpp"
 #include <QMimeData>
 #include "TextEditor.hpp"
+#include "Factory.hpp"
 
 namespace NGM
 {
@@ -36,7 +37,7 @@ namespace NGM
 		HighlightWidget *ResourceSplitter::highlightWidget = nullptr;
 
 		ResourceSplitter::ResourceSplitter(Manager::WindowManager *windowManager, QWidget *parent) :
-			QSplitter(parent), windowManager(windowManager), parentWidget(parent), focusedEditor(nullptr)
+			QSplitter(parent), parentWidget(parent), windowManager(windowManager), focusedEditor(nullptr)
 		{
 			setChildrenCollapsible(false);
 			setAcceptDrops(true);
@@ -67,6 +68,44 @@ namespace NGM
 
 			connect(widget, &Resource::Editor::isModified, current, &ResourceTab::modifiedWidget);
 			connect(widget, &Resource::Editor::isFocused, current, &ResourceTab::focused);
+		}
+
+		void ResourceSplitter::resourceAddEditor(Model::ResourceBaseItem *item,
+			const Resource::Factory *factory, Resource::Serializer *serializer,
+			const bool &active)
+		{
+			if (count() == 0 || active == false)
+			{
+				current = new ResourceTab(this);
+				addWidget(current);
+				tabs.push_back(current);
+				current->end = ResourceTab::Left;
+			}
+			else
+			{
+				for (ResourceTab *i : tabs)
+				{
+					if (i->contains(item))
+					{
+						return;
+					}
+				}
+			}
+			qDebug() << current;
+			Resource::Editor *editor = factory->create(item->root(), current);
+			qDebug() << editor->getResourceTab();
+			qDebug() << "Setting new directory." << item->root()->directory();
+			QDir::setCurrent(item->root()->directory());
+			serializer->read(editor, item->toContentItem()->resource);
+
+			current->setCurrentIndex(current->addTab(editor, item->name()));
+			editor->initialize();
+			current->widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(item, editor));
+			qDebug() << current->widgets.size();
+			focusWidget(editor);
+
+			connect(editor, &Resource::Editor::isModified, current, &ResourceTab::modifiedWidget);
+			connect(editor, &Resource::Editor::isFocused, current, &ResourceTab::focused);
 		}
 
 		void ResourceSplitter::movePage(const int &index, ResourceSplitter *splitter, const uint8_t settings)
@@ -259,6 +298,7 @@ namespace NGM
 		{
 			if (event->mimeData()->hasFormat("natural-gm/tab-detach") && dragTab != nullptr && count() == 0)
 			{
+				qDebug() << "ENTERED";
 				highlightWidget = new HighlightWidget(parentWidget);
 				highlightWidget->setGeometry(geometry());
 				highlightWidget->show();

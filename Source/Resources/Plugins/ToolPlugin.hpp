@@ -1,0 +1,4 @@
+#ifndef TOOLPLUGIN_HPP
+#define TOOLPLUGIN_HPP
+
+#endif // TOOLPLUGIN_HPP

@@ -1,0 +1,4 @@
+#ifndef DOCKWIDGET_HPP
+#define DOCKWIDGET_HPP
+
+#endif // DOCKWIDGET_HPP

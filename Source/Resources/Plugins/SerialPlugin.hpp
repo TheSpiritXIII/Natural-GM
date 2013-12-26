@@ -1,0 +1,4 @@
+#ifndef SERIALPLUGIN_HPP
+#define SERIALPLUGIN_HPP
+
+#endif // SERIALPLUGIN_HPP

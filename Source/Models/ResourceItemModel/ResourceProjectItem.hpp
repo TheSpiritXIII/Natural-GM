@@ -57,7 +57,7 @@ namespace NGM
 				ResourceGroupItem("Yes"), resource(resource), project(project), settings(settings)
 			{
 				int split = filepath.lastIndexOf('/')+1;
-				_name = filepath.right(filepath.size()-split);
+				_text = filepath.right(filepath.size()-split);
 				dir = filepath.left(split);
 				qDebug() << dir;
 			}

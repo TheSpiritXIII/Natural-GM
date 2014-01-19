@@ -168,7 +168,7 @@ namespace NGM
 			fileLayout->setMargin(0);
 
 			fileLayout->addWidget(new QLabel(tr("Directory: "), this));
-			directoryEdit = new QLineEdit(settingManager->directory, this);
+			directoryEdit = new QLineEdit(settingManager->oldDirectory, this);
 			directoryEdit->setReadOnly(true);
 			fileLayout->addWidget(directoryEdit, 2);
 

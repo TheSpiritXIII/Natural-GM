@@ -23,6 +23,7 @@
 #include <QStringBuilder>
 #include <QMessageBox>
 #include <QDir>
+using NGM::Resource::Plugin;
 
 #include <QDebug>
 
@@ -30,7 +31,7 @@ namespace NGM
 {
 	namespace Manager
 	{
-		typedef Plugin *(*Load)();
+		typedef Resource::Plugin *(*Load)();
 
 		void PluginManager::load()
 		{
@@ -42,10 +43,10 @@ namespace NGM
 				loadPlugin(dir.absolutePath() % QStringLiteral("/") %
 						   i % QStringLiteral("/"));
 			}
-			for (auto &i : _libraries)
+			QHash<Plugin*, QLibrary*>::const_iterator i = _libraries.constBegin();
+			while (i != _libraries.constEnd())
 			{
-				qDebug() << "Poop";
-				i.plugin()->init();
+				i.key()->init(nullptr);
 			}
 		}
 
@@ -55,7 +56,7 @@ namespace NGM
 			if (file.exists())
 			{
 				// Size increased if successful.
-				size_t size = _libraries.size();
+				int size = _libraries.size();
 				loadPlugin(file.fileName());
 				if (size != _libraries.size())
 				{
@@ -65,12 +66,13 @@ namespace NGM
 			return false;
 		}
 
-		list<const Plugin *> PluginManager::plugins() const
+		QList<const Resource::Plugin *> PluginManager::plugins() const
 		{
-			list<const Plugin*> list;
-			for (auto &i : _libraries)
+			QList<const Resource::Plugin*> list;
+			QHash<Plugin*, QLibrary*>::const_iterator i = _libraries.constBegin();
+			while (i != _libraries.constEnd())
 			{
-				list.push_back(i.plugin());
+				list.push_back(i.key());
 			}
 			return list;
 		}
@@ -83,10 +85,11 @@ namespace NGM
 				Load function = reinterpret_cast<Load>(lib->resolve("plugin"));
 				if (function)
 				{
-					Plugin *plug = function();
+					Resource::Plugin *plug = function();
 					if (plug != nullptr)
 					{
-						_libraries.insert(PluginLibrary(plug, lib));
+						_libraries.insert(plug, lib);
+						//_libraries.insert(PluginLibrary(plug, lib));
 					}
 					else
 					{

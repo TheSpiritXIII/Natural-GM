@@ -28,7 +28,7 @@
 #ifndef _NGM_TEXTEDITOR__HPP
 #define _NGM_TEXTEDITOR__HPP
 #include "Editor.hpp"
-#include <Qsci/qsciscintilla.h>
+//#include <Qsci/qsciscintilla.h>
 #include <QComboBox>
 #include <QLabel>
 #include <QDebug>
@@ -156,7 +156,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	The editable widget.
 			******************************************************/
-			QsciScintillaBase *textEdit;
+			//QsciScintillaBase *textEdit;
 
 			/**************************************************//*!
 			*	@brief	Updates the line font metrics width.
@@ -185,14 +185,14 @@ namespace NGM
 
 			int lastPosition;
 
-			void setFont(const int &style, const char *family, const int &size, const int &weight, const bool &italic, const bool &underline)
+			/*void setFont(const int &style, const char *family, const int &size, const int &weight, const bool &italic, const bool &underline)
 			{
 				textEdit->SendScintilla(QsciScintilla::SCI_STYLESETFONT, style, family);
 				textEdit->SendScintilla(QsciScintilla::SCI_STYLESETSIZE, style, size);
 				textEdit->SendScintilla(QsciScintilla::SCI_STYLESETWEIGHT, style, weight);
 				textEdit->SendScintilla(QsciScintilla::SCI_STYLESETITALIC, style, italic);
 				textEdit->SendScintilla(QsciScintilla::SCI_STYLESETUNDERLINE, style, underline);
-			}
+			}*/
 		};
 	}
 }

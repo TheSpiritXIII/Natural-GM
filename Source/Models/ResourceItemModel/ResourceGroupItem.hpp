@@ -45,7 +45,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Deallocates and removes all children.
 			******************************************************/
-			virtual ~ResourceGroupItem();
+			~ResourceGroupItem();
 
 			/**************************************************//*!
 			*	@return The number of children this item contains.

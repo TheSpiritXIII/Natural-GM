@@ -34,6 +34,15 @@ using std::string;
 using std::multimap;
 using namespace NGM::Definition;
 
+
+NGM::Manager::ProjectManager::~ProjectManager()
+{
+	for (QSet<Resource::Project*>::iterator i = _projects.begin(); i != _projects.end(); ++i)
+	{
+		delete (*i);
+	}
+}
+
 namespace NGM
 {
 	using namespace Resource;
@@ -48,22 +57,25 @@ namespace NGM
 		ProjectManager::ProjectManager()
 		{
 			typeFile = new NGM::Resource::Type(QStringLiteral("file"), new Factory(QStringLiteral("Default Text Editor"), &TextEditor::create));
-			types.insert(typeFile);
-			projects.insert(ProjectPair("GML Script", new Resource::Project(&textSerializer, typeFile, GMOther, GMLScriptDesc, QStringList("*.gml"))));
-			files.insert(ProjectPair("Plain Text", new Resource::Project(&textSerializer, typeFile, General, PlainTextDesc, QStringList("*.txt") << "*.*")));
-			projects.insert(ProjectPair(GMStudioProj, new Resource::Project(&gmxSerializer, nullptr, GMStudio, GMStudioProjDesc, QStringList("*.project.gmx"))));
-		}
+			_types.insert(typeFile);
 
-		ProjectManager::~ProjectManager()
-		{
-			for (auto& i : projects)
-			{
-				delete i.second;
-			}
-			for (auto i : types)
-			{
-				delete i;
-			}
+			Project *project = new Resource::Project("GML Script", GMOther,
+				GMLScriptDesc, FileDetails(QStringList("*.gml")),
+				&textSerializer, typeFile, Resource::Project::FileType);
+			projects.insert(ProjectPair("GML Script", project));
+			_projects.insert(project);
+
+			project =  new Resource::Project("Plain Text", General,
+				PlainTextDesc, QStringList("*.txt"), &textSerializer,
+				typeFile, Resource::Project::FileType);
+			files.insert(ProjectPair("Plain Text", project));
+			_projects.insert(project);
+
+			project =  new Resource::Project(GMStudioProj ,GMStudio,
+				GMStudioProjDesc, FileDetails(QStringList("*.project.gmx")),
+				&gmxSerializer, nullptr);
+			projects.insert(ProjectPair(GMStudioProj, project));
+			_projects.insert(project);
 		}
 
 		void ProjectManager::registerProject(Resource::Serializer *serializer,
@@ -74,6 +86,8 @@ namespace NGM
 			projects.insert(pair<QString, Resource::Project*>(name,
 				new Resource::Project(serializer, type, category, description,
 				extensions)));
+			_projects.insert(new Resource::Project(name, category,
+				description, FileDetails(extensions), serializer, type));
 		}
 
 		void ProjectManager::registerFile(Resource::Serializer *serializer,
@@ -89,7 +103,7 @@ namespace NGM
 		void ProjectManager::registerType(const QString &name, Factory *factory, size_t size)
 		{
 			Resource::Type *type = new Type(name);
-			if (types.find(type) != types.end())
+			if (_types.find(type) != _types.end())
 			{
 				type->addFactory(++factory);
 				while (size != 1)
@@ -97,7 +111,7 @@ namespace NGM
 					type->addFactory(++factory);
 					--size;
 				}
-				types.insert(type);
+				_types.insert(type);
 				delete type;
 			}
 			else
@@ -109,9 +123,9 @@ namespace NGM
 		const NGM::Resource::Type *ProjectManager::getType(const QString &name) const
 		{
 			Resource::Type *type = new Type(name);
-			auto i = types.find(type);
+			auto i = _types.find(type);
 			delete type;
-			if (i != types.end())
+			if (i != _types.end())
 			{
 				return (*i);
 			}
@@ -166,6 +180,32 @@ namespace NGM
 				}
 			}
 			return p;
+		}
+
+		void ProjectManager::projectsByCategories
+			(QVector<QVector<Resource::Project*>> *list,
+			 const QStringList &categoryFilter) const
+		{
+			// TODO Add Filter.
+			bool added = false;
+			for (auto &i : _projects)
+			{
+				for (auto &j : *list)
+				{
+					if (j.front()->category == i->category)
+					{
+						added = true;
+						break;
+					}
+				}
+				if (!added)
+				{
+					QVector<Resource::Project*> subcategory;
+					subcategory.append(i);
+					list->append(subcategory);
+				}
+				added = false;
+			}
 		}
 	}
 }

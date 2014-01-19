@@ -232,7 +232,7 @@ namespace NGM
 			{
 				formats.append(i.first);
 				formats.append("( ");
-				for(QString j : i.second->extensions)
+				for(QString j : i.second->oldExtensions)
 				{
 					formats.append(j);
 					formats.append(" ");
@@ -466,13 +466,13 @@ namespace NGM
 							if (j.second->projectItem != project)
 							{
 								project = j.second->projectItem;
-								list += project->name();
+								list += project->text();
 								list += "*\n";
 							}
 							if (j.first != j.second->projectItem)
 							{
 								list += "   ";
-								list += j.first->name();
+								list += j.first->text();
 								list += "*\n";
 							}
 						}
@@ -586,7 +586,7 @@ namespace NGM
 		{
 			for (auto &i : projectManager.projects)
 			{
-				for (auto &j : (i.second->extensions))
+				for (auto &j : (i.second->oldExtensions))
 				{
 					if (j == "*.*")
 					{

@@ -1,8 +1,8 @@
 /**
- *  @file ProjectManager.hpp
- *  @section License
+ *  @file ProjectManager.cpp
+ *	@section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -19,20 +19,21 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_PROJECTMANAGER__HPP
-#define _NGM_PROJECTMANAGER__HPP
-#include <map>
-#include <string>
-#include <QIcon>
+#ifndef NGM__PROJECTMANAGER__HPP
+#define NGM__PROJECTMANAGER__HPP
 #include <QString>
+#include <QSet>
+
+#include <map>
+#include <QIcon>
 #include "Type.hpp"
 #include "../Global.hpp"
 #include "Project.hpp"
 #include "TextSerializer.hpp"
 #include "GMXSerializer.hpp"
-#include "Set.hpp"
 
+// Need to split Projects and Editors.
+// Needs to fix over half functions.
 namespace NGM
 {
 	namespace Resource
@@ -42,8 +43,66 @@ namespace NGM
 	}
 	namespace Manager
 	{
+		class IconManager;
 		class WindowManager;
 		class ActionManager;
+
+		/**************************************************//*!
+		*	@brief	Iterates through a set of project's
+		*			icons. Used for setting the icons.
+		******************************************************/
+		class ProjectIconIterator
+		{
+		public:
+
+			/**************************************************//*!
+			*	@brief	Creates a project icon iterator using
+			*			a project set iterator.
+			******************************************************/
+			ProjectIconIterator(const QSet<Resource::Project*>::iterator &i) :
+				_i(i) {}
+
+			/**************************************************//*!
+			*	@brief	Returns the name of the project at the
+			*			current position.
+			******************************************************/
+			const QString getName()
+			{
+				return (*_i)->name;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns the icon at the current position.
+			******************************************************/
+			QIcon *getIcon()
+			{
+				return &(*_i)->icon;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns whether or not the iterators
+			*			match.
+			******************************************************/
+			inline bool operator==(const QSet<Resource::Project*>::iterator &i) const
+			{
+				return _i == i;
+			}
+
+			/**************************************************//*!
+			*	@brief	Increments the iterator.
+			******************************************************/
+			inline void operator++()
+			{
+				++_i;
+			}
+
+		private:
+
+			/**************************************************//*!
+			*	@brief	Stores the project set iterator.
+			******************************************************/
+			QSet<Resource::Project*>::iterator _i;
+		};
 
 		/**************************************************//*!
 		*	@brief	Registers project types.
@@ -62,42 +121,22 @@ namespace NGM
 			******************************************************/
 			~ProjectManager();
 
-			/**************************************************//*!
-			*	@brief	Registers a project type with the
-			*			specified metadata.
-			*	@param	serializer The way the file is loaded.
-			*	@param	name The name of the project type.
-			*	@param	category The category of the project. You
-			*			can use "|" to add a subcategory.
-			*	@param	description A detailed description of the
-			*			project type.
-			*	@param	extensions	A list of supported extensions.
-			******************************************************/
+			///	DEPRECATED
 			void registerProject(Resource::Serializer *serializer,
 				const QString &name, const QString &category,
 				const QString &description, const QStringList extensions,
 				Resource::Type *type);
 
-			/**************************************************//*!
-			*	@brief	Registers a file project type with the
-			*			specified metadata.
-			*	@param	serializer The way the file is loaded.
-			*	@param	name The name of the project type.
-			*	@param	category The category of the project. You
-			*			can use "|" to add a subcategory.
-			*	@param	description A detailed description of the
-			*			project type.
-			*	@param	extensions	A list of supported extensions.
-			******************************************************/
+			///	DEPRECATED
 			void registerFile(Resource::Serializer *serializer,
 				const QString &name, const QString &category,
 				const QString &description, const QStringList extensions,
 				Resource::Type *type);
 
-			/**************************************************//*!
-			*	@brief	Stores and adds a resource type.
-			******************************************************/
+			///	DEPRECATED
 			void registerType(const QString &name, Resource::Type *type);
+
+			///	DEPRECATED
 			void registerType(const QString &name, Resource::Factory *factory, size_t size = 0);
 
 			/**************************************************//*!
@@ -105,35 +144,18 @@ namespace NGM
 			******************************************************/
 			const Resource::Type *getType(const QString &name) const;
 
-			/**************************************************//*!
-			*	@brief	Returns a list of all registered projects.
-			******************************************************/
+			///	DEPRECATED
 			const std::multimap<const QString, Resource::Project*>&
 				getProjectList() const;
 
-			/**************************************************//*!
-			*	@brief	Returns a list of all registered file
-			*			projects.
-			******************************************************/
+			///	DEPRECATED
 			const std::multimap<const QString, Resource::Project*>&
 				getFileProjectList() const;
 
-			/**************************************************//*!
-			*	@return A map containing all projects in the
-			*			indicated category.
-			*	@param	category The category you are looking for.
-			*	@param	root True if you wish to include
-			*			subcategories, false otherwise
-			******************************************************/
+			///	DEPRECATED
 			std::map<const QString, Resource::Project*> getProjectCategory(QString category, bool root) const;
 
-			/**************************************************//*!
-			*	@return A map containing all projects in the
-			*			indicated category.
-			*	@param	category The category to search.
-			*	@param	root True if you wish to include
-			*			subcategories, false otherwise
-			******************************************************/
+			///	DEPRECATED
 			std::map<const QString, Resource::Project*> getFileProjectCategory(QString category, bool root) const;
 
 			/**************************************************//*!
@@ -155,6 +177,32 @@ namespace NGM
 				return &textSerializer;
 			}
 
+			/**************************************************//*!
+			*	@brief	Returns all projects sorted into
+			*			different categories.
+			******************************************************/
+			void projectsByCategories
+				(QVector<QVector<Resource::Project*>> *list,
+				 const QStringList &categoryFilter) const;
+
+			/**************************************************//*!
+			*	@brief	Returns an icon iterator, starting at
+			*			the first project.
+			******************************************************/
+			inline ProjectIconIterator iconIterator()
+			{
+				return ProjectIconIterator(_projects.begin());
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns whether or not the project icon
+			*			iterator is at the end.
+			******************************************************/
+			inline bool iconIteratorEnd(const ProjectIconIterator &i)
+			{
+				return i == _projects.end();
+			}
+
 		private:
 
 			/**************************************************//*!
@@ -169,30 +217,31 @@ namespace NGM
 			******************************************************/
 			Resource::GMXSerializer gmxSerializer;
 
-			/**************************************************//*!
-			*	@brief	Stores all registered types.
-			******************************************************/
-			Set<Resource::Type*> types;
+			QSet<Resource::Type*> _types;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered types.
 			******************************************************/
 			Resource::Type *typeFile;
 
-			/**************************************************//*!
-			*	@brief	Stores all registered projects.
-			******************************************************/
+			///	DEPRECATED
 			std::multimap<const QString, Resource::Project*> projects;
 
-			/**************************************************//*!
-			*	@brief	Stores all registered file types.
-			******************************************************/
+			///	DEPRECATED
 			std::multimap<const QString, Resource::Project*> files;
 
+			/**************************************************//*!
+			*	@brief	Stores all registered project types.
+			******************************************************/
+			QSet<Resource::Project*> _projects;
+
+			///	DEPRECATED
 			friend class NGM::Manager::WindowManager;
+
+			///	DEPRECATED
 			friend class NGM::Manager::ActionManager;
 		};
 	}
 }
 
-#endif // _NGM_PROJECTMANAGER__HPP
+#endif // NGM__PROJECTMANAGER__HPP

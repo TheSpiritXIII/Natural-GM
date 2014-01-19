@@ -2,7 +2,7 @@
  *  @file SettingManager.hpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -19,31 +19,28 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef _NGM_SETTINGSMANAGER__HPP
-#define _NGM_SETTINGSMANAGER__HPP
-#include "../Global.hpp"
-#include <QColor>
-#include <QDir>
-#include <string>
-#include <map>
+#ifndef NGM__SETTINGSMANAGER__HPP
+#define NGM__SETTINGSMANAGER__HPP
+#include <QStringList>
+
+class QWidget;
 
 namespace NGM
 {
 	namespace Manager
 	{
+		class IconManager;
+
+		typedef uint8_t ProjectPreferences;
+
 		/**************************************************//*!
 		*	@brief	Holds global application settings.
 		******************************************************/
-		class SettingManager
+		struct SettingManager final
 		{
-		public:
 
-			SettingManager() : directory(QDir::homePath()+"/Documents/GameMaker/Projects") {}
-
-			/**************************************************//*!
-			*	@brief	Basic setting bits.
-			******************************************************/
-			enum Preferences
+			//! DEPRECATED
+			enum PreferencesDeprecated
 			{
 				ShowWelcome         =   0x0001,//0b0000000000000001,
 				NoResourceTabs      =   0x0002,//0b0000000000000010,
@@ -57,14 +54,10 @@ namespace NGM
 				CodeEdgeLine        =   0x0080,//0b0000000010000000,
 				CodeEdgeBack        =   0x0180,//0b0000000110000000,
 				UseDirectory		=	0x0200,//0b0000001000000000,
-				AddDirectory		=	0x0400,//0b0000010000000000,
 				PreloadData			=	0x0800,//0b0000100000000000,
 				UniqueIcons			=	0x1000//b0001000000000000
 			};
-
-			/**************************************************//*!
-			*	@brief	The code colors.
-			******************************************************/
+			//! DEPRECATED
 			enum CodeColor
 			{
 				FontColor					=	0,
@@ -118,22 +111,189 @@ namespace NGM
 				Reserved15					=	48
 			};
 
-			/**************************************************//*!
-			*	@brief	Contains basic settings.
-			******************************************************/
+			//! DEPRECATED
 			uint32_t settings;
 
-			/**************************************************//*!
-			*	@brief	Contains basic color settings
-			******************************************************/
-			QColor colors[48];
+			//! DEPRECATED
+			QString oldDirectory;
+
+
+
 
 			/**************************************************//*!
-			*	@brief	Stores the default directory search location.
+			*	@brief	Contains basic application settings.
 			******************************************************/
-			QString directory;
+			enum ProjectPreference
+			{
+				AddDirectory		=	0x04,	/*!< Whether or not new projects
+													should add directories. */
+				Descending			=	0x01,	/*!< Whether or not projects are
+													sorted descending. */
+				IconMode			=	0x02,	/*!< Whether or not projects are
+													shown in icon mode. */
+				ShowGroups			=	0x08,	/*!< Whether or not group based
+													project types are
+													displayed. */
+				ShowFiles			=	0x10,	/*!< Whether or not file based
+													project types are
+													displayed.*/
+				SetDefault			=	0x80	/*!< Hints the the selected
+													directory as default.
+													Unused in settings. */
+			};
+
+			/**************************************************//*!
+			*	@brief	Header IDs for the settings format.
+			******************************************************/
+			enum FileHeader : char
+			{
+				RecentFiles			=	0,
+				RecentFilesMax		=	1,
+				DefaultDirectory	=	2,
+				LastDirectory		=	3
+			};
+
+			/// DEPRECATED.
+			SettingManager();
+
+			/**************************************************//*!
+			*	@brief	Stores an icon manager, for loading its
+			*			icons later.
+			******************************************************/
+			SettingManager(IconManager *iconManager);
+
+			/**************************************************//*!
+			*	@brief	Saves all settings.
+			******************************************************/
+			~SettingManager();
+
+			/**************************************************//*!
+			*	@brief	Loads the application settings. If the
+			*			settings file is not found, defaults are
+			*			set. All directories are set as the
+			*			"Documents" user folder by default.
+			*	@param	projectManager The icon manager, for
+			*			loading the default icon theme.
+			******************************************************/
+			void load();
+
+			/**************************************************//*!
+			*	@brief
+			******************************************************/
+			void restoreWidget(QWidget *widget);
+
+			/**************************************************//*!
+			*	@brief	Contains the preferences for the project
+			*			dialog.
+			******************************************************/
+			ProjectPreferences projectPreferences;
+
+			/**************************************************//*!
+			*	@brief	Sets the max recent file size.
+			******************************************************/
+			inline void setRecentFilesMax(unsigned char max)
+			{
+				_recentFilesMax = max;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns the max number of recent files.
+			******************************************************/
+			inline unsigned char recentFilesMax() const
+			{
+				return _recentFilesMax;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns a list of recent files.
+			******************************************************/
+			inline const QStringList recentFiles() const
+			{
+				return _recentFiles;
+			}
+
+			/**************************************************//*!
+			*	@brief	Adds a new item to the front of the list.
+			*			When max items are reached, the last one
+			*			is removed.
+			******************************************************/
+			void addRecentFile(const QString &file);
+
+			/**************************************************//*!
+			*	@brief	Returns the default directory. This is
+			*			the directory that is displayed when
+			*			creating new project.
+			******************************************************/
+			inline QString defaultDirectory() const
+			{
+				return _defaultDirectory;
+			}
+
+			/**************************************************//*!
+			*	@brief	Sets the default directory. To be used
+			*			when a project is created.
+			******************************************************/
+			inline void setDefaultDirectory(const QString &directory)
+			{
+				_defaultDirectory = directory;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns the last directory that was used
+			*			to open a project.
+			******************************************************/
+			inline QString lastDirectory() const
+			{
+				return _lastDirectory;
+			}
+
+			/**************************************************//*!
+			*	@brief	Sets the last directory. To be used when
+			*			a file is opened.
+			******************************************************/
+			inline void setLastDirectory(const QString &directory)
+			{
+				_lastDirectory = directory;
+			}
+
+		private:
+
+			/**************************************************//*!
+			*	@brief	Stores the icon manager, for loading the
+			*			icon manager's theme.
+			******************************************************/
+			IconManager *_iconManager;
+
+			/**************************************************//*!
+			*	@brief	Contains the recently used projects that
+			*			the user opened.
+			******************************************************/
+			QStringList _recentFiles;
+
+			/**************************************************//*!
+			*	@brief	Stores the max number of recent files.
+			******************************************************/
+			unsigned char _recentFilesMax;
+
+			/**************************************************//*!
+			*	@brief	Stores the last directory that the user
+			*			has agreed to set as the default.
+			******************************************************/
+			QString _defaultDirectory;
+
+			/**************************************************//*!
+			*	@brief	Stores the last directory used to open a
+			*			project in.
+			******************************************************/
+			QString _lastDirectory;
+
+			/**************************************************//*!
+			*	@brief	Stores the style name. This is how
+			*			windows are styled.
+			******************************************************/
+			QString _styleName;
 		};
 	}
 }
 
-#endif // _NGM_SETTINGSMANAGER__HPP
+#endif // NGM__SETTINGSMANAGER__HPP

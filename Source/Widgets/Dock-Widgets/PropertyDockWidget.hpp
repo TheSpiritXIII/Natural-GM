@@ -21,7 +21,7 @@
 **/
 #ifndef NGM__PROPERTYDOCKWIDGET__HPP
 #define NGM__PROPERTYDOCKWIDGET__HPP
-#include <QDockWidget>
+#include "DockWidget.hpp"
 
 namespace NGM
 {
@@ -29,14 +29,29 @@ namespace NGM
 	{
 		class SerialData;
 	}
+	namespace Manager
+	{
+		class AppManager;
+	}
 	namespace Widget
 	{
 		/**************************************************//*!
 		*	@brief	A dock widget with executable commands
 		*			and settable properties.
 		******************************************************/
-		class PropertyDockWidget : public QDockWidget
+		class PropertyDockWidget : public DockWidget
 		{
+			Q_OBJECT
+
+		public:
+
+			PropertyDockWidget(Manager::AppManager *manager, QWidget *parent = 0,
+				Qt::WindowFlags flags = 0) : DockWidget(parent, flags), manager(manager) {}
+
+			PropertyDockWidget(Manager::AppManager *manager, const QString &title,
+				QWidget *parent = 0, Qt::WindowFlags flags = 0) :
+				DockWidget(title, parent, flags), manager(manager) {}
+
 			/**************************************************//*!
 			*	@brief	Executes a command that is unique to
 			*			every dock widget with a parameter. It
@@ -47,16 +62,32 @@ namespace NGM
 
 			/**************************************************//*!
 			*	@brief	Sets the indicated property. Properties
-			*			are unique to each dock widget.
+			*			names are unique to each dock widget.
 			******************************************************/
 			virtual void setProperty(const QString &name,
-				Resource::SerialData *data = nullptr) = 0;
+				Resource::SerialData *data = nullptr)
+			{
+				Q_UNUSED(name);
+				Q_UNUSED(data);
+			}
 
 			/**************************************************//*!
 			*	@brief	Returns the property value of the
 			*			indicated name.
 			******************************************************/
-			virtual const Resource::SerialData *property(const QString &name) = 0;
+			virtual Resource::SerialData *property(const QString &name)
+			{
+				Q_UNUSED(name);
+				return nullptr;
+			}
+
+		protected:
+
+			/**************************************************//*!
+			*	@brief	Stores the global manager. Docks are
+			*			allowed to do whatever they want.
+			******************************************************/
+			Manager::AppManager *manager;
 
 		};
 	}

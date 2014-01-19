@@ -31,6 +31,8 @@
 #include <QEvent>
 #include <QMenu>
 
+// Issue - Add property table.
+// Missing - Add attribute calls, rather than property calls.
 namespace NGM
 {
 	namespace Resource
@@ -159,12 +161,14 @@ namespace NGM
 			virtual QWidget *preferences() const;
 
 			/**************************************************//*!
-			*	@brief	Returns the value of the indicated property.
+			*	@brief	Returns the value of the indicated
+			*			property.
 			******************************************************/
 			virtual Variant property(const char* property) const = 0;
 
 			/**************************************************//*!
-			*	@brief	Returns a list of all possible properties.
+			*	@brief	Returns a list of all possible
+			*			properties.
 			*
 			*	Some editors feature extendible properties. If
 			*	it does, then you can add any property regardless

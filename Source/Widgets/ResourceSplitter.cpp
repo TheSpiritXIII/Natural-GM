@@ -28,6 +28,7 @@
 #include <QMimeData>
 #include "TextEditor.hpp"
 #include "Factory.hpp"
+#include <QDir>
 
 namespace NGM
 {
@@ -98,7 +99,7 @@ namespace NGM
 			QDir::setCurrent(item->root()->directory());
 			serializer->read(editor, item->toContentItem()->resource);
 
-			current->setCurrentIndex(current->addTab(editor, item->name()));
+			current->setCurrentIndex(current->addTab(editor, item->text()));
 			editor->initialize();
 			current->widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(item, editor));
 			qDebug() << current->widgets.size();

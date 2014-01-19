@@ -21,141 +21,78 @@
 **/
 #ifndef NGM__PLUGIN__HPP
 #define NGM__PLUGIN__HPP
-#include <string>
-#include <list>
-#include <map>
-#include <QString>
-using std::string;
-using std::list;
-using std::map;
+#include "ToolPlugin.hpp"
 
 namespace NGM
 {
+	namespace Manager
+	{
+		class GlobalManager;
+	}
 	namespace Resource
 	{
-		class SerialData;
-	}
-
-	/**************************************************//*!
-	*	@brief	Manages a plugin interface.
-	******************************************************/
-	class Plugin
-	{
-	public:
+		/**************************************************//*!
+		*	@brief	A plugin function that gives access to
+		*			the global manager which is able to
+		*			access all other managers.
+		******************************************************/
+		typedef void *(*PluginMainFunc)(Manager::GlobalManager *manager);
 
 		/**************************************************//*!
-		*	@brief	Possible requests that can be requested
-		*			for information.
+		*	@brief	Manages a generic plugin interface.
+		*
+		* This interface is mainly for plugins that create
+		* widgets somewhere alongs its lifetime, usually
+		* being a new editor.
+		*
+		* This plugin must also be compiled with the same
+		* compiler that the
 		******************************************************/
-		enum Request
+		struct Plugin : ToolPlugin
 		{
-			Name			=	0, // The name of the plugin.
-			Version			=	1, // The version number.
-			Author			=	2, // The author of the plugin.
-			Website			=	3, // The website where the plugin is hosted.
-			Description		=	4, // A brief description of the plugin.
-			Contributors	=	5, // A list of contributors.
+			Plugin(const PluginRequestFunc request_,
+				   const PluginMainFunc init_,
+				   const PluginMainFunc destroy_,
+				   const float priority_ = 100,
+				   const SerialPluginFunc serialize_ = nullptr,
+				   const ToolPluginFunction * const functions_ = nullptr,
+				   const size_t functionSize_ = 1,
+				   const QString *dependencies_ = nullptr,
+				   const size_t dependencySize_ = 0) :
+				ToolPlugin(request_,
+						   serialize_,
+						   functions_,
+						   functionSize_,
+						   dependencies_,
+						   dependencySize_),
+				init(init_), destroy(destroy_), priority(priority_) {}
+
+			/**************************************************//*!
+			*	@brief	Called when the plugin is loaded.
+			******************************************************/
+			const PluginMainFunc init;
+
+			/**************************************************//*!
+			*	@brief	Called when the plugin is unloaded.
+			******************************************************/
+			const PluginMainFunc destroy;
+
+			/**************************************************//*!
+			*	@brief	The priority. A higher priority goes
+			*			first.
+			******************************************************/
+			const float priority;
+
+			/**************************************************//*!
+			*	@brief	Returns the higher priority. A plugin is
+			*			before another if it has a higher one.
+			******************************************************/
+			bool operator <(const Plugin &right)
+			{
+				return priority > right.priority;
+			}
 		};
-
-		/**************************************************//*!
-		*	@brief	A function pointer that plugins are able
-		*			to create and share.
-		******************************************************/
-		typedef Resource::SerialData *(*Function)(Resource::SerialData);
-
-		/**************************************************//*!
-		*	@brief	Called when the plugin is loaded.
-		******************************************************/
-		virtual void init() {}
-
-		/**************************************************//*!
-		*	@brief	Called when the plugin is unloaded.
-		******************************************************/
-		virtual void destroy() {}
-
-		/**************************************************//*!
-		*	@brief	Called when the user activates the
-		*			plugin.
-		******************************************************/
-		virtual void activate() {}
-
-		/**************************************************//*!
-		*	@brief	Extendible get function.
-		*	@see	Request
-		******************************************************/
-		virtual QString get(const Request &request) const = 0;
-
-		/**************************************************//*!
-		*	@brief	Returns whether or not this plugin can
-		*			be placed in the toolbar or menu.
-		******************************************************/
-		inline float priority() const
-		{
-			return _priority;
-		}
-
-		/**************************************************//*!
-		*	@brief	Returns the function of the indicated
-		*			name. Other plugins may call this.
-		******************************************************/
-		inline Function function(const string &name) const
-		{
-			return _functions.find(name)->second;
-		}
-
-		/**************************************************//*!
-		*	@brief	A list of all of the other plugin that
-		*			this plugin is dependent on.
-		******************************************************/
-		const list<QString> *dependencies() const
-		{
-			return &_dependencies;
-		}
-
-	protected:
-
-		/**************************************************//*!
-		*	@brief	Constructs a plugin with a priority.
-		******************************************************/
-		Plugin(const float &priority_ = 0) : _priority(priority_) {}
-
-		/**************************************************//*!
-		*	@brief	Constructs a plugin with the indicated
-		*			priority and dependencies
-		******************************************************/
-		Plugin(const float &priority_, const list<QString> &dependencies_) :
-			_priority(priority_), _dependencies(dependencies_) {}
-
-		/**************************************************//*!
-		*	@brief	Constructs a plugin with the indicated
-		*			priority, dependencies and functions.
-		******************************************************/
-		Plugin(const float &priority_, const list<QString> &dependencies_,
-			   const map<string, Function> &functions_) : _priority(priority_),
-			_dependencies(dependencies_), _functions(functions_) {}
-
-	private:
-
-		/**************************************************//*!
-		*	@brief	The priority of the plugin. A higher
-		*			priority means that the plugin is
-		*			initialized earlier.
-		******************************************************/
-		float _priority;
-
-		/**************************************************//*!
-		*	@brief	Stores any dependencies the plugin might
-		*			have.
-		******************************************************/
-		list<QString> _dependencies;
-
-		/**************************************************//*!
-		*	@brief	Stores internal functions that other
-		*			plugins may call.
-		******************************************************/
-		map<string, Function> _functions;
-
-	};
+	}
 }
 
 #endif // NGM__PLUGIN__HPP

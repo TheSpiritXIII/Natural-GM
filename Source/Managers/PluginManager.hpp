@@ -24,33 +24,11 @@
 #include <QFileSystemWatcher>
 #include "Plugin.hpp"
 #include <QLibrary>
-#include <Set.hpp>
+#include <QList>
+#include <QHash>
 
 namespace NGM
 {
-	/**************************************************//*!
-	*	@brief	Stores plugins and their repsective
-	*			libraries. To be used internally by the
-	*			the plugin manager.
-	*	@see	PluginManager
-	******************************************************/
-	struct PluginLibrary
-	{
-		PluginLibrary(Plugin *plugin, QLibrary *library) :
-			_plugin(plugin), _library(library) {}
-		inline Plugin *plugin() const
-		{
-			return _plugin;
-		}
-		bool operator<(const PluginLibrary &right) const
-		{
-			return _plugin->priority() < right._plugin->priority();
-		}
-	private:
-		Plugin *_plugin;
-		QLibrary *_library;
-	};
-
 	namespace Manager
 	{
 		/**************************************************//*!
@@ -76,19 +54,19 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Removes the indicated plugin.
 			******************************************************/
-			void remove(const Plugin *plugin);
+			void remove(const Resource::Plugin *plugin);
 
 			/**************************************************//*!
 			*	@brief	Generates a list of plugins.
 			******************************************************/
-			list<const Plugin*> plugins() const;
+			QList<const Resource::Plugin*> plugins() const;
 
 		private:
 
 			/**************************************************//*!
 			*	@brief	Stores all loaded libraries.
 			******************************************************/
-			Set<PluginLibrary> _libraries;
+			QHash<Resource::Plugin*, QLibrary*> _libraries;
 
 			/**************************************************//*!
 			*	@brief	Loads the indicated plugin.

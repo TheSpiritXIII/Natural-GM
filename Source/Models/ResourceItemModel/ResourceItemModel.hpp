@@ -2,7 +2,7 @@
  *  @file ResourceItemModel.hpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -19,11 +19,10 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_RESOURCEITEMMODEL__HPP
-#define _NGM_RESOURCEITEMMODEL__HPP
-#include <vector>
+#ifndef NGM__RESOURCEITEMMODEL__HPP
+#define NGM__RESOURCEITEMMODEL__HPP
 #include <QAbstractItemModel>
+#include <vector>
 
 namespace NGM
 {
@@ -168,9 +167,10 @@ namespace NGM
 			*	@brief	Manages generic icons.
 			******************************************************/
 			const Manager::ActionManager *actionManager;
+
 		};
 	}
 }
 
 
-#endif // _NGM_RESOURCEITEMMODEL__HPP
+#endif // NGM__RESOURCEITEMMODEL__HPP

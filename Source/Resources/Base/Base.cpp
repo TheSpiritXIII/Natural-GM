@@ -26,7 +26,6 @@
 #include "Resource.hpp"
 #include "Serializer.hpp"
 #include "ResourceTab.hpp"
-#include <QDebug>
 
 namespace NGM
 {
@@ -36,10 +35,11 @@ namespace NGM
 				(const Model::ResourceProjectItem * const,
 				 Widget::ResourceTab * const)) : name(name), create(create) {}
 
-		Project::Project(const Serializer * const serializer,const Type * const type,
+		Project::Project(const Serializer * const serializer, const Type * const type,
 				const QString category, const QString description, const QStringList extensions) :
-			serializer(serializer), type(type), category(category),
-			description(description), extensions(extensions) {}
+			category(category),
+			description(description), //oldExtensions(extensions),
+			serializer(serializer), type(type), projectType(GroupType) {}
 
 		Resource::Resource(const Type * const type, QString location,
 			const ResourceStatus status) : status(status), type(type),
@@ -70,10 +70,9 @@ namespace NGM
 		{
 			if (data)
 			{
-				qDebug() << data->children.size();
 				if (data->children.find("icon") != data->children.end())
 				{
-					return (*data->children.at("icon")->asVariant()->variant.icon());
+					return (*static_cast<SerialVariant*>(data->children.find("icon").value())->value.getIcon());
 				}
 			}
 			return icon;

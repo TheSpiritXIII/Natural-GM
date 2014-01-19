@@ -2,7 +2,7 @@
  *  @file ResourceProxyModel.hpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -19,9 +19,8 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_RESOURCEPROXYMODEL__HPP
-#define _NGM_RESOURCEPROXYMODEL__HPP
+#ifndef NGM__RESOURCEPROXYMODEL__HPP
+#define NGM__RESOURCEPROXYMODEL__HPP
 #include <QAbstractProxyModel>
 #include <QTreeView>
 
@@ -111,4 +110,4 @@ namespace NGM
 	}
 }
 
-#endif // _NGM_RESOURCEPROXYMODEL__HPP
+#endif // NGM__RESOURCEPROXYMODEL__HPP

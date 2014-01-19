@@ -58,7 +58,7 @@ namespace NGM
 
 			if (role == Qt::DisplayRole)
 			{
-				return static_cast<ResourceBaseItem*>(index.internalPointer())->name();
+				return static_cast<ResourceBaseItem*>(index.internalPointer())->text();
 			}
 			if (role == Qt::DecorationRole)
 			{

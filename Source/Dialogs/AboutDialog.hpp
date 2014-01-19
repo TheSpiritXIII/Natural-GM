@@ -37,7 +37,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Creates the dialog with text.
 			******************************************************/
-			AboutDialog(QWidget *parent);
+			AboutDialog(QWidget *parent = 0);
 
 		};
 	}

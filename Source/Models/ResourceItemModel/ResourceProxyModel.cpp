@@ -1,5 +1,5 @@
 /**
- *  @file ResourceProxyModel.hpp
+ *  @file ResourceProxyModel.cpp
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak

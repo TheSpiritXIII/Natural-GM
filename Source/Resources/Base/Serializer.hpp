@@ -105,6 +105,12 @@ namespace NGM
 			******************************************************/
 			const SerializerSettings settings;
 
+			/*CreateLayout
+			LoadLayout
+			SaveLayout
+			OpenResource
+			SaveResource*/
+
 		};
 	}
 }

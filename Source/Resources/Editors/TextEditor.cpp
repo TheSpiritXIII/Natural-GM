@@ -39,7 +39,7 @@ namespace NGM
 
 		TextEditor::TextEditor(const Model::ResourceProjectItem * const item, Widget::ResourceTab * const tab) : Editor(item, tab)
 		{
-			qDebug() << "TAB INIT:" << tab;
+			/*qDebug() << "TAB INIT:" << tab;
 			state = CanPaste | CanZoomIn | CanZoomOut;
 			textEdit = new QsciScintilla(this);
 
@@ -50,11 +50,11 @@ namespace NGM
 
 
 			int mask = textEdit->SendScintilla(QsciScintilla::SCI_GETMODEVENTMASK);
-				/*textEdit->SendScintilla(QsciScintilla::SCI_SETMODEVENTMASK, mask | QsciScintilla::SC_MOD_CHANGEFOLD);*/
+				//textEdit->SendScintilla(QsciScintilla::SCI_SETMODEVENTMASK, mask | QsciScintilla::SC_MOD_CHANGEFOLD);
 
 				textEdit->SendScintilla(QsciScintilla::SCI_SETFOLDFLAGS, QsciScintilla::SC_FOLDFLAG_LINEAFTER_CONTRACTED);
 
-				//textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINTYPEN, 2, (long)QsciScintilla::SC_MARGIN_SYMBOL);*/
+				//textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINTYPEN, 2, (long)QsciScintilla::SC_MARGIN_SYMBOL);
 				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINMASKN, 2, QsciScintilla::SC_MASK_FOLDERS);
 				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINSENSITIVEN, 2, 1);
 
@@ -177,7 +177,7 @@ namespace NGM
 			positionLabel = new QLabel("Ln: 0  Col: 0", this);
 			selectLabel = new QLabel("Sel: N/A", this);
 			typeComboBox = new QComboBox(this);
-			typeComboBox->addItem("Plain Text");
+			typeComboBox->addItem("Plain Text");*/
 		}
 
 		TextEditor::~TextEditor()
@@ -194,32 +194,32 @@ namespace NGM
 
 		void TextEditor::cut()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_CUT);
+			//textEdit->SendScintilla(QsciScintilla::SCI_CUT);
 		}
 
 		void TextEditor::copy()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_COPY);
+			//textEdit->SendScintilla(QsciScintilla::SCI_COPY);
 		}
 
 		void TextEditor::paste()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_PASTE);
+			//textEdit->SendScintilla(QsciScintilla::SCI_PASTE);
 		}
 
 		void TextEditor::undo()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_UNDO);
+			//textEdit->SendScintilla(QsciScintilla::SCI_UNDO);
 		}
 
 		void TextEditor::redo()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_REDO);
+			//textEdit->SendScintilla(QsciScintilla::SCI_REDO);
 		}
 
 		void TextEditor::zoomIn()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_ZOOMIN);
+			/*textEdit->SendScintilla(QsciScintilla::SCI_ZOOMIN);
 			if (textEdit->SendScintilla(QsciScintilla::SCI_GETZOOM, 0) == 20)
 			{
 				state &= ~CanZoomIn;
@@ -228,12 +228,12 @@ namespace NGM
 			if (~state & CanZoomOut)
 			{
 				emit canZoomOut(true);
-			}
+			}*/
 		}
 
 		void TextEditor::zoomOut()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_ZOOMOUT);
+			/*textEdit->SendScintilla(QsciScintilla::SCI_ZOOMOUT);
 			int smallest = -textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)+2;
 			int current = textEdit->SendScintilla(QsciScintilla::SCI_GETZOOM, 0);
 			if (smallest > -10 ? current == smallest : current)
@@ -245,12 +245,12 @@ namespace NGM
 			{
 				state &= CanZoomIn;
 				emit canZoomIn(true);
-			}
+			}*/
 		}
 
 		void TextEditor::zoom()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_SETZOOM, 0);
+			/*textEdit->SendScintilla(QsciScintilla::SCI_SETZOOM, 0);
 			if (~state & CanZoomIn)
 			{
 				emit canZoomIn(true);
@@ -258,7 +258,7 @@ namespace NGM
 			if (~state & CanZoomOut)
 			{
 				emit canZoomOut(true);
-			}
+			}*/
 		}
 
 		void TextEditor::search(uint8_t settings, QString data) const
@@ -268,34 +268,34 @@ namespace NGM
 
 		void TextEditor::status(Manager::WindowManager * const windowManager) const
 		{
-			windowManager->addStatusWidget(typeComboBox, 2);
+			/*windowManager->addStatusWidget(typeComboBox, 2);
 			windowManager->addStatusWidget(positionLabel, 1);
 			windowManager->addStatusWidget(selectLabel, 1);
 			windowManager->addStatusWidget(lengthLabel, 1);
 			typeComboBox->show();
 			positionLabel->show();
 			selectLabel->show();
-			lengthLabel->show();
+			lengthLabel->show();*/
 		}
 
 		Variant TextEditor::property(const char *property) const
 		{
-			if (strcmp(property, "text") == 0)
+			/*if (strcmp(property, "text") == 0)
 			{
 				return Variant(reinterpret_cast<char*>(textEdit->SendScintilla(QsciScintilla::SCI_GETCHARACTERPOINTER)));
 			}
 #ifdef NGM_DEBUG
 			qDebug() << "Widget: Unknown property '" << property << "'";
 #endif
-			return Variant();
+			return Variant();*/
 		}
 
 		void TextEditor::setProperty(const char *property, Variant &value)
 		{
-			if (strcmp(property, "text") == 0)
+			/*if (strcmp(property, "text") == 0)
 			{
 				textEdit->SendScintilla(QsciScintilla::SCI_SETTEXT, 0, reinterpret_cast<long>(value.charPtr()));
-			}
+			}*/
 		}
 
 		QStringList TextEditor::getPropertyList() const
@@ -305,26 +305,26 @@ namespace NGM
 
 		void TextEditor::initialize()
 		{
-			blockSignals(false);
+			/*blockSignals(false);
 			textEdit->blockSignals(false);
 			textEdit->SendScintilla(QsciScintilla::SCI_SETSAVEPOINT);
 			textEdit->SendScintilla(QsciScintilla::SCI_EMPTYUNDOBUFFER);
 			lengthLabel->setText("Len: "+QString::number(textEdit->SendScintilla(QsciScintilla::SCI_GETLENGTH)));
 			updateLineLength();
-			textEdit->installEventFilter(this);
+			textEdit->installEventFilter(this);*/
 		}
 
 		Editor *TextEditor::clone(Widget::ResourceTab *tab) const
 		{
-			TextEditor *editor = new TextEditor(projectItem, tab);
+			/*TextEditor *editor = new TextEditor(projectItem, tab);
 			editor->textEdit->SendScintilla(QsciScintilla::SCI_SETDOCPOINTER, textEdit->SendScintilla(QsciScintilla::SCI_GETDOCPOINTER));
 			editor->initialize();
-			return editor;
+			return editor;*/
 		}
 
 		void TextEditor::saveSession(const QString &filename) const
 		{
-			QFile file(filename);
+			/*QFile file(filename);
 			file.open(QFile::WriteOnly);
 			QTextStream stream(&file);
 			stream << textEdit->SendScintilla(QsciScintilla::SCI_GETFIRSTVISIBLELINE);
@@ -334,12 +334,12 @@ namespace NGM
 				stream << position;
 				position = textEdit->SendScintilla(QsciScintilla::SCI_CONTRACTEDFOLDNEXT, 0);
 			}
-			file.close();
+			file.close();*/
 		}
 
 		void TextEditor::loadSession(const QString &filename)
 		{
-			QFile file(filename);
+			/*QFile file(filename);
 			file.open(QFile::ReadOnly);
 			QTextStream stream(&file);
 			long value;
@@ -350,19 +350,19 @@ namespace NGM
 				stream >> value;
 				textEdit->SendScintilla(QsciScintilla::SCI_TOGGLEFOLD, value);
 			}
-			file.close();
+			file.close();*/
 		}
 
 		void TextEditor::saved()
 		{
-			textEdit->SendScintilla(QsciScintilla::SCI_SETSAVEPOINT);
+			/*textEdit->SendScintilla(QsciScintilla::SCI_SETSAVEPOINT);
 			state &= ~IsModified;
-			emit isModified(false);
+			emit isModified(false);*/
 		}
 
 		void TextEditor::updateLineLength()
 		{
-			int lines = textEdit->SendScintilla(QsciScintilla::SCI_GETLINECOUNT);
+			/*int lines = textEdit->SendScintilla(QsciScintilla::SCI_GETLINECOUNT);
 			if (lines > 9999)
 			{
 				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 0, textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)*6);
@@ -378,7 +378,7 @@ namespace NGM
 			else
 			{
 				textEdit->SendScintilla(QsciScintilla::SCI_SETMARGINWIDTHN, 0, textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, 0)*3);
-			}
+			}*/
 		}
 	}
 }

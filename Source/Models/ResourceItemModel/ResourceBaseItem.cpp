@@ -22,26 +22,24 @@
 #include "ResourceBaseItem.hpp"
 #include "ResourceGroupItem.hpp"
 #include "ResourceItemModel.hpp"
-#include <QDebug>
 
 namespace NGM
 {
 	namespace Model
 	{
-		ResourceBaseItem::ResourceBaseItem(const QString &name) : _root(nullptr), _parent(nullptr), _model(nullptr), _name(name)
+		ResourceBaseItem::ResourceBaseItem(const QString &name) : _root(nullptr), _parent(nullptr), _model(nullptr), _text(name)
 		{
 			// Empty.
 		}
 
-		QString ResourceBaseItem::name() const
-		{
-			return _name;
-		}
+		ResourceBaseItem::ResourceBaseItem(ResourceProjectItem *root,
+			const QString &text) : _root(root), _text(text) {}
 
 		const QModelIndex ResourceBaseItem::index()
 		{
 			if (_parent != NULL)
 			{
+				// return _root->_model->index(row(), 0, _parent->index());
 				return _model->index(row(), 0, _parent->index());
 			}
 			return QModelIndex();
@@ -64,11 +62,6 @@ namespace NGM
 			return 0;
 		}
 
-		ResourceBaseItem *ResourceBaseItem::parent()
-		{
-			return _parent;
-		}
-
 		ResourceContentItem *ResourceBaseItem::toContentItem()
 		{
 			return nullptr;
@@ -82,11 +75,6 @@ namespace NGM
 		ResourceGroupItem *ResourceBaseItem::toGroupItem()
 		{
 			return nullptr;
-		}
-
-		ResourceProjectItem *ResourceBaseItem::root()
-		{
-			return _root;
 		}
 	}
 }

@@ -30,6 +30,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QDir>
 using std::list;
 using std::pair;
 
@@ -164,7 +165,7 @@ namespace NGM
 
 						QMessageBox message;
 						message.setIcon(QMessageBox::Question);
-						message.setText("The resource \"" + item->name() + "\" has been modified.");
+						message.setText("The resource \"" + item->text() + "\" has been modified.");
 						message.setInformativeText("Do you want to save your changes?");
 						message.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 						message.setDefaultButton(QMessageBox::Yes);
@@ -222,7 +223,7 @@ namespace NGM
 				serializer->read(widget, resource);
 				widget->initialize();
 
-				setCurrentIndex(addTab(widget, item->name()));
+				setCurrentIndex(addTab(widget, item->text()));
 				widgets.insert(std::pair<Model::ResourceBaseItem*, Resource::Editor*>(item, widget));
 				return widget;
 			}

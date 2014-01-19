@@ -45,7 +45,8 @@ namespace NGM
 		class SerialObject;
 
 		/**************************************************//*!
-		*	@brief	Metadata for resource types.
+		*	@brief	Metadata for resource types. Manages the
+		*			creation for editors.
 		******************************************************/
 		class Type
 		{

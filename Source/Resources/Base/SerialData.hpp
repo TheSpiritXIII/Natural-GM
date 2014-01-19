@@ -2,9 +2,9 @@
  *  @file SerialData.hpp
  *	@section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak and Josh Ventura
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
- *      This file is a part of the Natural GM IDE.
+ *      This file is part of the Natural GM IDE.
  *
  *      This program is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,51 +19,35 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_SERIALDATA__H
-#define _NGM_SERIALDATA__H
-#include <map>
-#include <string>
-#include <vector>
+#ifndef NGM__SERIALDATA__H
+#define NGM__SERIALDATA__H
 #include <cstdint>
-#include <QImage>
-#include <Variant.hpp>
+#include <QMap>
+#include <QString>
+#include <QVector>
+#include "Variant.hpp"
 
 namespace NGM
 {
 	namespace Resource
 	{
-		using std::map;
-		using std::string;
-		using std::vector;
-
 		struct Resource;
-
-		struct SerialData;
-		struct SerialObject;
-		struct SerialAttributes;
-		struct SerialImage;
-		struct SerialAnimation;
-		struct SerialBlob;
-		struct SerialResource;
-		struct SerialVariant;
 
 		/**************************************************//*!
 		*	@brief	Contains SerialData identifiers. As a
-		*			convention, these are in the format
-		*			"[plugin]-[brief]", where "[plugin]" is
-		*			the name of the plugin that created the
-		*			ID, and "[brief]" is a brief description.
+		*			convention, these are in the formated
+		*			with the first four characters as the
+		*			plugin identifier and the last four for
+		*			the actual class identifier.
 		******************************************************/
-		namespace SerialUUID
+		namespace SerialID
 		{
-			const uint8_t undefined	[8]	=	{'U', 'N', 'D', 'E', 'F', 'I', 'N', 'D'};
-			const uint8_t object	[8]	=	{'N', 'G', 'M', '-', 'o', 'b', 'j', 't'};
-			const uint8_t image		[8]	=	{'N', 'G', 'M', '-', 'i', 'm', 'g', 'e'};
-			const uint8_t animation	[8]	=	{'N', 'G', 'M', '-', 'a', 'n', 'i', 'm'};
-			const uint8_t blob		[8]	=	{'N', 'G', 'M', '-', 'b', 'l', 'o', 'b'};
-			const uint8_t resource	[8]	=	{'N', 'G', 'M', '-', 'r', 's', 'r', 'c'};
-			const uint8_t variant	[8]	=	{'N', 'G', 'M', '-', 'v', 'a', 'r', 't'};
+			const uint64_t Object		=	0x4e474d2d6f626a74;
+			const uint64_t Image		=	0x4e474d2d696d6765;
+			const uint64_t Animation	=	0x4e474d2d616e696d;
+			const uint64_t Blob			=	0x4e474d2d626c6f62;
+			const uint64_t Resource		=	0x4e474d2d72737263;
+			const uint64_t Variant		=	0x4e474d2d7661726e;
 		}
 
 		/**************************************************//*!
@@ -72,40 +56,34 @@ namespace NGM
 		struct SerialData
 		{
 
-			/**************************************************//*!
-			*	@breif	Returns a unique identifier for class type.
-			******************************************************/
-			virtual const uint8_t *getUUID() const;
+			typedef void (*CleanFunc)();
 
 			/**************************************************//*!
-			*	@brief	A safe cast to an object type.
+			*	@brief	Stores a unique identifier. Each subclass
+			*			should have unique numbers, so that it is
+			*			easier to cast.
 			******************************************************/
-			virtual SerialObject *asObject();
+			const uint64_t identifier;
+
+		protected:
 
 			/**************************************************//*!
-			*	@brief	A safe cast to an image type.
+			*	@brief	Only inherited fields can identify.
 			******************************************************/
-			virtual SerialImage *asImage();
+			CleanFunc Clean;
 
 			/**************************************************//*!
-			*	@brief	A safe cast to an animation type.
+			*	@brief	Only inherited fields can identify.
 			******************************************************/
-			virtual SerialAnimation *asAnimation();
+			SerialData(const uint64_t &identifier)
+				: identifier(identifier) {}
+
+		private:
 
 			/**************************************************//*!
-			*	@brief	A safe cast to a blob type.
+			*	@brief	Using this class directly is prohibited.
 			******************************************************/
-			virtual SerialBlob *asBlob();
-
-			/**************************************************//*!
-			*	@brief	A safe cast to a resource type.
-			******************************************************/
-			virtual SerialResource *asResource();
-
-			/**************************************************//*!
-			*	@brief	A safe cast to a variant type.
-			******************************************************/
-			virtual SerialVariant *asVariant();
+			SerialData() : identifier(0) {}
 
 		};
 
@@ -115,29 +93,19 @@ namespace NGM
 		struct SerialObject: SerialData
 		{
 			/**************************************************//*!
+			*	@brief	Uses SerialID::Object.
+			******************************************************/
+			SerialObject() : SerialData(SerialID::Object) {}
+
+			/**************************************************//*!
 			*	@brief	A group of children.
 			******************************************************/
-			map<string, SerialData*> children;
+			QMap<QString, SerialData*> children;
 
 			/**************************************************//*!
 			*	@brief	A group of attributes
 			******************************************************/
-			map<string, string> attributes;
-
-			/**************************************************//*!
-			*	@breif	Returns a unique identifier for class type.
-			******************************************************/
-			virtual const uint8_t *getUUID() const;
-
-			/**************************************************//*!
-			*	@brief	Removes all children.
-			******************************************************/
-			virtual ~SerialObject();
-
-			/**************************************************//*!
-			*	@brief	Returns this.
-			******************************************************/
-			virtual SerialObject *asObject();
+			QMap<QLatin1String, QLatin1String> attributes;
 		};
 
 		/**************************************************//*!
@@ -146,29 +114,14 @@ namespace NGM
 		struct SerialImage : SerialData
 		{
 			/**************************************************//*!
+			*	@brief	Uses SerialID::Image.
+			******************************************************/
+			SerialImage() : SerialData(SerialID::Image), image(nullptr) {}
+
+			/**************************************************//*!
 			*	@brief	An image.
 			******************************************************/
 			QImage *image;
-
-			/**************************************************//*!
-			*	@brief	Sets a null image.
-			******************************************************/
-			SerialImage();
-
-			/**************************************************//*!
-			*	@breif	Returns a unique identifier for class type.
-			******************************************************/
-			virtual const uint8_t *getUUID() const;
-
-			/**************************************************//*!
-			*	@brief	Removes image data.
-			******************************************************/
-			virtual ~SerialImage();
-
-			/**************************************************//*!
-			*	@brief	Returns this.
-			******************************************************/
-			virtual SerialImage *asImage();
 		};
 
 		/**************************************************//*!
@@ -177,24 +130,14 @@ namespace NGM
 		struct SerialAnimation: SerialData
 		{
 			/**************************************************//*!
+			*	@brief	Uses SerialID::Animation.
+			******************************************************/
+			SerialAnimation() : SerialData(SerialID::Animation) {}
+
+			/**************************************************//*!
 			*	@brief	A group of images.
 			******************************************************/
-			vector<QImage*> images;
-
-			/**************************************************//*!
-			*	@breif	Returns a unique identifier for class type.
-			******************************************************/
-			virtual const uint8_t *getUUID() const;
-
-			/**************************************************//*!
-			*	@brief	Removes all image data.
-			******************************************************/
-			virtual ~SerialAnimation();
-
-			/**************************************************//*!
-			*	@brief	Returns this.
-			******************************************************/
-			virtual SerialAnimation *asAnimation();
+			QVector<QImage*> images;
 		};
 
 		/**************************************************//*!
@@ -203,19 +146,14 @@ namespace NGM
 		struct SerialBlob: SerialData
 		{
 			/**************************************************//*!
+			*	@brief	Uses SerialID::Blob.
+			******************************************************/
+			SerialBlob() : SerialData(SerialID::Blob) {}
+
+			/**************************************************//*!
 			*	@brief	Contains the data.
 			******************************************************/
 			char *data;
-
-			/**************************************************//*!
-			*	@breif	Returns a unique identifier for class type.
-			******************************************************/
-			virtual const uint8_t *getUUID() const;
-
-			/**************************************************//*!
-			*	@brief	Returns this.
-			******************************************************/
-			virtual SerialBlob *asBlob();
 		};
 
 		/**************************************************//*!
@@ -224,19 +162,14 @@ namespace NGM
 		struct SerialResource : SerialData
 		{
 			/**************************************************//*!
+			*	@brief	Uses SerialID::Resource.
+			******************************************************/
+			SerialResource() : SerialData(SerialID::Resource) {}
+
+			/**************************************************//*!
 			*	@brief	Contains all resources.
 			******************************************************/
-			vector<Resource*> resources;
-
-			/**************************************************//*!
-			*	@breif	Returns a unique identifier for class type.
-			******************************************************/
-			virtual const uint8_t *getUUID() const;
-
-			/**************************************************//*!
-			*	@brief	Returns this.
-			******************************************************/
-			virtual SerialResource *asResource();
+			QVector<Resource*> resources;
 		};
 
 		/**************************************************//*!
@@ -245,21 +178,16 @@ namespace NGM
 		struct SerialVariant : SerialData
 		{
 			/**************************************************//*!
+			*	@brief	Uses SerialID::Variant.
+			******************************************************/
+			SerialVariant() : SerialData(SerialID::Variant) {}
+
+			/**************************************************//*!
 			*	@brief	Contains all resources.
 			******************************************************/
-			Variant variant;
-
-			/**************************************************//*!
-			*	@breif	Returns a unique identifier for class type.
-			******************************************************/
-			virtual const uint8_t *getUUID() const;
-
-			/**************************************************//*!
-			*	@brief	Returns this.
-			******************************************************/
-			virtual SerialVariant *asVariant();
+			Variant value;
 		};
 	}
 }
 
-#endif // _NGM_SERIALDATA__H
+#endif // NGM__SERIALDATA__H

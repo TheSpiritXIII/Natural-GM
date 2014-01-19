@@ -73,11 +73,11 @@ namespace NGM
 			{
 				QFile file(resource->location);
 				file.open(QIODevice::WriteOnly);
-				file.write(widget->property("text").charPtr());
+				file.write(widget->property("text").getCharPtr());
 				file.close();
 				return;
 			}
-			QByteArray text = widget->property("text").charPtr();
+			QByteArray text = widget->property("text").getCharPtr();
 			std::vector<int8_t> data;
 			//data.emplace_back(text.data(), text.size());
 			//resource->serialData->attributes["text"] = &data;

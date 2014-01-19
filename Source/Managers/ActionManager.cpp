@@ -120,7 +120,7 @@ namespace NGM
 			{
 				icons[IconFolder] = QIcon(theme+"/main/folder.png");
 			}
-			for(auto& i : project->types)
+			for(auto& i : project->_types)
 			{
 				QString path = theme;
 				path.reserve(13+theme.size()+i->name.size());

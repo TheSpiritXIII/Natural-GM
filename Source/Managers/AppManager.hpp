@@ -26,7 +26,6 @@
 #include "IconManager.hpp"
 #include "ProjectManager.hpp"
 #include "SettingManager.hpp"
-#include "ResourceItemModel.hpp"
 
 class QAction;
 class QKeyEvent;
@@ -36,6 +35,10 @@ namespace NGM
 	namespace Widget
 	{
 		class ResourceWindow;
+	}
+	namespace Model
+	{
+		class ResourceItemModel;
 	}
 	namespace Manager
 	{
@@ -162,11 +165,20 @@ namespace NGM
 				return &_settingManager;
 			}
 
+			inline Model::ResourceItemModel *model() const
+			{
+				return _model;
+			}
+
 			// to do.
 			// void open(const QString &file);
 			// void close(const int &row);
 			// int rows();
 			// QString rowText(const int &row);
+
+		protected:
+
+			void customEvent(QEvent *);
 
 		public slots:
 
@@ -271,7 +283,7 @@ namespace NGM
 
 			SettingManager _settingManager;
 			// To do.
-			NGM::Model::ResourceItemModel *_hierarchy;
+			Model::ResourceItemModel *_model;
 
 		};
 	}

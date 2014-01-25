@@ -2,7 +2,7 @@
  *  @file ResourceContentItem.hpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -19,9 +19,8 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_RESOURCECONTENTITEM__HPP
-#define _NGM_RESOURCECONTENTITEM__HPP
+#ifndef NGM__RESOURCECONTENTITEM__HPP
+#define NGM__RESOURCECONTENTITEM__HPP
 #include "ResourceBaseItem.hpp"
 #include "Resource.hpp"
 
@@ -30,30 +29,71 @@ namespace NGM
 	namespace Model
 	{
 		/**************************************************//*!
-		*	@brief An item that stores a resource. This class
-		*		   can only be used with ResourceItemModel.
+		*	@see	ResourceContentItem::Setting
+		******************************************************/
+		typedef uint8_t ResourceSettings;
+
+		/**************************************************//*!
+		*	@brief	An item that stores a resource and an
+		*			optional file path.
+		*
+		* The file path is optional because there may not be
+		* a file path or the file path is not a system path.
+		* A system path might be helpful to a serializer. For
+		* example, a zip path can be stored that way (because
+		* zip files are not exactly system paths). For this
+		* reason, a boolean exists to test whether or not
+		* the file path was meant to be a system path.
 		******************************************************/
 		class ResourceContentItem : public ResourceBaseItem
 		{
 		public:
 
 			/**************************************************//*!
-			*	@brief Creates an item with the indicated name.
+			*	@brief	Hints for how the user interacts with
+			*			this item.
 			******************************************************/
-			ResourceContentItem(NGM::Resource::Resource *resource, const QString &name) :
-				ResourceBaseItem(name), resource(resource) {}
+			enum Setting
+			{
+				IsSystemPath	=	0x1,	/*!< Hints that the file path
+												should be a real path. */
+				NoExtension		=	0x2		/*!< Omits the extension when
+												setting a file path. */
+			};
 
 			/**************************************************//*!
-			 *	@brief The resource of the item that this item represents.
+			*	@brief	Creates an item with the indicated name.
 			******************************************************/
+			ResourceContentItem(NGM::Resource::Resource *resource,
+				const QString &filepath, ResourceSettings settings = 0);
+
+			/**************************************************//*!
+			*	@brief	Sets the internal filepath and updates
+			*			the item display text.
+			******************************************************/
+			void setFilepath(const QString &filepath);
+
+			/// INCOMPLETE
 			NGM::Resource::Resource *resource;
 
-			ResourceContentItem *toContentItem()
-			{
-				return this;
-			}
+			/**************************************************//*!
+			*	@brief	A safe cast to this.
+			******************************************************/
+			ResourceContentItem *toContentItem();
+
+		private:
+
+			/**************************************************//*!
+			*	@brief	Stores a filepath.
+			******************************************************/
+			QString _filepath;
+
+			/**************************************************//*!
+			*	@brief	Resource display hints.
+			******************************************************/
+			ResourceSettings _settings;
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEITEM__HPP
+#endif // NGM__RESOURCEITEM__HPP

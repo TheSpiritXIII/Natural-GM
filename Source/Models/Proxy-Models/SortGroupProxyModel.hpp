@@ -52,7 +52,8 @@ namespace NGM
 			*	@brief	Filters rows to include searched items
 			*			and children of searched groups.
 			******************************************************/
-			virtual bool filterAcceptsRow(int row, const QModelIndex &parent) const;
+			virtual bool filterAcceptsRow(int row,
+										  const QModelIndex &parent) const;
 		};
 	}
 }

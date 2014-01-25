@@ -22,7 +22,11 @@
 #ifndef NGM__RESOURCEITEMMODEL__HPP
 #define NGM__RESOURCEITEMMODEL__HPP
 #include <QAbstractItemModel>
-#include <vector>
+#include "ResourceProjectItem.hpp"
+
+// TODO: File URL support for models and framework for projects.
+// TODO: Add icon manager support (this will remove deprecated items).
+// TODO: Add fix project deprecated settings.
 
 namespace NGM
 {
@@ -32,9 +36,6 @@ namespace NGM
 	}
 	namespace Model
 	{
-		class ResourceGroupItem;
-		class ResourceProjectItem;
-
 		/**************************************************//*!
 		*	@brief	A Qt based model that stores resources.
 		******************************************************/
@@ -44,10 +45,16 @@ namespace NGM
 
 		public:
 
-			/**************************************************//*!
-			*	@brief	Initializers the model with a root item.
-			******************************************************/
-			ResourceItemModel(const Manager::ActionManager *actionManager, QObject *parent = 0);
+			/// DEPRECATED
+			ResourceItemModel(const Manager::ActionManager *actionManager,
+							  QObject *parent = 0,
+							  QString headerText = QString());
+
+			/*
+			ResourceItemModel(const Manager::IconManager *iconManager,
+							  const QString &headerText = QString(),
+							  QObject *parent = 0);
+			*/
 
 			/**************************************************//*!
 			*	@brief	Destroys the root item and its children.
@@ -55,108 +62,156 @@ namespace NGM
 			~ResourceItemModel();
 
 			/**************************************************//*!
-			*	@return	The item data. (Required)
+			*	@brief	Returns whether or not items are being
+			*			sorted internally within the model.
+			******************************************************/
+			inline bool sort() const
+			{
+				return _sort;
+			}
+
+			/**************************************************//*!
+			*	@brief	Sets whether or not to sort items.
+			*	@see	sort()
+			******************************************************/
+			void setSort(bool yes);
+
+			/**************************************************//*!
+			*	@brief	Returns the data at the indicated index
+			*			depending on the indicated role. Only
+			*			the display and decoration roles are
+			*			supported.
 			******************************************************/
 			QVariant data(const QModelIndex &index, int role) const;
 
 			/**************************************************//*!
-			*	@return	The item flags. (Required)
+			*	@brief	Returns the item flags. By default, most
+			*			items are selectable, except the root.
+			*			Flags change relative to the index's
+			*			project settings.
 			******************************************************/
 			Qt::ItemFlags flags(const QModelIndex &index) const;
 
 			/**************************************************//*!
-			*	@return	The header data. Always empty. (Required)
+			*	@brief	Returns the header data. Only the display
+			*			role is suppored and returns the root's
+			*			display text. Orientation does not
+			*			matter.
 			******************************************************/
-			QVariant headerData(Qt::Orientation, int = Qt::DisplayRole) const;
+			QVariant headerData(Qt::Orientation,
+								int role = Qt::DisplayRole) const;
 
 			/**************************************************//*!
-			*	@return	The item index of the indicated row and
-			*			column. (Required)
+			*	@brief	Returns the item index at the indicated
+			*			row position and parent.
 			******************************************************/
-			QModelIndex index(int row,int column, const QModelIndex &parent = QModelIndex()) const;
+			QModelIndex index(int row, int, const QModelIndex &parent =
+					QModelIndex()) const;
 
 			/**************************************************//*!
-			*	@return	The parent of the indicated index. (Required)
+			*	@brief	Returns the parent at the indicated
+			*			index.
 			******************************************************/
 			QModelIndex parent(const QModelIndex &index) const;
 
 			/**************************************************//*!
-			*	@return	The row count of the indicated index.
+			*	@brief	Returns the child count of the indicated
+			*			parent.
 			******************************************************/
 			int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
 			/**************************************************//*!
-			*	@return	Always 1. (Required)
+			*	@brief	Always returns 1 (required for subclass).
 			******************************************************/
 			int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 			/**************************************************//*!
-			*	@brief	Moves the indicated rows.
+			*	@brief	Returns support for Copy and Move.
 			******************************************************/
-			bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild);
+			Qt::DropActions supportedDragActions() const;
 
 			/**************************************************//*!
-			*	@brief	Removes the indicated rows.
+			*	@brief	Returns support for Copy and Move.
 			******************************************************/
-			bool removeRows( int row, int count, const QModelIndex & parent = QModelIndex());
+			Qt::DropActions supportedDropActions() const;
 
 			/**************************************************//*!
-			*	@brief	Inserts into the indicated rows.
+			*	@brief	Returns support for internal model
+			*			move.
 			******************************************************/
-			bool insertRows(int row, int count, const QModelIndex &parent);
+			QStringList mimeTypes() const;
 
 			/**************************************************//*!
-			*	@brief	Appends an item into the root.
+			*	@brief	Creates a mime data for both internal
+			*			moves and file URLs copy.
 			******************************************************/
-			void append(ResourceProjectItem *item);
+			QMimeData *mimeData(const QModelIndexList &indexes) const;
 
 			/**************************************************//*!
-			*	@brief	Appends multiple items into the root.
+			*	@brief	Either moves an internal item, or
+			*			requests a project to copy a file.
 			******************************************************/
-			void append(std::vector<ResourceProjectItem*> &items);
+			bool dropMimeData(const QMimeData * data, Qt::DropAction action,
+							  int row, int column, const QModelIndex & parent);
 
 			/**************************************************//*!
-			*	@brief	Removes the indicated count of items from
-			*			back of the root.
+			*	@brief	Inserts an item into the root.
+			*	@see	ResourceGroupItem::insert()
 			******************************************************/
-			void pop(int count  = 1);
+			inline void insert(ResourceProjectItem *item)
+			{
+				_root->insert(item);
+			}
 
-			/**************************************************//*!
-			*	@brief	Removes the indicated rows from the root.
-			******************************************************/
-			void remove(int row, int count = 1);
+		protected:
 
-			/**************************************************//*!
-			*	@brief	Inserts an item into the indicated row.
-			******************************************************/
-			void insert(ResourceProjectItem *item, int row);
+			friend class ResourceGroupItem;
 
-			/**************************************************//*!
-			*	@brief	Inserts multiple items into the indicated row.
-			******************************************************/
-			void insert(std::vector<ResourceProjectItem*> &items, int row);
+			inline void beginInsert(QModelIndex parent, int first, int last)
+			{
+				beginInsertRows(parent, first, last);
+			}
 
-			/**************************************************//*!
-			*	@brief	Updates the view. Items must use this when inserting.
-			******************************************************/
-			void beginInsert(QModelIndex parent, int first, int last);
+			inline void endInsert()
+			{
+				endInsertRows();
+			}
 
-			/**************************************************//*!
-			*	@brief	Updates the view. Items must use this when inserting.
-			******************************************************/
-			void endInsert();
+			inline void beginRemove(QModelIndex parent, int first, int last)
+			{
+				beginRemoveRows(parent, first, last);
+			}
 
-			/**************************************************//*!
-			*	@brief	Updates the view. Items must use this when removing.
-			******************************************************/
-			void beginRemove(QModelIndex parent, int first, int last);
+			inline void endRemove()
+			{
+				endRemoveRows();
+			}
 
-			/**************************************************//*!
-			*	@brief	Updates the view. Items must use this when removing.
-			******************************************************/
-			void endRemove();
+			inline void beginMove(const QModelIndex &sourceParent,
+				int sourceFirst, int sourceLast,
+				const QModelIndex &destinationParent, int destinationChild)
+			{
+				beginMoveRows(sourceParent, sourceFirst, sourceLast,
+							  destinationParent, destinationChild);
+			}
+
+			inline void endMove()
+			{
+				endMoveRows();
+			}
 
 		private:
+
+			/// DEPRECATED
+			const Manager::ActionManager *actionManager;
+
+			// const Manager::IconManager *iconManager;
+
+			/**************************************************//*!
+			*	@brief	Stores the last internally created mime,
+			*			for verifying drops.
+			******************************************************/
+			static QMimeData *internalMime;
 
 			/**************************************************//*!
 			*	@brief	The internal root item.
@@ -164,10 +219,10 @@ namespace NGM
 			NGM::Model::ResourceGroupItem *_root;
 
 			/**************************************************//*!
-			*	@brief	Manages generic icons.
+			*	@brief	Decides whether or not to sort items as
+			*			they are inserted.
 			******************************************************/
-			const Manager::ActionManager *actionManager;
-
+			bool _sort;
 		};
 	}
 }

@@ -22,59 +22,48 @@
 #include "ResourceBaseItem.hpp"
 #include "ResourceGroupItem.hpp"
 #include "ResourceItemModel.hpp"
+#include "ResourceProjectItem.hpp"
 
-namespace NGM
+NGM::Model::ResourceBaseItem::ResourceBaseItem(const QString &text) :
+	_parent(nullptr), _project(nullptr), _model(nullptr), _text(text) {}
+
+NGM::Model::ResourceBaseItem::~ResourceBaseItem() {}
+
+const QModelIndex NGM::Model::ResourceBaseItem::index() const
 {
-	namespace Model
+	if (_parent != nullptr)
 	{
-		ResourceBaseItem::ResourceBaseItem(const QString &name) : _root(nullptr), _parent(nullptr), _model(nullptr), _text(name)
-		{
-			// Empty.
-		}
-
-		ResourceBaseItem::ResourceBaseItem(ResourceProjectItem *root,
-			const QString &text) : _root(root), _text(text) {}
-
-		const QModelIndex ResourceBaseItem::index()
-		{
-			if (_parent != NULL)
-			{
-				// return _root->_model->index(row(), 0, _parent->index());
-				return _model->index(row(), 0, _parent->index());
-			}
-			return QModelIndex();
-		}
-
-		int ResourceBaseItem::row() const
-		{
-			// To do.
-			if (_parent)
-			{
-				ResourceGroupItem *p = _parent->toGroupItem();
-				for(size_t i = 0; i < p->_children.size(); ++i)
-				{
-					if (p->_children[i] == const_cast<ResourceBaseItem*>(this))
-					{
-						return i;
-					}
-				}
-			}
-			return 0;
-		}
-
-		ResourceContentItem *ResourceBaseItem::toContentItem()
-		{
-			return nullptr;
-		}
-
-		ResourceProjectItem *ResourceBaseItem::toProjectItem()
-		{
-			return nullptr;
-		}
-
-		ResourceGroupItem *ResourceBaseItem::toGroupItem()
-		{
-			return nullptr;
-		}
+		return _model->index(childNumber(), 0, _parent->index());
 	}
+	return QModelIndex();
+}
+
+int NGM::Model::ResourceBaseItem::childNumber() const
+{
+	if (_parent)
+	{
+		return _parent->childPosition(this);
+	}
+	return -1;
+}
+
+NGM::Model::ResourceContentItem *NGM::Model::ResourceBaseItem::toContentItem()
+{
+	return nullptr;
+}
+
+NGM::Model::ResourceProjectItem *NGM::Model::ResourceBaseItem::toProjectItem()
+{
+	return nullptr;
+}
+
+NGM::Model::ResourceGroupItem *NGM::Model::ResourceBaseItem::toGroupItem()
+{
+	return nullptr;
+}
+
+bool NGM::Model::ResourceBaseItem::lessThan(const ResourceBaseItem *lhs,
+											const ResourceBaseItem *rhs)
+{
+	return lhs->text() < rhs->text();
 }

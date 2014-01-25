@@ -2,7 +2,7 @@
  *  @file ResourceGroupItem.hpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -19,19 +19,30 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_RESOURCEGROUPITEM__HPP
-#define _NGM_RESOURCEGROUPITEM__HPP
+#ifndef NGM__RESOURCEGROUPITEM__HPP
+#define NGM__RESOURCEGROUPITEM__HPP
 #include "ResourceBaseItem.hpp"
+#include <QList>
+
+// REMOVE
 #include <vector>
+#include <QVector>
 
 namespace NGM
 {
 	namespace Model
 	{
+		typedef QList<NGM::Model::ResourceBaseItem*>::iterator
+			ResourceItemIterator;
+
 		/**************************************************//*!
-		*	@brief An item that store children. This class can
-		*		   only be used with ResourceItemModel.
+		*	@brief	An item that store children. Children
+		*			should either be content items or group
+		*			items.
+		*
+		* This item is dependent on the model. If the model
+		* has sorting enabled, then the behavior of several
+		* functions change.
 		******************************************************/
 		class ResourceGroupItem : public ResourceBaseItem
 		{
@@ -40,7 +51,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief Creates an item with the indicated name.
 			******************************************************/
-			ResourceGroupItem(const QString &name) : ResourceBaseItem(name) {}
+			ResourceGroupItem(const QString &name = QString());
 
 			/**************************************************//*!
 			*	@brief	Deallocates and removes all children.
@@ -48,67 +59,97 @@ namespace NGM
 			~ResourceGroupItem();
 
 			/**************************************************//*!
-			*	@return The number of children this item contains.
+			*	@brief	Sorts all child items alphebatically
+			*			recursively.
 			******************************************************/
-			int count() const;
+			void sort();
 
 			/**************************************************//*!
-			*	@return The child at the indicated row.
+			*	@brief	Returns the number of children this item
+			*			contains.
 			******************************************************/
-			ResourceBaseItem *child(int row);
-
-			std::vector<ResourceBaseItem*> take(int row, int count);
+			inline int count() const
+			{
+				return _children.size();
+			}
 
 			/**************************************************//*!
-			*	@return Appends an item to this item as a child. This is fast.
+			*	@brief	Returns the child at the indicated
+			*			position.
 			******************************************************/
-			void append(ResourceBaseItem *item);
+			inline ResourceBaseItem *child(int position) const
+			{
+				return _children[position];
+			}
 
 			/**************************************************//*!
-			*	@return Appends multiple children at once. This is fast.
+			*	@brief	Returns the position that the child is
+			*			located. If the model is sorted, then
+			*			this is an O(logn) find. Returns -1 if
+			*			the child could not be found.
 			******************************************************/
-			void append(std::vector<ResourceBaseItem*> items);
+			int childPosition(const ResourceBaseItem *find) const;
 
 			/**************************************************//*!
-			*	@return Removes the indicated number of children from the back.
+			*	@beif	Inserts a child. If sorting is enabled,
+			*			the item is placed alphabetically. If
+			*			sorting is not enabled, this item is
+			*			placed at the end.
 			******************************************************/
-			void pop(int count  = 1);
+			void insert(ResourceBaseItem *item);
 
 			/**************************************************//*!
-			*	@return Removes the children at the indicated rows.
+			*	@beif	Inserts a child into the indicated
+			*			position, provided sorting is not
+			*			enabled.
 			******************************************************/
-			void remove(int row, int count = 1);
+			void insert(ResourceBaseItem *item, int position);
 
 			/**************************************************//*!
-			*	@return Removes and returns the children at the indicated rows.
+			*	@brief	Removes the item at the indicated
+			*			position and moves it to the indicated
+			*			group. If sorting is enabled, then the
+			*			item is automatically sorted. If sorting
+			*			is not enabled, then the item is added
+			*			to the end of the group.
 			******************************************************/
-			//std::vector<ResourceBaseItem*> take(int row, int count = 1);
+			void move(int from, ResourceGroupItem *group);
 
 			/**************************************************//*!
-			*	@return Inserts a children at the indicated row.
+			*	@brief	Removes the item at the indicated
+			*			position, and moves it to the indicated
+			*			position inside the indicated group.
 			******************************************************/
-			void insert(ResourceBaseItem *item, int row);
+			void move(int from, ResourceGroupItem *group, int to);
 
 			/**************************************************//*!
-			*	@return Inserts multiple children to the indicated row.
+			*	@brief	Removes the item at the indicated
+			*			position, but does not delete it.
 			******************************************************/
-			void insert(std::vector<ResourceBaseItem*> items, int row);
+			void remove(int position, int countOld = 1);
 
 			/**************************************************//*!
-			*	@return A safe case to a ResourceGroupItem. Returns this.
+			*	@brief	Returns a safe cast to this.
 			******************************************************/
 			ResourceGroupItem *toGroupItem();
 
-		protected:
-
-			friend class ResourceBaseItem;
+		private:
 
 			/**************************************************//*!
-			*	@brief Contains all of its children.
+			*	@brief	Contains all of children.
 			******************************************************/
-			std::vector<ResourceBaseItem*> _children;
+			QList<ResourceBaseItem*> _children;
+
+			/**************************************************//*!
+			*	@brief	Recursively sets the model and project
+			*			on the indicated item. If the item is a
+			*			group item, all its children and their
+			*			children are set too.
+			******************************************************/
+			void setData(ResourceBaseItem *item, ResourceItemModel *model,
+						  ResourceProjectItem *project) const;
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEGROUPITEM__HPP
+#endif // NGM__RESOURCEGROUPITEM__HPP

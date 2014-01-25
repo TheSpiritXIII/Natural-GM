@@ -47,6 +47,10 @@ namespace NGM
 			******************************************************/
 			ResourceWindow(Manager::AppManager *manager, QWidget *parent = 0);
 
+			/**************************************************//*!
+			*	@brief	Returns the hierarchy dock, which is what
+			*			display all projects.
+			******************************************************/
 			inline HierarchyDockWidget *hierarchyDock() const
 			{
 				return _hierarchyDock;

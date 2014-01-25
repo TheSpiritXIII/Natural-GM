@@ -2,7 +2,7 @@
  *  @file ResourceItemModel.cpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -20,238 +20,273 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ResourceItemModel.hpp"
-#include "ResourceProjectItem.hpp"
-#include "ResourceGroupItem.hpp"
+// #include "ActionManager"
+#include <QMimeData>
+
+#include <sstream>
+
+// TODO: Find way to transfer pointers without string stream.
+// TODO: Add flag checking.
+
+// REMOVE
+#include <QDebug>
+
+// INCOMPLETE
 #include "ActionManager.hpp"
 #include "Project.hpp"
 #include "Type.hpp"
-#include <QDebug>
 
-namespace NGM
+QMimeData *NGM::Model::ResourceItemModel::internalMime = nullptr;
+
+NGM::Model::ResourceItemModel::ResourceItemModel(
+	const Manager::ActionManager *actionManager, QObject *parent,
+		QString headerText) : QAbstractItemModel(parent),
+	actionManager(actionManager), _sort(false)
 {
-	namespace Model
+	_root = new ResourceGroupItem(headerText);
+	_root->_model = this;
+}
+
+/*NGM::Model::ResourceItemModel::ResourceItemModel(
+	const Manager::IconManager *actionManager, QString headerText,
+	QObject *parent, ) : QAbstractItemModel(parent),
+	iconManager(actionManager), _sort(false)
+{
+	_root = new ResourceGroupItem(headerText);
+	_root->_model = this;
+}*/
+
+NGM::Model::ResourceItemModel::~ResourceItemModel()
+{
+	delete _root;
+}
+
+void NGM::Model::ResourceItemModel::setSort(bool yes)
+{
+	if (yes && _sort != yes)
 	{
-		ResourceItemModel::ResourceItemModel(const Manager::ActionManager *actionManager,
-			QObject *parent) : QAbstractItemModel(parent), actionManager(actionManager)
-		{
-			_root = new ResourceGroupItem(QString());
-			_root->_model = this;
-		}
-
-		ResourceItemModel::~ResourceItemModel()
-		{
-			delete _root;
-		}
-
-		int ResourceItemModel::columnCount(const QModelIndex &parent) const
-		{
-			Q_UNUSED(parent)
-			return 1;
-		}
-
-		QVariant ResourceItemModel::data(const QModelIndex &index, int role) const
-		{
-			if (!index.isValid())
-			{
-				return QVariant();
-			}
-
-			if (role == Qt::DisplayRole)
-			{
-				return static_cast<ResourceBaseItem*>(index.internalPointer())->text();
-			}
-			if (role == Qt::DecorationRole)
-			{
-				qDebug() << "Reload bro.";
-				ResourceBaseItem *item = static_cast<ResourceBaseItem*>(index.internalPointer());
-				if (item->toProjectItem() != nullptr)
-				{
-					if (item->toProjectItem()->project->type)
-					{
-						return item->toProjectItem()->project->type->getIcon(item->toProjectItem()->resource->serialData);
-					}
-				}
-				else if (item->toContentItem() != nullptr)
-				{
-					if (item->toContentItem()->resource->type)
-					{
-						qDebug() << item->toContentItem()->resource->icon.isNull();
-
-						//qDebug() << item->toContentItem()->resource->type;
-						//return item->toContentItem()->resource->type->getIcon(item->toContentItem()->resource->serialData);
-					}
-					return item->toContentItem()->resource->icon;
-				}
-				return (actionManager->icons[Manager::ActionManager::IconFolder]);
-			}
-
-			return QVariant();
-		}
-
-		Qt::ItemFlags ResourceItemModel::flags(const QModelIndex &index) const
-		{
-			if (index.isValid())
-			{
-				return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-			}
-			return Qt::ItemIsEnabled;
-		}
-
-		QVariant ResourceItemModel::headerData(Qt::Orientation, int) const
-		{
-			return QVariant();
-		}
-
-		QModelIndex ResourceItemModel::index(int row, int column, const QModelIndex &parent) const
-		{
-			Q_UNUSED(column)
-			if (!hasIndex(row, 0, parent))
-			{
-				return QModelIndex();
-			}
-
-			ResourceBaseItem *_parent;
-
-			if (!parent.isValid())
-			{
-				_parent = _root;
-			}
-			else
-			{
-				_parent = static_cast<ResourceBaseItem*>(parent.internalPointer());
-			}
-
-			ResourceBaseItem *_child = _parent->toGroupItem()->child(row);
-			if (_child)
-			{
-				return createIndex(row, 0, _child);
-			}
-			return QModelIndex();
-		}
-
-		QModelIndex ResourceItemModel::parent(const QModelIndex &index) const
-		{
-			if (!index.isValid())
-			{
-				return QModelIndex();
-			}
-
-			ResourceBaseItem *_child = static_cast<ResourceBaseItem*>(index.internalPointer());
-			ResourceBaseItem *_parent = _child->parent();
-
-			if (_parent->toGroupItem() == _root)
-			{
-				return QModelIndex();
-			}
-
-			return createIndex(_parent->row(), 0, _parent);
-		}
-
-		int ResourceItemModel::rowCount(const QModelIndex &parent) const
-		{
-			ResourceBaseItem *_parent;
-			if (!parent.isValid())
-			{
-				_parent = _root;
-			}
-			else
-			{
-				_parent = static_cast<ResourceBaseItem*>(parent.internalPointer());
-			}
-
-			if (_parent->toGroupItem() == nullptr)
-			{
-				return 0;
-			}
-			return _parent->toGroupItem()->count();
-		}
-
-		bool ResourceItemModel::removeRows(int row, int count, const QModelIndex &parent)
-		{
-			if (count < 1 || row < 0 || (row + count) > rowCount(parent))
-			{
-				return false;
-			}
-			beginRemoveRows(parent, row, row+count-1);
-			ResourceGroupItem* item = static_cast<ResourceGroupItem*>(parent.internalPointer());
-			item->remove(row, count);
-			endRemoveRows();
-			return true;
-		}
-
-		bool ResourceItemModel::insertRows(int row, int count, const QModelIndex &parent)
-		{
-			if (count < 1 || row < 0 || row > rowCount(parent))
-			{
-				return false;
-			}
-			beginInsertRows(parent, row, row+count-1);
-			ResourceGroupItem* item = static_cast<ResourceGroupItem*>(parent.internalPointer());
-			std::vector<ResourceBaseItem*> insert;
-			for(int i = 0; i < count; ++i)
-			{
-				insert.push_back(new ResourceBaseItem(""));
-			}
-			item->insert(insert, row);
-			endInsertRows();
-			return true;
-		}
-
-		bool ResourceItemModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
-		{
-
-			if (count < 1 || sourceRow < 0 || (sourceRow + count) > rowCount(sourceParent) ||
-				destinationChild < 0 || destinationChild > rowCount(destinationParent))
-			{
-				return false;
-			}
-			beginMoveRows(sourceParent, sourceRow, sourceRow+count-1, destinationParent, destinationChild);
-			ResourceGroupItem* source = static_cast<ResourceGroupItem*>(sourceParent.internalPointer());
-			ResourceGroupItem* destination = static_cast<ResourceGroupItem*>(destinationParent.internalPointer());
-			destination->insert(source->take(sourceRow, count), destinationChild);
-			endMoveRows();
-			return true;
-		}
-
-		void ResourceItemModel::append(ResourceProjectItem *item)
-		{
-			_root->append(item);
-			item->_root = item;
-		}
-
-		void ResourceItemModel::pop(int count)
-		{
-			_root->pop(count);
-		}
-
-		void ResourceItemModel::insert(ResourceProjectItem *item, int row)
-		{
-			_root->insert(item, row);
-		}
-
-		void ResourceItemModel::remove(int row, int count)
-		{
-			_root->remove(row, count);
-		}
-
-		void ResourceItemModel::beginInsert(QModelIndex parent, int first, int last)
-		{
-			beginInsertRows(parent, first, last);
-		}
-
-		void ResourceItemModel::endInsert()
-		{
-			endInsertRows();
-		}
-
-		void ResourceItemModel::beginRemove(QModelIndex parent, int first, int last)
-		{
-			beginRemoveRows(parent, first, last);
-		}
-
-		void ResourceItemModel::endRemove()
-		{
-			endRemoveRows();
-		}
+		_root->sort();
 	}
+	_sort = yes;
+}
+
+QVariant NGM::Model::ResourceItemModel::data(const QModelIndex &index,
+											 int role) const
+{
+	if (!index.isValid())
+	{
+		return QVariant();
+	}
+
+	if (role == Qt::DisplayRole)
+	{
+		return static_cast<ResourceBaseItem*>(index.internalPointer())->text();
+	}
+	if (role == Qt::DecorationRole)
+	{
+		ResourceBaseItem *item = static_cast<ResourceBaseItem*>(index.internalPointer());
+		if (item->toProjectItem() != nullptr)
+		{
+			if (item->toProjectItem()->project->type)
+			{
+				//return item->toProjectItem()->project->type->getIcon(item->toProjectItem()->resource->serialData);
+			}
+		}
+		else if (item->toContentItem() != nullptr)
+		{
+			/*if (item->toContentItem()->resource->type)
+			{
+				qDebug() << item->toContentItem()->resource->icon.isNull();
+
+				//qDebug() << item->toContentItem()->resource->type;
+				//return item->toContentItem()->resource->type->getIcon(item->toContentItem()->resource->serialData);
+			}
+			return item->toContentItem()->resource->icon;*/
+		}
+		//return (actionManager->icons[Manager::ActionManager::IconFolder]);
+	}
+
+	return QVariant();
+}
+
+Qt::ItemFlags NGM::Model::ResourceItemModel::flags(
+		const QModelIndex &index) const
+{
+	if (index.isValid())
+	{
+		ResourceBaseItem *item = static_cast<ResourceBaseItem*>(
+					index.internalPointer());
+		ResourceContentItem *content = item->toContentItem();
+		if (content)
+		{
+			return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
+					Qt::ItemIsDragEnabled;
+		}
+		if (1) // If flag is set.
+		{
+			ResourceGroupItem *group = item->toGroupItem();
+			if (group && (group->parent() == _root /* && flag is set. */))
+			{
+				return Qt::ItemIsEnabled;
+			}
+		}
+		return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
+	}
+	return Qt::ItemIsEnabled;
+}
+
+QVariant NGM::Model::ResourceItemModel::headerData(Qt::Orientation,
+												   int role) const
+{
+	if (role == Qt::DisplayRole)
+	{
+		return _root->text();
+	}
+	return QVariant();
+}
+
+QModelIndex NGM::Model::ResourceItemModel::index(int row, int,
+		const QModelIndex &parent) const
+{
+	if (!hasIndex(row, 0, parent))
+	{
+		return QModelIndex();
+	}
+
+	ResourceGroupItem *_parent;
+
+	if (!parent.isValid())
+	{
+		_parent = _root;
+	}
+	else
+	{
+		_parent = static_cast<ResourceGroupItem*>(parent.internalPointer());
+	}
+
+	ResourceBaseItem *_child = _parent->child(row);
+	if (_child)
+	{
+		return createIndex(row, 0, _child);
+	}
+	return QModelIndex();
+}
+
+QModelIndex NGM::Model::ResourceItemModel::parent(
+		const QModelIndex &index) const
+{
+	if (!index.isValid())
+	{
+		return QModelIndex();
+	}
+
+	ResourceGroupItem *_parent = static_cast<ResourceBaseItem*>
+			(index.internalPointer())->parent();
+
+	if (_parent == _root)
+	{
+		return QModelIndex();
+	}
+
+	return createIndex(_parent->childNumber(), 0, _parent);
+}
+
+int NGM::Model::ResourceItemModel::rowCount(const QModelIndex &parent) const
+{
+	ResourceBaseItem *_parent;
+	if (!parent.isValid())
+	{
+		_parent = _root;
+	}
+	else
+	{
+		_parent = static_cast<ResourceBaseItem*>(parent.internalPointer());
+	}
+
+	if (_parent->toGroupItem() == nullptr)
+	{
+		return 0;
+	}
+	return _parent->toGroupItem()->count();
+}
+
+int NGM::Model::ResourceItemModel::columnCount(const QModelIndex &) const
+{
+	return 1;
+}
+
+Qt::DropActions NGM::Model::ResourceItemModel::supportedDragActions() const
+{
+	return Qt::CopyAction | Qt::MoveAction;
+}
+
+Qt::DropActions NGM::Model::ResourceItemModel::supportedDropActions() const
+{
+	return Qt::CopyAction | Qt::MoveAction;
+}
+
+QStringList NGM::Model::ResourceItemModel::mimeTypes() const
+{
+	return QStringList("Natural-GM/Model-Drag");
+}
+QMimeData *NGM::Model::ResourceItemModel::mimeData(
+		const QModelIndexList &indexes) const
+{
+	qDebug() << "Mr. Mime";
+	QMimeData *mimeData = new QMimeData();
+
+	std::stringstream ss;
+	QByteArray array;
+	for (QModelIndexList::const_iterator i = indexes.begin();
+		 i != indexes.end(); ++i)
+	{
+		ss << i->internalPointer() << std::endl;
+		qDebug() << i->internalPointer();
+	}
+	std::string str = ss.str();
+	array.append(str.c_str(), str.size());
+	mimeData->setData(QStringLiteral("Natural-GM/Model-Drag"), array);
+	internalMime = mimeData;
+	return mimeData;
+}
+
+bool NGM::Model::ResourceItemModel::dropMimeData(const QMimeData *data,
+	Qt::DropAction action, int row, int, const QModelIndex &parent)
+{
+	// TODO: Optimize by decreasing inputs (process groups at once).
+	qDebug() << "Drop mime";
+	qDebug() << "MIME" << data;
+	if (data->hasFormat(QStringLiteral("Natural-GM/Model-Drag")) &&
+			internalMime == data)
+	{
+		ResourceGroupItem *group = static_cast<ResourceGroupItem*>(
+					parent.internalPointer());
+
+		std::stringstream ss;
+		ss << data->data("Natural-GM/Model-Drag").data();
+		void *ptr = 0;
+		ResourceBaseItem *item;
+		if (row == -1)
+		{
+			row = 0;
+		}
+		while (ss >> ptr)
+		{
+			item = static_cast<ResourceBaseItem*>(ptr);
+			if (item->root() == group->root())
+			{
+				if (!_sort)
+				{
+					item->parent()->move(item->childNumber(), group, row);
+					++row;
+				}
+				else if (group != item->parent())
+				{
+					item->parent()->move(item->childNumber(), group);
+				}
+			}
+		}
+		qDebug() << (action == Qt::MoveAction);
+	}
+	return false;
 }

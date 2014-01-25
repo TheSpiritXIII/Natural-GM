@@ -44,7 +44,7 @@ namespace NGM
 			setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 			setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-			setCentralWidget(new Widget::ProjectWidget(manager));
+			setCentralWidget(new Widget::ProjectWidget(manager, this));
 
 			setMinimumSize(640, 480);
 

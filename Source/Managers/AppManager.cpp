@@ -21,13 +21,17 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "AppManager.hpp"
+#include "ResourceItemModel.hpp"
+#include "ResourceContentItem.hpp"
 #include "Global.hpp"
-#include <QMainWindow>
-#include <QStringList>
 #include <QLocalSocket>
+#include <QStringList>
+#include <QMainWindow>
 #include <QAction>
 #include <QFile>
 
+
+// REMOVE
 #include <QDebug>
 
 #include <iostream>
@@ -133,6 +137,7 @@ namespace NGM
 			}
 
 			setApplicationName(QStringLiteral("Natural GM"));
+			setApplicationDisplayName(applicationName());
 			_settingManager.load();
 
 			connect(&_iconManager, &IconManager::iconsChanged, this, &AppManager::reloadActionIcons);
@@ -234,6 +239,32 @@ namespace NGM
 			connect(_actions[IconManager::Preferences], &QAction::triggered, this, &AppManager::showIncomplete);
 			connect(_actions[IconManager::About], &QAction::triggered, this, &AppManager::showAboutDialog);
 			connect(_actions[IconManager::Plugins], &QAction::triggered, this, &AppManager::showIncomplete);
+
+			_model = new Model::ResourceItemModel(nullptr);
+			//_model->setSort(true);
+
+			Resource::Project *project = _projectManager.findProject("GML Script");
+			qDebug() << project;
+			Model::ResourceProjectItem *item = new Model::ResourceProjectItem(nullptr, project, "C:/Intel/Poo.pee", 0);
+			_model->insert(item);
+
+			Model::ResourceGroupItem *group2 = new Model::ResourceGroupItem("Group 2");
+			item->insert(group2);
+
+			Model::ResourceGroupItem *group1 = new Model::ResourceGroupItem("Group 1");
+			item->insert(group1);
+
+			Model::ResourceContentItem *item1 = new Model::ResourceContentItem(nullptr, "Item 1");
+			group1->insert(item1);
+
+			Model::ResourceContentItem *item2 = new Model::ResourceContentItem(nullptr, "Item 2");
+			group2->insert(item2);
+
+			Model::ResourceContentItem *item4 = new Model::ResourceContentItem(nullptr, "Item 4");
+			group2->insert(item4);
+
+			Model::ResourceContentItem *item3 = new Model::ResourceContentItem(nullptr, "Item 3");
+			group2->insert(item3);
 
 			createWindow();
 

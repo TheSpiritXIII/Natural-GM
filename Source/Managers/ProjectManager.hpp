@@ -22,7 +22,7 @@
 #ifndef NGM__PROJECTMANAGER__HPP
 #define NGM__PROJECTMANAGER__HPP
 #include <QString>
-#include <QSet>
+#include <QList>
 
 #include <map>
 #include <QIcon>
@@ -43,9 +43,10 @@ namespace NGM
 	}
 	namespace Manager
 	{
-		class IconManager;
 		class WindowManager;
 		class ActionManager;
+
+		typedef QList<Resource::Project*>::iterator ProjectIterator;
 
 		/**************************************************//*!
 		*	@brief	Iterates through a set of project's
@@ -59,8 +60,7 @@ namespace NGM
 			*	@brief	Creates a project icon iterator using
 			*			a project set iterator.
 			******************************************************/
-			ProjectIconIterator(const QSet<Resource::Project*>::iterator &i) :
-				_i(i) {}
+			ProjectIconIterator(ProjectIterator i) : _i(i) {}
 
 			/**************************************************//*!
 			*	@brief	Returns the name of the project at the
@@ -83,7 +83,7 @@ namespace NGM
 			*	@brief	Returns whether or not the iterators
 			*			match.
 			******************************************************/
-			inline bool operator==(const QSet<Resource::Project*>::iterator &i) const
+			inline bool operator==(const ProjectIterator &i) const
 			{
 				return _i == i;
 			}
@@ -101,7 +101,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Stores the project set iterator.
 			******************************************************/
-			QSet<Resource::Project*>::iterator _i;
+			ProjectIterator _i;
 		};
 
 		/**************************************************//*!
@@ -120,29 +120,6 @@ namespace NGM
 			*	@brief	Deallocates all project types.
 			******************************************************/
 			~ProjectManager();
-
-			///	DEPRECATED
-			void registerProject(Resource::Serializer *serializer,
-				const QString &name, const QString &category,
-				const QString &description, const QStringList extensions,
-				Resource::Type *type);
-
-			///	DEPRECATED
-			void registerFile(Resource::Serializer *serializer,
-				const QString &name, const QString &category,
-				const QString &description, const QStringList extensions,
-				Resource::Type *type);
-
-			///	DEPRECATED
-			void registerType(const QString &name, Resource::Type *type);
-
-			///	DEPRECATED
-			void registerType(const QString &name, Resource::Factory *factory, size_t size = 0);
-
-			/**************************************************//*!
-			*	@brief	Returns the type with the specified name.
-			******************************************************/
-			const Resource::Type *getType(const QString &name) const;
 
 			///	DEPRECATED
 			const std::multimap<const QString, Resource::Project*>&
@@ -180,10 +157,35 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Returns all projects sorted into
 			*			different categories.
+			*	@param	categoryFilter The categories that are
+			*			allowed to be listed.
 			******************************************************/
 			void projectsByCategories
 				(QVector<QVector<Resource::Project*>> *list,
 				 const QStringList &categoryFilter) const;
+
+			/**************************************************//*!
+			*	@brief	Adds a project.
+			******************************************************/
+			void addProject(Resource::Project *project);
+
+			/**************************************************//*!
+			*	@brief	Returns the project with the specified
+			*			name. This is O(n).
+			******************************************************/
+			// TODO: Maybe make this const.
+			Resource::Project *findProject(const QString &name);
+
+			/**************************************************//*!
+			*	@brief	Adds a type.
+			******************************************************/
+			void addType(Resource::Type *type);
+
+			/**************************************************//*!
+			*	@brief	Returns the type with the specified name.
+			*			This is O(logn).
+			******************************************************/
+			const Resource::Type *findType(const QString &name) const;
 
 			/**************************************************//*!
 			*	@brief	Returns an icon iterator, starting at
@@ -217,7 +219,7 @@ namespace NGM
 			******************************************************/
 			Resource::GMXSerializer gmxSerializer;
 
-			QSet<Resource::Type*> _types;
+			QList<Resource::Type*> _types;
 
 			/**************************************************//*!
 			*	@brief	Stores all registered types.
@@ -233,7 +235,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Stores all registered project types.
 			******************************************************/
-			QSet<Resource::Project*> _projects;
+			QList<Resource::Project*> _projects;
 
 			///	DEPRECATED
 			friend class NGM::Manager::WindowManager;

@@ -23,57 +23,51 @@
 #include <queue>
 using std::queue;
 
-#include <QDebug>
+NGM::Model::SortGroupProxyModel::SortGroupProxyModel(QObject *parent) :
+	QSortFilterProxyModel(parent) {}
 
-namespace NGM
+bool NGM::Model::SortGroupProxyModel::filterAcceptsRow(int row,
+	const QModelIndex &parent) const
 {
-	namespace Model
+	if (QSortFilterProxyModel::filterAcceptsRow(row, parent))
 	{
-		SortGroupProxyModel::SortGroupProxyModel(QObject *parent) : QSortFilterProxyModel(parent) {}
+		return true;
+	}
 
-		bool SortGroupProxyModel::filterAcceptsRow(int row, const QModelIndex &parent) const
+	if (filterRegExp().isEmpty())
+	{
+		return true;
+	}
+
+	QModelIndex p = parent;
+	while (p.isValid())
+	{
+		if (QSortFilterProxyModel::filterAcceptsRow(p.row(), p.parent()))
 		{
-			if (QSortFilterProxyModel::filterAcceptsRow(row, parent))
+			return true;
+		}
+		p = p.parent();
+	}
+
+	int rowCount;
+	queue<QModelIndex> q;
+	q.push(sourceModel()->index(row, 0, parent));
+
+	while (!q.empty())
+	{
+		p = q.front();
+		q.pop();
+
+		rowCount = sourceModel()->rowCount(p);
+		for (int i = 0; i != rowCount; ++i)
+		{
+			if (QSortFilterProxyModel::filterAcceptsRow(i, p))
 			{
 				return true;
 			}
-
-			if (filterRegExp().isEmpty())
-			{
-				return true;
-			}
-
-			QModelIndex p = parent;
-			while (p.isValid())
-			{
-				if (QSortFilterProxyModel::filterAcceptsRow(p.row(), p.parent()))
-				{
-					return true;
-				}
-				p = p.parent();
-			}
-
-			int rowCount;
-			queue<QModelIndex> q;
-			q.push(sourceModel()->index(row, 0, parent));
-
-			while (!q.empty())
-			{
-				p = q.front();
-				q.pop();
-
-				rowCount = sourceModel()->rowCount(p);
-				for (int i = 0; i != rowCount; ++i)
-				{
-					if (QSortFilterProxyModel::filterAcceptsRow(i, p))
-					{
-						return true;
-					}
-					q.push(sourceModel()->index(i, 0, p));
-				}
-			}
-
-			return false;
+			q.push(sourceModel()->index(i, 0, p));
 		}
 	}
+
+	return QSortFilterProxyModel::filterAcceptsRow(row, parent);
 }

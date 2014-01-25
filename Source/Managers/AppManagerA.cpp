@@ -182,3 +182,11 @@ namespace NGM
 		}
 	}
 }
+
+// REMOVE
+#include <QDebug>
+
+void NGM::Manager::AppManager::customEvent(QEvent *)
+{
+	qDebug() << "Obtained custom event.";
+}

@@ -47,7 +47,9 @@ namespace NGM
 		{
 			ProjectPointer project;
 			QString location, templater;
-			Dialog::ProjectDialog2 d(this, &project, &location, &templater, 0);
+			Manager::ProjectPreferences preferences;
+			Dialog::ProjectDialog2 d(this, &project, &location, &templater,
+									 &preferences);
 			d.setWindowIcon(*_iconManager.applicationIcon());
 			if (d.exec() == QDialog::Accepted)
 			{

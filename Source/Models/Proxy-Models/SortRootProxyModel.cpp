@@ -24,74 +24,69 @@
 #include <QDebug>
 #endif
 
-namespace NGM
+NGM::Model::SortRootProxyModel::SortRootProxyModel(QObject *parent) :
+	SortGroupProxyModel(parent), _sourceView(nullptr), _priority(0) {}
+
+void NGM::Model::SortRootProxyModel::setSourceModel(QAbstractItemModel *source)
 {
-	namespace Model
+	if (sourceModel())
 	{
-		SortRootProxyModel::SortRootProxyModel(QObject *parent) :
-			SortGroupProxyModel(parent), _sourceView(nullptr), _priority(0) {}
-
-		void SortRootProxyModel::setSourceModel(QAbstractItemModel *source)
-		{
-			if (sourceModel())
-			{
-				disconnect(sourceModel(), &QAbstractItemModel::rowsRemoved,
-						   this, &SortRootProxyModel::updatePriority);
-			}
-			QAbstractProxyModel::setSourceModel(source);
-			connect(source, &QAbstractItemModel::rowsRemoved,
-					this, &SortRootProxyModel::updatePriority);
-		}
-
-		QVariant SortRootProxyModel::data(const QModelIndex &index, int role) const
-		{
-			if (role == Qt::FontRole && !index.parent().isValid() && index.row() == _priority)
-			{
-				QFont font;
-				font.setBold(true);
-				return font;
-			}
-			if (role == Qt::DecorationRole && _sourceView->isExpanded(index))
-			{
-				return QSortFilterProxyModel::data(index, DecorationExpandRole);
-			}
-			return QSortFilterProxyModel::data(index, role);
-		}
-
-		void SortRootProxyModel::setSourceView(QTreeView *sourceView)
-		{
-			if (sourceView->model() == this)
-			{
-				_sourceView = sourceView;
-			}
-	#ifdef QT_DEBUG
-			else
-			{
-				qWarning() << "Natural::SortFolderProxyModel: Invalid view.";
-			}
-	#endif
-		}
-
-		QTreeView *SortRootProxyModel::sourceView() const
-		{
-			return _sourceView;
-		}
-
-		bool SortRootProxyModel::filterAcceptsRow(int row, const QModelIndex &parent) const
-		{
-			if (!parent.isValid())
-			{
-				return true;
-			}
-			return SortGroupProxyModel::filterAcceptsRow(row, parent);
-		}
-
-		void SortRootProxyModel::updatePriority(const QModelIndex &, int, int)
-		{
-			while (_priority < sourceModel()->rowCount())
-			{
-				--_priority;
-			}
-		}
+		disconnect(sourceModel(), &QAbstractItemModel::rowsRemoved,
+				   this, &SortRootProxyModel::updatePriority);
 	}
+	QSortFilterProxyModel::setSourceModel(source);
+	connect(source, &QAbstractItemModel::rowsRemoved,
+			this, &SortRootProxyModel::updatePriority);
+}
+
+QVariant NGM::Model::SortRootProxyModel::data(const QModelIndex &index,
+											  int role) const
+{
+	if (role == Qt::FontRole && !index.parent().isValid() &&
+			index.row() == _priority)
+	{
+		QFont font;
+		font.setBold(true);
+		return font;
+	}
+	if (role == Qt::DecorationRole && _sourceView->isExpanded(index))
+	{
+		return QSortFilterProxyModel::data(index, DecorationExpandRole);
+	}
+	return QSortFilterProxyModel::data(index, role);
+}
+
+void NGM::Model::SortRootProxyModel::setSourceView(QTreeView *sourceView)
+{
+	if (sourceView->model() == this)
+	{
+		_sourceView = sourceView;
+	}
+#ifdef QT_DEBUG
+	else
+	{
+		qWarning() << "Natural::SortFolderProxyModel: Invalid view.";
+	}
+#endif
+}
+
+void NGM::Model::SortRootProxyModel::setPriority(int index)
+{
+	if (rowCount() < index && index > 0)
+	{
+		_priority = index;
+	}
+	_updatePriority();
+}
+
+bool NGM::Model::SortRootProxyModel::filterAcceptsRow(int row,
+	const QModelIndex &parent) const
+{
+	return SortGroupProxyModel::filterAcceptsRow(row, parent);
+}
+
+void NGM::Model::SortRootProxyModel::updatePriority(const QModelIndex &,
+													int, int)
+{
+	_updatePriority();
 }

@@ -26,29 +26,31 @@ DEFINES		+=	QSCINTILLA_DLL
 #   Include locations.
 #----------------------------------------------
 INCLUDEPATH	+=	$$PWD/ \
-	Windows \
 	Classes/ErrorLogger \
 	Classes/RapidXML \
 	Classes/Delegates \
 	Classes/RapidJSON \
-	Managers \
-	Models \
-	Dialogs \
-	Widgets \
-	Resources \
 	Containers \
+	Dialogs \
+	Events \
+	Widgets \
+	Models \
+	Managers \
 	Models/ResourceItemModel \
 	Models/Proxy-Models \
 	Models/ProjectItemModel \
+	Resources \
 	Resources/Serializers \
 	Resources/Base \
 	Resources/Editors \
 	Resources/Types \
 	Resources/Plugins \
+	Threads \
 	Widgets/Windows \
 	Widgets/Dock-Widgets \
 	Widgets/Widgets \
-	Widgets/Dialogs
+	Widgets/Dialogs \
+	Windows
 #----------------------------------------------
 #   Header files.
 #----------------------------------------------
@@ -61,7 +63,6 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Managers/ProjectManager.hpp \
 	Resources/Serializers/TextSerializer.hpp \
 	Widgets/ResourceTab.hpp \
-	Widgets/ResourceSplitter.hpp \
 	Models/ResourceItemModel/ResourceBaseItem.hpp \
 	Models/ResourceItemModel/ResourceContentItem.hpp \
 	Models/ResourceItemModel/ResourceGroupItem.hpp \
@@ -84,7 +85,6 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Widgets/ResourceSplitterHandle.hpp \
 	Widgets/HighlightWidget.hpp \
 	Widgets/ResourceTabBar.hpp \
-	Models/ResourceItemModel/ResourceProxyModel.hpp \
 	Containers/String.hpp \
 	Containers/Map.hpp \
 	Containers/Vector.hpp \
@@ -118,7 +118,12 @@ HEADERS		+=	Windows/MainWindow.hpp \
     Models/ProjectItemModel/ProjectSetItemModel.hpp \
     Models/ProjectItemModel/ProjectSetModelItem.hpp \
     Models/ProjectItemModel/ProjectItemModel.hpp \
-    Classes/Delegates/SizableItemDelegate.hpp
+    Classes/Delegates/SizableItemDelegate.hpp \
+    Widgets/ResourceSplitter.hpp \
+    Widgets/StatusBars/StatusBar.hpp \
+    Events/ProgressEvent.hpp \
+    Threads/SerializerThread.hpp \
+    Events/ResourceModelEvent.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -144,7 +149,6 @@ SOURCES		+= \
 	Widgets/HighlightWidget.cpp \
 	Widgets/ResourceTabBar.cpp \
 	Resources/Serializers/GMXSerializer.cpp \
-	Models/ResourceItemModel/ResourceProxyModel.cpp \
 	Managers/PluginManager.cpp \
 	Widgets/Dock-Widgets/DockWidget.cpp \
 	Managers/PropertyManager.cpp \
@@ -164,7 +168,14 @@ SOURCES		+= \
     Models/ProjectItemModel/ProjectSetItemModel.cpp \
     Resources/Base/FileDetails.cpp \
     Classes/Delegates/SizableItemDelegate.cpp \
-    Managers/SettingManager.cpp
+    Managers/SettingManager.cpp \
+    Models/ResourceItemModel/ResourceProjectItem.cpp \
+    Models/ResourceItemModel/ResourceContentItem.cpp \
+    Widgets/StatusBars/StatusBar.cpp \
+    Resources/Base/Serializer.cpp \
+    Events/ProgressEvent.cpp \
+    Threads/SerializerThread.cpp \
+    Events/ResourceModelEvent.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------

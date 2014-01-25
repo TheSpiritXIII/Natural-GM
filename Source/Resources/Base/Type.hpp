@@ -149,6 +149,16 @@ namespace NGM
 				return this->name < right;
 			}
 
+			static bool lessThan(const Type *lhs, const Type *rhs)
+			{
+				return lhs->name < rhs->name;
+			}
+
+			static bool lessThanText(const Type *lhs, const QString &rhs)
+			{
+				return lhs->name < rhs;
+			}
+
 		private:
 
 			/**************************************************//*!

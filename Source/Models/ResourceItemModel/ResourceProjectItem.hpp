@@ -2,7 +2,7 @@
  *  @file ResourceProjectItem.hpp
  *  @section License
  *
- *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2013-2014 Daniel Hrabovcak
  *
  *      This file is a part of the Natural GM IDE.
  *
@@ -19,16 +19,11 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#pragma once
-#ifndef _NGM_RESOURCEPROJECTITEM__HPP
-#define _NGM_RESOURCEPROJECTITEM__HPP
+#ifndef NGM__RESOURCEPROJECTITEM__HPP
+#define NGM__RESOURCEPROJECTITEM__HPP
 #include "ResourceGroupItem.hpp"
-#include "ResourceContentItem.hpp"
-#include <stdint.h>
-#include <set>
-#include <map>
-#include <string>
-#include <QDebug>
+
+// TODO: Maybe move resource and project type to private and make const?
 
 namespace NGM
 {
@@ -39,10 +34,24 @@ namespace NGM
 	}
 	namespace Model
 	{
-		class ResourceProjectItem : public ResourceGroupItem
+		/**************************************************//*!
+		*	@see	ResourceProjectItem::Setting
+		******************************************************/
+		typedef uint8_t ProjectSettings;
+
+		/**************************************************//*!
+		*	@brief	An item that stores both children and
+		*			project metadata.
+		*
+		* As this item requires a filepath, it is recommended
+		* not to use ProjectBaseItem::setText(), as this will
+		* cause confusion. Instead, use setFilepath().
+		******************************************************/
+		class ResourceProjectItem final : public ResourceGroupItem
 		{
 		public:
 
+			/// DEPRECATED.
 			enum Settings
 			{
 				isPreloaded		=	0x01,	// Changes the way the serializer works.
@@ -50,55 +59,96 @@ namespace NGM
 			};
 
 			/**************************************************//*!
-			*	@brief Creates an item with the indicated name.
+			*	@brief	Settings that change the way that the
+			*			users is able to interact with items.
 			******************************************************/
-			ResourceProjectItem(NGM::Resource::Resource *resource, NGM::Resource::Project *project,
-								const QString &filepath, const uint8_t &settings) :
-				ResourceGroupItem("Yes"), resource(resource), project(project), settings(settings)
+			enum Setting
 			{
-				int split = filepath.lastIndexOf('/')+1;
-				_text = filepath.right(filepath.size()-split);
-				dir = filepath.left(split);
-				qDebug() << dir;
-			}
+				Temporary		=	0x01,	/*!< Denotes that the project is
+												temporary and as such, be cached
+												wherever possible. */
+				NoDuplicates	=	0x02,	/*!< Disallows duplicate naming when
+												a project is renamed. All items
+												are checked. */
+				NoSubDuplicates	=	0x06,	/*!< Disallows duplicate naming when
+												a project is renamed. Only the
+												current subcategory is
+												checked. */
+				AllowSubMoving	=	0x08,	/*!< Allows the user to move items
+												only in their containing sub
+												categories. */
+				AllowMoving		=	0x18,	/*!< Allows the user to move items
+												around in the tree. */
+				NoStaticSubCat	=	0x20,	/*!< Indicates that the sub
+												categories are not static, and
+												can be moved. This flag also
+												allows sub categories to be
+												renamed. */
+				CreateGroups	=	0x40	/*!< Allows the user to create
+												groups, where they are able
+												to move their items. */
+			};
 
-			const QString directory()
+			/// DEPRECATED
+			ResourceProjectItem(NGM::Resource::Resource *resource,
+				NGM::Resource::Project *project, const QString &filepath,
+				ProjectSettings settings);
+
+			/**************************************************//*!
+			*	@brief	Returns the directory that this item is
+			*			stored in.
+			******************************************************/
+			inline const QString directory() const
 			{
-				return dir;
+				return _directory;
 			}
 
 			/**************************************************//*!
-			 *	@brief The resource of the item that this item represents.
+			*	@brief	Returns the file name. This is also the
+			*			display name.
 			******************************************************/
+			inline const QString filename() const
+			{
+				return _filename;
+			}
+
+			/**************************************************//*!
+			*	@brief	Changes the internal filepath and updates
+			*			the item display text.
+			******************************************************/
+			void setFilepath(const QString filepath);
+
+			/// INCOMPLETE
 			Resource::Resource *resource;
 
-			/**************************************************//*!
-			 *	@brief The project that all resources depend on.
-			******************************************************/
+			/// INCOMPLETE
 			Resource::Project *project;
 
 			/**************************************************//*!
-			 *	@brief The project that all resources depend on.
+			*	@brief	Returns a safe case to a this.
 			******************************************************/
-			const uint8_t settings;
-
-			/**************************************************//*!
-			*	@return A safe case to a ResourceProjectItem. Returns this.
-			******************************************************/
-			ResourceProjectItem *toProjectItem()
-			{
-				return this;
-			}
+			ResourceProjectItem *toProjectItem();
 
 		private:
 
-			std::map<std::string, std::set<ResourceContentItem*>> cache;
+			/**************************************************//*!
+			*	@brief	Contains the directory that the project
+			*			is stored in.
+			******************************************************/
+			QString _directory;
 
-			QString dir;
-			QString file;
+			/**************************************************//*!
+			*	@brief	Contains the filename.
+			*	@see	_directory
+			******************************************************/
+			QString _filename;
 
+			/**************************************************//*!
+			*	@brief	Project interaction hints.
+			******************************************************/
+			ProjectSettings _settings;
 		};
 	}
 }
 
-#endif // _NGM_RESOURCEPROJECTITEM__HPP
+#endif // NGM__RESOURCEPROJECTITEM__HPP

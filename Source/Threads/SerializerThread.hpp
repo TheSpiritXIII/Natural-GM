@@ -1,5 +1,5 @@
 /**
- *  @file HierarchyDockWidget.hpp
+ *  @file SerializerThread.hpp
  *	@section License
  *
  *      Copyright (C) 2013-2014 Daniel Hrabovcak
@@ -19,88 +19,89 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef NGM__HIERARCHYDOCKWIDGET__HPP
-#define NGM__HIERARCHYDOCKWIDGET__HPP
-#include "DockWidget.hpp"
-
-class QLineEdit;
-class QTreeView;
-/*
-Plugins also need to do (related):
-- Close project.
-- Open project.
-- Rename file/project.
-- Add item.
-*/
+#ifndef NGM__SERIALIZERTHREAD__HPP
+#define NGM__SERIALIZERTHREAD__HPP
+#include <QThread>
+#include <QMutex>
 
 namespace NGM
 {
-	namespace Manager
+	namespace Resource
 	{
-		class AppManager;
+		class Serializer;
 	}
-	namespace Model
-	{
-		class SortRootProxyModel;
-	}
-	namespace Widget
+	namespace Thread
 	{
 		/**************************************************//*!
-		*	@brief	A dock widget that displays resources in
-		*			a proxy model. Also includes a filter
-		*			edit.
+		*	@brief	A thread that has the ability to load,
+		*			save or create a project using a
+		*			serializer.
 		******************************************************/
-		class HierarchyDockWidget : public DockWidget
+		class SerializerThread : public QThread
 		{
+			Q_OBJECT
+
 		public:
 
 			/**************************************************//*!
-			*	@brief	Creates a dock widget with a manager, a
-			*			title, a parent and flags.
+			*	@brief	Possible commands that can be executed
+			*			with serializers.
 			******************************************************/
-			HierarchyDockWidget(Manager::AppManager *manager, const
-				QString &title, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+			enum class Command : char
+			{
+				Create	=	0,	/*!< Creates the project layout. */
+				Load	=	1,	/*!< Loads the project layout. */
+				Save	=	2,	/*!< Saves the project layout. */
+				Reload	=	3	/*!< Requests a reload of the project layout. */
+			};
 
 			/**************************************************//*!
-			*	@brief	Expands the indicated root row and all of
-			*			its children.
+			*	@brief	Creates a thread object with the
+			*			indicated parent.
 			******************************************************/
-			void expandRoot(const int &row);
+			SerializerThread(QObject *parent = 0);
 
 			/**************************************************//*!
-			*	@brief	Collapses the indicated root row and all
-			*			of its children.
+			*	@brief	Sets a command to be executed and the
+			*			serializer to execute when the thread is
+			*			started. This function will be blocked
+			*			if the thread is running. However, a
+			*			deadlock can always occur.
 			******************************************************/
-			void collapseRoot(const int &row);
+			void setSerializer(Resource::Serializer *serializer,
+							   Command command);
+
+		protected:
 
 			/**************************************************//*!
-			*	@brief	Expands the indicated root row.
+			*	@brief	Executes the stored serializer with the
+			*			stored command. This function is blocked
+			*			when setSerializer() is used. In
+			*			addition, the serializer and commands
+			*			are erased after the command is finished
+			*			executing.
 			******************************************************/
-			void expandRow(const int &row);
-
-			/**************************************************//*!
-			*	@brief	Collapses the indicated root row.
-			******************************************************/
-			void collapseRow(const int &row);
+			void run();
 
 		private:
 
 			/**************************************************//*!
-			*	@brief	Displays a filtered resource model.
+			*	@brief	Reponsible for blocking data.
 			******************************************************/
-			QTreeView *_treeView;
+			QMutex _mutex;
 
 			/**************************************************//*!
-			*	@brief	Stores the search index.
+			*	@brief	Stores the serializer to be executed.
 			******************************************************/
-			QLineEdit *_filterEdit;
+			Resource::Serializer *_serializer;
 
 			/**************************************************//*!
-			*	@brief	Stores the display model->
+			*	@brief	Stores the command to be executed to the
+			*			serializer.
 			******************************************************/
-			Model::SortRootProxyModel *model;
+			Command _command;
 		};
 	}
 }
 
-#endif // NGM__HIERARCHYDOCKWIDGET__HPP
+#endif // NGM__SERIALIZERTHREAD__HPP

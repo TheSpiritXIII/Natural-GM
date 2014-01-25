@@ -22,6 +22,7 @@
 #ifndef NGM__SORTROOTPROXYMODEL__H
 #define NGM__SORTROOTPROXYMODEL__H
 #include "SortGroupProxyModel.hpp"
+#include <cassert>
 
 namespace NGM
 {
@@ -69,31 +70,29 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Requests data from the source model.
 			******************************************************/
-			virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+			virtual QVariant data(const QModelIndex & index,
+								  int role = Qt::DisplayRole) const;
 
 			/**************************************************//*!
 			*	@brief	Stores the tree view. The tree view must
 			*			display this proxy model.
 			******************************************************/
-			virtual void setSourceView(QTreeView *sourceView);
+			void setSourceView(QTreeView *sourceView);
 
 			/**************************************************//*!
 			*	@brief	Returns the current source view.
 			******************************************************/
-			QTreeView *sourceView() const;
+			inline QTreeView *sourceView() const
+			{
+				return _sourceView;
+			}
 
 			/**************************************************//*!
 			*	@brief	Set the priority index (it is bolded).
 			*			Setting this to any value outside the
 			*			children range will not work.
 			******************************************************/
-			inline void setPriority(int index)
-			{
-				if (rowCount() < index)
-				{
-					_priority = index;
-				}
-			}
+			void setPriority(int index);
 
 			/**************************************************//*!
 			*	@brief	Returns the current index that has
@@ -131,6 +130,19 @@ namespace NGM
 			*	@brief	Stores the priority root index.
 			******************************************************/
 			int _priority;
+
+			/**************************************************//*!
+			*	@brief	Verifies that the priority is in the
+			*			correct range.
+			******************************************************/
+			inline void _updatePriority()
+			{
+				assert(_priority >= 0);
+				while (_priority > sourceModel()->rowCount())
+				{
+					--_priority;
+				}
+			}
 		};
 	}
 }

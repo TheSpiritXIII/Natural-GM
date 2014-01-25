@@ -133,14 +133,6 @@ namespace NGM
 			*			hint, it does not need to be true.
 			******************************************************/
 			const ProjectType projectType;
-
-			/**************************************************//*!
-			*	@brief	Sorts projects by name.
-			******************************************************/
-			inline bool operator<(const Project &other)
-			{
-				return name < other.name;
-			}
 		};
 	}
 }

@@ -20,11 +20,12 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "HierarchyDockWidget.hpp"
-#include "SerialData.hpp"
+#include "ResourceItemModel.hpp"
+#include "SortRootProxyModel.hpp"
+#include "AppManager.hpp"
 #include <QVBoxLayout>
 #include <QTreeView>
 #include <QLineEdit>
-using namespace NGM::Resource;
 
 #include <queue>
 using std::queue;
@@ -33,8 +34,6 @@ NGM::Widget::HierarchyDockWidget::HierarchyDockWidget(
 		Manager::AppManager *manager, const QString &title, QWidget *parent,
 		Qt::WindowFlags flags) : DockWidget(title, parent, flags)
 {
-	Q_UNUSED(manager);
-	// TO DO
 	QWidget *baseWidget = new QWidget(this);
 	QVBoxLayout *layout = new QVBoxLayout(baseWidget);
 	layout->setMargin(0);
@@ -47,27 +46,33 @@ NGM::Widget::HierarchyDockWidget::HierarchyDockWidget(
 	connect(_filterEdit, &QLineEdit::textChanged,
 			model, &Model::SortRootProxyModel::setFilterFixedString);
 
-	QTreeView *treeView = new QTreeView(baseWidget);
-	//model->setSourceModel(manager->model());
-	treeView->setModel(model);
-	model->setSourceView(treeView);
+	_treeView = new QTreeView(baseWidget);
+	_treeView->setAcceptDrops(true);
+	_treeView->setHeaderHidden(true);
+	_treeView->setUniformRowHeights(true);
+	_treeView->setDropIndicatorShown(true);
+	_treeView->setDragEnabled(true);
+	_treeView->setSelectionMode(QAbstractItemView::ContiguousSelection);
+	_treeView->setDragDropMode(QAbstractItemView::InternalMove);
+	model->setSourceModel(manager->model());
+	model->setDynamicSortFilter(true);
+	_treeView->setModel(model);
+	model->setSourceView(_treeView);
 
 	layout->addWidget(_filterEdit);
-	layout->addWidget(treeView);
+	layout->addWidget(_treeView);
 	setWidget(baseWidget);
 }
 
 void NGM::Widget::HierarchyDockWidget::expandRoot(const int &row)
 {
-	QTreeView *view = model->sourceView();
-
 	queue<QModelIndex> q;
 	q.push(model->index(row, 0));
 	QModelIndex index;
 	while (!q.empty())
 	{
 		index = q.front();
-		view->expand(index);
+		_treeView->expand(index);
 		q.pop();
 
 		for (int i = 0; i != model->rowCount(index); ++i)
@@ -79,15 +84,13 @@ void NGM::Widget::HierarchyDockWidget::expandRoot(const int &row)
 
 void NGM::Widget::HierarchyDockWidget::collapseRoot(const int &row)
 {
-	QTreeView *view = model->sourceView();
-
 	queue<QModelIndex> q;
 	q.push(model->index(row, 0));
 	QModelIndex index;
 	while (!q.empty())
 	{
 		index = q.front();
-		view->collapse(index);
+		_treeView->collapse(index);
 		q.pop();
 
 		for (int i = 0; i != model->rowCount(index); ++i)
@@ -95,4 +98,14 @@ void NGM::Widget::HierarchyDockWidget::collapseRoot(const int &row)
 			q.push(model->index(i, 0, index));
 		}
 	}
+}
+
+void NGM::Widget::HierarchyDockWidget::expandRow(const int &row)
+{
+	_treeView->expand(model->index(row, 0));
+}
+
+void NGM::Widget::HierarchyDockWidget::collapseRow(const int &row)
+{
+	_treeView->collapse(model->index(row, 0));
 }

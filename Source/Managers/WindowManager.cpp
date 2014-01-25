@@ -219,7 +219,7 @@ namespace NGM
 
 		void WindowManager::addProject(Model::ResourceProjectItem *project)
 		{
-			heirarchy->append(project);
+			heirarchy->insert(project);
 		}
 
 		void WindowManager::openProjectDialog(const bool &files)
@@ -574,7 +574,7 @@ namespace NGM
 				Resource::Resource *r = new Resource::Resource(project->type, filename, Resource::Resource::IsFilename);
 				qDebug() << "STATUS NOW:" << r->status;
 				Model::ResourceProjectItem *item = new Model::ResourceProjectItem(r, project, filename, 0);
-				heirarchy->append(item);
+				heirarchy->insert(item);
 				QProgressBar p;
 				project->serializer->structure(item, &projectManager, &p);
 				return item;

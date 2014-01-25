@@ -47,6 +47,7 @@ NGM::Dialog::ProjectDialog2::ProjectDialog2(const Manager::AppManager *manager,
 	_defaultDirectory(manager->settingManager()->defaultDirectory())
 {
 	setMinimumSize(854, 480);
+	setWindowTitle(tr("Create a Project"));
 	QVBoxLayout *layout = new QVBoxLayout(this);
 
 	_projectWidget = new Widget::ProjectWidget(manager, this);
@@ -562,6 +563,7 @@ void NGM::Dialog::ProjectDialog2::setCurrentTemplate()
 
 void NGM::Dialog::ProjectDialog2::cancelPressed()
 {
+	_project->data = nullptr;
 	_location->clear();
 	_template->clear();
 	*_preferences = 0;

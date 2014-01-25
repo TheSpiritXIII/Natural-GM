@@ -469,7 +469,7 @@ namespace NGM
 						qDebug() << path;
 						Resource *resource = new Resource(type, path, Resource::IsFilename);
 						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[8]));
-						item->append(content);
+						item->insert(content);
 
 						SerialObject *imageData = new SerialObject;
 						resource->serialData = imageData;
@@ -502,7 +502,7 @@ namespace NGM
 							qWarning() << "GMX Serializer: sprite: Group name undefined.";
 						}
 						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
+						item->insert(group);
 						addBackground(group, node);
 					}
 				}
@@ -523,7 +523,7 @@ namespace NGM
 					{
 						Resource *resource = new Resource(0, 0, 0);
 						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[11]));
-						item->append(content);
+						item->insert(content);
 
 						SerialObject *imageData = new SerialObject;
 						resource->serialData = imageData;
@@ -555,7 +555,7 @@ namespace NGM
 							qWarning() << "GMX Serializer: background: Group name undefined.";
 						}
 						Model::ResourceGroupItem *group = new Model::ResourceGroupItem(name);
-						item->append(group);
+						item->insert(group);
 						addBackground(group, node);
 					}
 				}
@@ -677,7 +677,7 @@ namespace NGM
 
 									}
 							}
-							item->append(content);
+							item->insert(content);
 						}
 						else if (node->name_size() == len+1)
 						{
@@ -709,7 +709,7 @@ namespace NGM
 								}
 							}
 							group = new Model::ResourceGroupItem(name);
-							item->append(group);
+							item->insert(group);
 							stack.push(Pair<Model::ResourceGroupItem*, xml_node<>*>(group, node));
 						}
 						else
@@ -784,7 +784,7 @@ namespace NGM
 							{
 								content = new Model::ResourceContentItem(resource, name.right(len+position));
 							}
-							item->append(content);
+							item->insert(content);
 						}
 						else if (node->name_size() == len+1)
 						{
@@ -816,7 +816,7 @@ namespace NGM
 								}
 							}
 							group = new Model::ResourceGroupItem(name);
-							item->append(group);
+							item->insert(group);
 							stack.push(Pair<Model::ResourceGroupItem*, xml_node<>*>(group, node));
 						}
 						else

@@ -1,5 +1,5 @@
 /**
- *  @file HierarchyDockWidget.hpp
+ *  @file PriorityStatusBar.hpp
  *	@section License
  *
  *      Copyright (C) 2013-2014 Daniel Hrabovcak
@@ -19,88 +19,98 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef NGM__HIERARCHYDOCKWIDGET__HPP
-#define NGM__HIERARCHYDOCKWIDGET__HPP
-#include "DockWidget.hpp"
+#ifndef NGM__PRIORITYSTATUSBAR__HPP
+#define NGM__PRIORITYSTATUSBAR__HPP
+#include <QStatusBar>
 
-class QLineEdit;
-class QTreeView;
-/*
-Plugins also need to do (related):
-- Close project.
-- Open project.
-- Rename file/project.
-- Add item.
-*/
+class QLabel;
+class QProgressBar;
+
+/*struct WidgetStretch
+{
+	QWidget *widget;
+	int stretch;
+};
+
+typedef QList<WidgetStretch*> WidgetStretchList;*/
 
 namespace NGM
 {
-	namespace Manager
-	{
-		class AppManager;
-	}
-	namespace Model
-	{
-		class SortRootProxyModel;
-	}
 	namespace Widget
 	{
 		/**************************************************//*!
-		*	@brief	A dock widget that displays resources in
-		*			a proxy model. Also includes a filter
-		*			edit.
+		*	@brief	Sends queued messages to StatusBar.
 		******************************************************/
-		class HierarchyDockWidget : public DockWidget
+		class StatusBarMessenger : public QObject
 		{
+			Q_OBJECT
+
+		public:
+
+			StatusBarMessenger() {}
+
+		signals:
+
+			/**************************************************//*!
+			*	@brief	Sets the label text. This is added to the
+			*			slo
+			******************************************************/
+			void setText(const QString &text) const;
+
+			/**************************************************//*!
+			*	@brief	Sets the progress value.
+			******************************************************/
+			void setProgress(int value) const;
+		};
+
+		/**************************************************//*!
+		*	@brief	A status bar with an internal progress
+		*			bar and text label, visible when there is
+		*			an important message.
+		******************************************************/
+		class StatusBar : public QStatusBar
+		{
+			Q_OBJECT
+
 		public:
 
 			/**************************************************//*!
-			*	@brief	Creates a dock widget with a manager, a
-			*			title, a parent and flags.
+			*	@brief	Sets the label and progress bar to
+			*			visible. All other widgets are removed.
+			*	@param	min The minimum value of progress.
+			*	@param	max The maximum value of progress.
 			******************************************************/
-			HierarchyDockWidget(Manager::AppManager *manager, const
-				QString &title, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+			void setProgressLabel(int min, int max);
 
 			/**************************************************//*!
-			*	@brief	Expands the indicated root row and all of
-			*			its children.
+			*	@brief	Adds the indicated widgets with stretches
+			*			to the status bar. If the progress bar is
+			*			visible, then this has no effect.
 			******************************************************/
-			void expandRoot(const int &row);
+			//setWidgets(const WidgetStretchList &widgetStretchList);
 
-			/**************************************************//*!
-			*	@brief	Collapses the indicated root row and all
-			*			of its children.
-			******************************************************/
-			void collapseRoot(const int &row);
-
-			/**************************************************//*!
-			*	@brief	Expands the indicated root row.
-			******************************************************/
-			void expandRow(const int &row);
-
-			/**************************************************//*!
-			*	@brief	Collapses the indicated root row.
-			******************************************************/
-			void collapseRow(const int &row);
+			StatusBarMessenger *messenger();
 
 		private:
 
 			/**************************************************//*!
-			*	@brief	Displays a filtered resource model.
+			*	@brief	The internal label. This is to the right
+			*			of the progress bar.
 			******************************************************/
-			QTreeView *_treeView;
+			QLabel *_label;
 
 			/**************************************************//*!
-			*	@brief	Stores the search index.
+			*	@brief	The internal progress bar. This is to
+			*			the left of the label.
 			******************************************************/
-			QLineEdit *_filterEdit;
+			QProgressBar *_progress;
 
 			/**************************************************//*!
-			*	@brief	Stores the display model->
+			*	@brief	Responsible for sending messages.
 			******************************************************/
-			Model::SortRootProxyModel *model;
+			StatusBarMessenger _messenger;
 		};
 	}
 }
 
-#endif // NGM__HIERARCHYDOCKWIDGET__HPP
+#endif // NGM__PRIORITYSTATUSBAR__HPP

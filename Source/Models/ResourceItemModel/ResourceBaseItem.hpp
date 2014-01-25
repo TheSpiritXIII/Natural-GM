@@ -42,14 +42,11 @@ namespace NGM
 		{
 		public:
 
-			/// DEPRECATED
-			int row() const;
-
 			/**************************************************//*!
-			*	@brief	Virtual, so other item types can delete
-			*			their children.
+			*	@brief	Other item types are responsible for
+			*			deleting their data. This does nothing.
 			******************************************************/
-			virtual ~ResourceBaseItem() {}
+			virtual ~ResourceBaseItem();
 
 			/**************************************************//*!
 			*	@brief	Returns the text of this item.
@@ -62,7 +59,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Sets a new text name for this item.
 			******************************************************/
-			inline void text(const QString &name)
+			inline void setText(const QString &name)
 			{
 				_text = name;
 			}
@@ -70,17 +67,21 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	The model index of the item.
 			******************************************************/
-			const QModelIndex index();
+			const QModelIndex index() const;
 
 			/**************************************************//*!
 			*	@brief	Returns the row number inside its parent.
+			*			If the item cannot be found, then -1 is
+			*			returned.
 			******************************************************/
 			int childNumber() const;
 
 			/**************************************************//*!
-			*	@return The item that holds this as a child, or NULL.
+			*	@brief	Returns the item that stores this item as
+			*			a child, or nullptr if this item is not
+			*			currently stored in anything.
 			******************************************************/
-			inline ResourceBaseItem *parent() const
+			inline ResourceGroupItem *parent() const
 			{
 				return _parent;
 			}
@@ -90,7 +91,7 @@ namespace NGM
 			******************************************************/
 			inline ResourceProjectItem *root() const
 			{
-				return _root;
+				return _project;
 			}
 
 			/**************************************************//*!
@@ -108,46 +109,47 @@ namespace NGM
 			******************************************************/
 			virtual ResourceGroupItem *toGroupItem();
 
+			/**************************************************//*!
+			*	@brief	Returns whether or not the left item is
+			*			less than the right one.
+			******************************************************/
+			static bool lessThan(const ResourceBaseItem *lhs,
+								 const ResourceBaseItem *rhs);
+
 		protected:
 
 			friend class ResourceItemModel;
 			friend class ResourceGroupItem;
-
-			/// DEPRECATED
-			ResourceBaseItem(const QString &name);
-
-			/// DEPRECATED
-			ResourceProjectItem *_root;
 
 			/**************************************************//*!
 			*	@brief	Creates an item with a root and a name.
 			*			The root should be the topmost root of
 			*			this item.
 			******************************************************/
-			ResourceBaseItem(ResourceProjectItem *root = nullptr,
-							 const QString &text = QString());
-
-			/**************************************************//*!
-			*	@brief	Stores the string name of this item.
-			******************************************************/
-			QString _text;
+			ResourceBaseItem(const QString &text = QString());
 
 			/**************************************************//*!
 			*	@brief	Stores the parent. This is defined by
 			*			the parent item during insertions.
 			******************************************************/
-			ResourceBaseItem *_parent;
+			ResourceGroupItem *_parent;
 
 			/**************************************************//*!
 			*	@brief	Holds the topmost root item.
 			******************************************************/
-			ResourceProjectItem *_root2;
+			ResourceProjectItem *_project;
 
 			/**************************************************//*!
-			*	@brief	Stores the model this item is contained
-			*			in. Necessary for obtaining the index.
+			*	@brief	Stores the containing model.
 			******************************************************/
 			ResourceItemModel *_model;
+
+		private:
+
+			/**************************************************//*!
+			*	@brief	Stores the display name of this item.
+			******************************************************/
+			QString _text;
 		};
 	}
 }

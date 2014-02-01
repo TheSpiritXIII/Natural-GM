@@ -232,7 +232,7 @@ namespace NGM
 			{
 				formats.append(i.first);
 				formats.append("( ");
-				for(QString j : i.second->oldExtensions)
+				for(QString j : i.second->extensions.extensions)
 				{
 					formats.append(j);
 					formats.append(" ");
@@ -557,12 +557,12 @@ namespace NGM
 			Model::ResourceProjectItem *projectItem = item->toProjectItem();
 			if (projectItem != nullptr)
 			{
-				projectItem->project->serializer->write(editor, projectItem->resource);
+				projectItem->project()->serializer->write(editor, projectItem->resource);
 			}
 			else
 			{
 				Model::ResourceContentItem *contentItem = item->toContentItem();
-				contentItem->root()->project->serializer->write(editor, contentItem->resource);
+				contentItem->projectItem()->project()->serializer->write(editor, contentItem->content);
 			}
 		}
 
@@ -571,8 +571,8 @@ namespace NGM
 			if (QFile::exists(filename))
 			{
 				qDebug() << "Created normally.";
-				Resource::Resource *r = new Resource::Resource(project->type, filename, Resource::Resource::IsFilename);
-				qDebug() << "STATUS NOW:" << r->status;
+				Resource::Content *r = new Resource::Content(project->type, filename, Resource::Content::IsSystemPath);
+				qDebug() << "STATUS NOW:" << r->settings;
 				Model::ResourceProjectItem *item = new Model::ResourceProjectItem(r, project, filename, 0);
 				heirarchy->insert(item);
 				QProgressBar p;
@@ -586,7 +586,7 @@ namespace NGM
 		{
 			for (auto &i : projectManager.projects)
 			{
-				for (auto &j : (i.second->oldExtensions))
+				for (auto &j : (i.second->extensions.extensions))
 				{
 					if (j == "*.*")
 					{

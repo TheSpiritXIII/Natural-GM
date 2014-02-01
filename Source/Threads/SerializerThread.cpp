@@ -20,18 +20,30 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "SerializerThread.hpp"
+#include "ResourceProjectItem.hpp"
 #include "Serializer.hpp"
+#include "Project.hpp"
 #include <QMutexLocker>
 
+#include <QDebug>
+
 NGM::Thread::SerializerThread::SerializerThread(QObject *parent) :
-		QThread(parent), _serializer(nullptr) {}
+		QThread(parent), _item(nullptr) {}
 
 void NGM::Thread::SerializerThread::setSerializer(
-		Resource::Serializer *serializer, Command command)
+	Model::ResourceProjectItem *item, Command command)
 {
 	QMutexLocker locker(&_mutex);
-	_serializer = serializer;
+	_item = item;
 	_command = command;
+}
+
+NGM::Model::ResourceProjectItem *NGM::Thread::SerializerThread::item()
+{
+	QMutexLocker locker(&_mutex);
+	Model::ResourceProjectItem *i = _item;
+	_item = nullptr;
+	return i;
 }
 
 void NGM::Thread::SerializerThread::run()
@@ -40,16 +52,16 @@ void NGM::Thread::SerializerThread::run()
 	switch (_command)
 	{
 	case Command::Create:
-		//_serializer->layoutCreate();
+		_item->project()->serializer->layoutCreate(_item);
 		break;
 	case Command::Load:
-		//_serializer->layoutLoad(_resourceProjectItem, _serializerOptions);
+		_item->project()->serializer->layoutLoad(_item);
 		break;
 	case Command::Save:
-		//_serializer->layoutLoad(_resourceProjectItem, _serializerOptions);
+		_item->project()->serializer->layoutSave(_item);
 		break;
 	case Command::Reload:
-		//_serializer->layoutReload(_resourceProjectItem, _serializerOptions);
+		_item->project()->serializer->layoutReload(_item);
 		break;
 	}
 }

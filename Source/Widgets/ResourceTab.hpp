@@ -32,7 +32,7 @@ namespace NGM
 	namespace Resource
 	{
 		class Editor;
-		struct Resource;
+		struct Content;
 	}
 	namespace Manager
 	{

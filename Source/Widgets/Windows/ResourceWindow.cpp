@@ -21,6 +21,7 @@
 **/
 #include "ResourceWindow.hpp"
 #include "HierarchyDockWidget.hpp"
+#include "StatusBar.hpp"
 #include "AppManager.hpp"
 #include <QFocusEvent>
 
@@ -28,38 +29,35 @@
 
 #include <QDebug>
 
-namespace NGM
+NGM::Widget::ResourceWindow::ResourceWindow(Manager::AppManager *manager,
+	QWidget *parent) : QMainWindow(parent), _manager(manager)
 {
-	namespace Widget
-	{
-		ResourceWindow::ResourceWindow(Manager::AppManager *manager, QWidget *parent) :
-			QMainWindow(parent), _manager(manager)
-		{
-			setAttribute(Qt::WA_DeleteOnClose);
-			_hierarchyDock = new HierarchyDockWidget(manager, "Hierarchy", this);
-			addDockWidget(Qt::LeftDockWidgetArea, _hierarchyDock);
+	setAttribute(Qt::WA_DeleteOnClose);
+	_hierarchyDock = new HierarchyDockWidget(manager, "Hierarchy", this);
+	addDockWidget(Qt::LeftDockWidgetArea, _hierarchyDock);
 
-			setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
-			setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
-			setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-			setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+	setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+	setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+	setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-			setCentralWidget(new Widget::ProjectWidget(manager, this));
+	setCentralWidget(new Widget::ProjectWidget(manager, this));
 
-			setMinimumSize(640, 480);
+	setMinimumSize(640, 480);
 
-			setFocusPolicy(Qt::StrongFocus);
-		}
+	setFocusPolicy(Qt::StrongFocus);
 
-		void ResourceWindow::keyPressEvent(QKeyEvent *event)
-		{
-			_manager->processKeyPress(event);
-		}
+	_statusBar = new StatusBar(this);
+	setStatusBar(_statusBar);
+}
 
-		void ResourceWindow::focusInEvent(QFocusEvent *event)
-		{
-			_manager->activeResourceWindow = this;
-			event->accept();
-		}
-	}
+void NGM::Widget::ResourceWindow::keyPressEvent(QKeyEvent *event)
+{
+	_manager->processKeyPress(event);
+}
+
+void NGM::Widget::ResourceWindow::focusInEvent(QFocusEvent *event)
+{
+	_manager->activeResourceWindow = this;
+	event->accept();
 }

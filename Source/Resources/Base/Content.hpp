@@ -39,33 +39,38 @@ namespace NGM
 		*	@brief	Holds status flags for resources.
 		*	@see	Resource::Status
 		******************************************************/
-		typedef uint8_t ResourceStatus;
+		typedef uint8_t ResourceSettings;
 
 		/**************************************************//*!
-		*	@brief	Contains resource data.
+		*	@brief	Contains resource content data.
+		*
+		* The file path is optional because there may not be
+		* a file path or the file path is not a system path.
+		* A system path might be helpful to a serializer. For
+		* example, a zip path can be stored that way (because
+		* zip files are not exactly system paths). For this
+		* reason, a boolean exists to test whether or not
+		* the file path was meant to be a system path.
 		******************************************************/
-		struct Resource
+		struct Content
 		{
-
 			/**************************************************//*!
-			*	@brief	Flags that describe the resources's status.
-			*
-			*	IsFilename is probably the most important flag.
-			*	If set, resources can be opened by general
-			*	editors (hex/text editors). The file is also
-			*	added to the file watcher when being opened.
+			*	@brief	Hints for how the user interacts with
+			*			this item.
 			******************************************************/
-			enum Status
+			enum Setting
 			{
-				// Decides whether the resource's location is a true path.
-				IsFilename	=	0x01
+				IsSystemPath	=	0x1,	/*!< Hints that the file path
+												should be a real path. */
+				NoExtension		=	0x2		/*!< Omits the extension when
+												displaying the file name. */
 			};
 
 			/**************************************************//*!
-			*	@brief	Contains the status of the resource.
-			* 	@see	StatusFlags
+			*	@brief	Initializes the resource.
 			******************************************************/
-			ResourceStatus status;
+			Content(const Type *const type, QString filepath = QString(),
+				ResourceSettings settings = 0);
 
 			/**************************************************//*!
 			*	@brief	The type identifier of the resource.
@@ -78,21 +83,19 @@ namespace NGM
 			SerialObject *serialData;
 
 			/**************************************************//*!
-			*	@brief	Stores the file location of the
-			*			resource. The status should have an
-			* 			IsModified flag set if the location
-			*			is set.
+			*	@brief	Stores a filepath.
 			******************************************************/
-			QString location;
-			
-			QIcon icon;
+			QString filepath;
 
 			/**************************************************//*!
-			*	@brief	Initializes the resource.
+			*	@brief	Resource display hints.
 			******************************************************/
-			Resource(const Type * const type, QString location,
-				const ResourceStatus status = 0);
+			ResourceSettings settings;
 
+			/**************************************************//*!
+			*	@brief	The resource display icon.
+			******************************************************/
+			QIcon icon;
 		};
 	}
 }

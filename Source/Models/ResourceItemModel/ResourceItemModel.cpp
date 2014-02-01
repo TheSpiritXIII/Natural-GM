@@ -36,6 +36,8 @@
 #include "Project.hpp"
 #include "Type.hpp"
 
+#include "Serializer.hpp"
+
 QMimeData *NGM::Model::ResourceItemModel::internalMime = nullptr;
 
 NGM::Model::ResourceItemModel::ResourceItemModel(
@@ -78,7 +80,7 @@ QVariant NGM::Model::ResourceItemModel::data(const QModelIndex &index,
 		return QVariant();
 	}
 
-	if (role == Qt::DisplayRole)
+	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		return static_cast<ResourceBaseItem*>(index.internalPointer())->text();
 	}
@@ -87,7 +89,7 @@ QVariant NGM::Model::ResourceItemModel::data(const QModelIndex &index,
 		ResourceBaseItem *item = static_cast<ResourceBaseItem*>(index.internalPointer());
 		if (item->toProjectItem() != nullptr)
 		{
-			if (item->toProjectItem()->project->type)
+			if (item->toProjectItem()->project()->type)
 			{
 				//return item->toProjectItem()->project->type->getIcon(item->toProjectItem()->resource->serialData);
 			}
@@ -122,17 +124,11 @@ Qt::ItemFlags NGM::Model::ResourceItemModel::flags(
 			return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
 					Qt::ItemIsDragEnabled;
 		}
-		if (1) // If flag is set.
-		{
-			ResourceGroupItem *group = item->toGroupItem();
-			if (group && (group->parent() == _root /* && flag is set. */))
-			{
-				return Qt::ItemIsEnabled;
-			}
-		}
-		return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
+		return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
+			   Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled |
+			   Qt::ItemIsEditable;
 	}
-	return Qt::ItemIsEnabled;
+	return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
 }
 
 QVariant NGM::Model::ResourceItemModel::headerData(Qt::Orientation,
@@ -270,14 +266,54 @@ bool NGM::Model::ResourceItemModel::dropMimeData(const QMimeData *data,
 		{
 			row = 0;
 		}
+		qDebug() << group;
 		while (ss >> ptr)
 		{
 			item = static_cast<ResourceBaseItem*>(ptr);
-			if (item->root() == group->root())
+			qDebug() << ResourceBaseItem::IsStatic;
+			qDebug() << item->text() << item->flags();
+			if (item->flags() & ResourceBaseItem::NotMovable)
 			{
+				continue;
+			}
+			//qDebug() << "Can contain?" << group->canContain(item);
+			if (item->parent() == _root && group == nullptr)
+			{
+				qDebug() << "Yes hi.";
 				if (!_sort)
 				{
-					item->parent()->move(item->childNumber(), group, row);
+					int number = item->childNumber();
+					if (row == number)
+					{
+						continue;
+					}
+					_root->move(number, _root, row);
+					++row;
+				}
+				else if (group != item->parent())
+				{
+					item->parent()->move(item->childNumber(), group);
+				}
+			}
+			else if (item->parent() != _root && group != nullptr &&
+					 item->projectItem() == group->projectItem())
+			{
+				//qDebug() << "Not contain"
+				if (!group->canContain(item))
+				{
+					continue;
+				}
+				qDebug() << "Yes casual.";
+				qDebug() << item->projectItem();
+				qDebug() << group->projectItem();
+				if (!_sort)
+				{
+					int number = item->childNumber();
+					if (item->parent() == group && row == number)
+					{
+						continue;
+					}
+					item->parent()->move(number, group, row);
 					++row;
 				}
 				else if (group != item->parent())

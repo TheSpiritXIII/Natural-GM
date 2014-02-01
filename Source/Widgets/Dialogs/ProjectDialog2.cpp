@@ -485,6 +485,7 @@ void NGM::Dialog::ProjectDialog2::choosePressed()
 		}
 	}
 	*_location += _projectEdit->text();
+	qDebug() << "YOLO1:" << *_location;
 
 	if (!(*_location).count('.') &&
 		!_project->data->extensions.isfile(*_location))
@@ -495,20 +496,6 @@ void NGM::Dialog::ProjectDialog2::choosePressed()
 			QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 		{
 			return;
-		}
-	}
-	else
-	{
-		*_location = _project->data->extensions.makefile(*_location);
-		if (!_project->data->extensions.isfile(*_location))
-		{
-			if (QMessageBox::warning(this, tr("Warning"), tr("There was an "
-				"error setting the project file extension. No extension will "
-				"be set. Continue?"), QMessageBox::Yes, QMessageBox::No) ==
-					QMessageBox::No)
-			{
-				return;
-			}
 		}
 	}
 	if (QFile::exists(*_location))

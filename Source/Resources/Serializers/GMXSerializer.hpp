@@ -45,14 +45,17 @@ namespace NGM
 			GMXSerializer();
 
 			/**************************************************//*!
-			*	@brief	Inputs resource data to editor data.
+			*	@brief	Creates the basic layout. The layout
+			*			consists of only subgroups and a few
+			*			contents.
 			******************************************************/
-			void read(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const;
+			void layoutCreate(Model::ResourceProjectItem *item) const;
 
-			/**************************************************//*!
-			*	@brief	Outputs editor data to resource data.
-			******************************************************/
-			void write(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const;
+			/// DEPRECATED
+			void read(Editor *editor, Content *resource, const SerializerOptions &options = 0) const;
+
+			/// DEPRECATED
+			void write(Editor *editor, Content *resource, const SerializerOptions &options = 0) const;
 
 			bool save(Model::ResourceProjectItem *item, QProgressBar *progressBar) const;
 
@@ -118,7 +121,7 @@ namespace NGM
 			bool addResourceM(Model::ResourceGroupItem *item,
 				rapidxml::xml_node<> *node, const Type *type,
 				const char *literal, const size_t &len,
-				const QString &extension, Map<String, Resource *> &map) const;
+				const QString &extension, Map<String, Content *> &map) const;
 
 			/**************************************************//*!
 			*	@brief	Adds path items recrusively.

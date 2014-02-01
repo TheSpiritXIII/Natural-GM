@@ -23,21 +23,47 @@
 #include <QProgressBar>
 #include <QLabel>
 
-void NGM::Widget::StatusBar::setProgressLabel(int min, int max)
+NGM::Widget::StatusBar::StatusBar(QWidget *parent) : QStatusBar(parent)
 {
-	_progress->setMinimum(min);
+	_label = new QLabel(this);
+	_progress = new QProgressBar(this);
+	_progress->setTextVisible(false);
+	addWidget(_progress);
+	addWidget(_label, 1);
+	setReady();
+}
+
+void NGM::Widget::StatusBar::setReady()
+{
+	_progress->setVisible(false);
+	_label->setVisible(true);
+	_label->setText(tr("Ready."));
+}
+
+void NGM::Widget::StatusBar::setProgressShow(int max)
+{
+	_progress->setValue(0);
 	_progress->setMaximum(max);
 	_progress->setVisible(true);
 	_label->setVisible(true);
-	/*connect(&_messenger, &StatusBarMessenger::setText,
-			_label, &QLabel::setText, Qt::QueuedConnection);
-	connect(&_messenger, &StatusBarMessenger::setProgress,
-			_label, &QLabel::setText, Qt::QueuedConnection);*/
+	_label->setText(QString());
 }
 
-NGM::Widget::StatusBarMessenger *NGM::Widget::StatusBar::messenger()
+void NGM::Widget::StatusBar::setProgressValue(int value)
 {
+	_progress->setValue(value);
+}
 
-	return &_messenger;
+void NGM::Widget::StatusBar::setProgressText(const QString &text)
+{
+	_label->setText(text);
+}
+
+void NGM::Widget::StatusBar::setWidgets()
+{
+	if (!_progress->isVisible())
+	{
+		_label->setVisible(false);
+	}
 }
 

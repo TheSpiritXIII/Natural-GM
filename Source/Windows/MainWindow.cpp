@@ -111,7 +111,7 @@ namespace NGM
 		Model::ResourceBaseItem *item = reinterpret_cast<Model::ResourceBaseItem*>(index.internalPointer());
 		if (!item->toGroupItem())
 		{
-			if (item->toContentItem() && item->toContentItem()->resource->type)
+			if (item->toContentItem() && item->toContentItem()->content->type)
 			{
 				resourceSplitter->resourceOpen(item);
 			}
@@ -175,11 +175,11 @@ namespace NGM
 				}
 				else if (selectedItem->toContentItem())
 				{
-					const Resource::Type *type = selectedItem->toContentItem()->resource->type;
+					const Resource::Type *type = selectedItem->toContentItem()->content->type;
 					qDebug() << "MADE IT THIS FAR";
-					qDebug() << (selectedItem->toContentItem()->resource->status & Resource::Resource::IsFilename);
+					qDebug() << (selectedItem->toContentItem()->content->settings & Resource::Content::IsSystemPath);
 					qDebug() << (!type || (type && type->name != QStringLiteral("file")));
-					if ((selectedItem->toContentItem()->resource->status & Resource::Resource::IsFilename) &&
+					if ((selectedItem->toContentItem()->content->settings & Resource::Content::IsSystemPath) &&
 						(!type || (type && type->name != QStringLiteral("file"))))
 					{
 						int c = 0;

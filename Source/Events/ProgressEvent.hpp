@@ -52,7 +52,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Returns the stored text.
 			******************************************************/
-			inline QString getText() const
+			inline QString text() const
 			{
 				return _text;
 			}
@@ -90,7 +90,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Returns the stored value.
 			******************************************************/
-			inline int getValue() const
+			inline int value() const
 			{
 				return _value;
 			}
@@ -128,7 +128,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Returns the stored value.
 			******************************************************/
-			inline int getValue() const
+			inline int value() const
 			{
 				return _value;
 			}

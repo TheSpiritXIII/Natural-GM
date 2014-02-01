@@ -44,12 +44,12 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Inputs resource data to editor data.
 			******************************************************/
-			void read(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const;
+			void read(Editor *editor, Content *resource, const SerializerOptions &options = 0) const;
 
 			/**************************************************//*!
 			*	@brief	Outputs editor data to resource data.
 			******************************************************/
-			void write(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const;
+			void write(Editor *editor, Content *resource, const SerializerOptions &options = 0) const;
 
 			/**************************************************//*!
 			*	@brief	Creates the project tree structure.

@@ -26,6 +26,7 @@
 #include "IconManager.hpp"
 #include "ProjectManager.hpp"
 #include "SettingManager.hpp"
+#include "SerializerThread.hpp"
 
 class QAction;
 class QKeyEvent;
@@ -210,6 +211,10 @@ namespace NGM
 			******************************************************/
 			void windowClosed(Widget::ResourceWindow *window);
 
+			void serializerStart();
+
+			void serializerDone();
+
 		private slots:
 
 			/**************************************************//*!
@@ -230,6 +235,10 @@ namespace NGM
 			*			icon manager.
 			******************************************************/
 			void reloadActionIcons();
+
+			void disableProjectActions();
+
+			void enableProjectActions();
 
 		private:
 
@@ -284,6 +293,8 @@ namespace NGM
 			SettingManager _settingManager;
 			// To do.
 			Model::ResourceItemModel *_model;
+
+			Thread::SerializerThread _serializerThread;
 
 		};
 	}

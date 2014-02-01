@@ -23,9 +23,23 @@
 #include "Editor.hpp"
 #include "Factory.hpp"
 #include "Project.hpp"
-#include "Resource.hpp"
+#include "Content.hpp"
 #include "Serializer.hpp"
 #include "ResourceTab.hpp"
+
+NGM::Resource::Content::Content(const Type * const type, QString filepath,
+	ResourceSettings settings) : type(type), filepath(filepath),
+	settings(settings) {}
+
+NGM::Resource::Project::Project(const QString name, const QString category,
+		const QString description, const FileDetails extensions,
+		const Serializer *const serializer, const Type * const type,
+		const ProjectType projectType) : name(name), category(category),
+	description(description), extensions(extensions), serializer(serializer),
+	type(type), projectType(projectType) {}
+
+NGM::Resource::Serializer::Serializer(const SerializerOptions &settings) :
+	settings(settings) {}
 
 namespace NGM
 {
@@ -34,18 +48,6 @@ namespace NGM
 		Factory::Factory(const QString &name, Editor *(* const create)
 				(const Model::ResourceProjectItem * const,
 				 Widget::ResourceTab * const)) : name(name), create(create) {}
-
-		Project::Project(const Serializer * const serializer, const Type * const type,
-				const QString category, const QString description, const QStringList extensions) :
-			category(category),
-			description(description), //oldExtensions(extensions),
-			serializer(serializer), type(type), projectType(GroupType) {}
-
-		Resource::Resource(const Type * const type, QString location,
-			const ResourceStatus status) : status(status), type(type),
-			location(location),	serialData(nullptr){}
-
-		Serializer::Serializer(const SerializerSettings &settings) : settings(settings) {}
 
 		Editor *Type::create(const Model::ResourceProjectItem * const item,
 							 Widget::ResourceTab * const tab) const

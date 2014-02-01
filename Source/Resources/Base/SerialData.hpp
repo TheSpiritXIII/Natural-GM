@@ -31,7 +31,7 @@ namespace NGM
 {
 	namespace Resource
 	{
-		struct Resource;
+		struct Content;
 
 		/**************************************************//*!
 		*	@brief	Contains SerialData identifiers. As a
@@ -169,7 +169,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Contains all resources.
 			******************************************************/
-			QVector<Resource*> resources;
+			QVector<Content*> resources;
 		};
 
 		/**************************************************//*!

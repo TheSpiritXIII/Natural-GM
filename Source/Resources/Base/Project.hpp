@@ -52,14 +52,6 @@ namespace NGM
 
 			/**************************************************//*!
 			*	@brief	Initializes all member variables.
-			******************************************************/
-			// deprecated
-			Project(const Serializer * const serializer, const Type * const type,
-					const QString category, const QString description,
-					const QStringList oldExtensions);
-
-			/**************************************************//*!
-			*	@brief	Initializes all member variables.
 			*	@param	category You may add a '-' to denote that
 			*			a subgroup. For example "General-Other"
 			*			would have "Other" as a subgroup of
@@ -75,10 +67,7 @@ namespace NGM
 					const QString description, const FileDetails extensions,
 					const Serializer *const serializer,
 					const Type * const type = nullptr,
-					const ProjectType projectType = GroupType) :
-				name(name), category(category), description(description),
-				extensions(extensions), serializer(serializer),
-				type(type), projectType(projectType) {}
+					const ProjectType projectType = GroupType);
 
 			/**************************************************//*!
 			*	@brief	The name of this project type.
@@ -96,11 +85,6 @@ namespace NGM
 			*			detailed description of the project type.
 			******************************************************/
 			const QString description;
-
-			/**************************************************//*!
-			*	@brief	Deprecated.
-			******************************************************/
-			const QStringList oldExtensions;
 
 			/**************************************************//*!
 			*	@brief	Contains a list of extensions used in

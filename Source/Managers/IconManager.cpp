@@ -49,6 +49,12 @@ void NGM::Manager::IconManager::load()
 	actionIcons[SaveAs] = QFile::exists(file) ? QIcon(file) : QIcon();
 	file = dir % QStringLiteral("saveall.png");
 	actionIcons[SaveAll] = QFile::exists(file) ? QIcon(file) : QIcon();
+	file = dir % QStringLiteral("saveproject.png");
+	actionIcons[SaveProject] = QFile::exists(file) ? QIcon(file) : QIcon();
+	file = dir % QStringLiteral("saveprojectas.png");
+	actionIcons[SaveProjectAs] = QFile::exists(file) ? QIcon(file) : QIcon();
+	file = dir % QStringLiteral("saveprojectall.png");
+	actionIcons[SaveProjectAll] = QFile::exists(file) ? QIcon(file) : QIcon();
 	file = dir % QStringLiteral("close.png");
 	actionIcons[Close] = QFile::exists(file) ? QIcon(file) : QIcon();
 	file = dir % QStringLiteral("closeall.png");

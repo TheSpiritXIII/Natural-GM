@@ -1,5 +1,5 @@
 /**
- *  @file SerializerThread.hpp
+ *  @file ResourceTreeView.hpp
  *	@section License
  *
  *      Copyright (C) 2013-2014 Daniel Hrabovcak
@@ -19,94 +19,88 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef NGM__SERIALIZERTHREAD__HPP
-#define NGM__SERIALIZERTHREAD__HPP
-#include <QThread>
-#include <QMutex>
+#ifndef NGM__RESOURCETREEVIEW__HPP
+#define NGM__RESOURCETREEVIEW__HPP
+#include <QTreeView>
 
 namespace NGM
 {
 	namespace Model
 	{
-		class ResourceProjectItem;
+		class ResourceBaseItem;
+		class ResourceItemModel;
 	}
-	namespace Thread
+	namespace Widget
 	{
 		/**************************************************//*!
-		*	@brief	A thread that has the ability to load,
-		*			save or create a project using a
-		*			serializer.
+		*	@brief	A tree view that is best for displaying
+		*			and editing the main resource item.
 		******************************************************/
-		class SerializerThread : public QThread
+		class ResourceTreeView : public QTreeView
 		{
 			Q_OBJECT
 
 		public:
-
+			
 			/**************************************************//*!
-			*	@brief	Possible commands that can be executed
-			*			with serializers.
+			*	@brief	Creates a view with the indicated parent
+			*			and item model.
 			******************************************************/
-			enum class Command : char
-			{
-				Create	=	0,	/*!< Creates the project layout. */
-				Load	=	1,	/*!< Loads the project layout. */
-				Save	=	2,	/*!< Saves the project layout. */
-				Reload	=	3	/*!< Requests a reload of the project layout. */
-			};
-
-			/**************************************************//*!
-			*	@brief	Creates a thread object with the
-			*			indicated parent.
-			******************************************************/
-			SerializerThread(QObject *parent = 0);
-
-			/**************************************************//*!
-			*	@brief	Sets a command to be executed and the
-			*			item to execute the command in when the
-			*			thread is started. This function will be
-			*			blocked if the thread is running.
-			******************************************************/
-			void setSerializer(Model::ResourceProjectItem *item,
-							   Command command);
-
-			/**************************************************//*!
-			*	@brief	Returns the stored project item. The item
-			*			is set to nullptr afterwards.
-			******************************************************/
-			Model::ResourceProjectItem *item();
+			ResourceTreeView(Model::ResourceItemModel *model,
+				QWidget *parent = 0);
 
 		protected:
+			
+			/**************************************************//*!
+			*	@brief	Displays a context menu relative to the
+			*			current selected resource item.
+			******************************************************/
+			void contextMenuEvent(QContextMenuEvent *);
 
 			/**************************************************//*!
-			*	@brief	Executes the stored serializer with the
-			*			stored command. This function is blocked
-			*			when setSerializer() is used. In
-			*			addition, the serializer and commands
-			*			are erased after the command is finished
-			*			executing.
+			*	@brief	When no items are clicked, selections are
+			*			cleaered.
 			******************************************************/
-			void run();
+			void mousePressEvent(QMouseEvent *);
+
+		private slots:
+
+			/**************************************************//*!
+			*	@brief	Sorts the selected groups.
+			******************************************************/
+			void sortSelected() const;
+
+			/**************************************************//*!
+			*	@brief	Expands the selected groups.
+			******************************************************/
+			void expandSelected();
+
+			/**************************************************//*!
+			*	@brief	Collapses the selected groups.
+			******************************************************/
+			void collapseSelected();
+
+			/**************************************************//*!
+			*	@brief	Adds a new group to the selected group.
+			*			The new group is queued for renaming
+			*			right away.
+			******************************************************/
+			void addGroupSelected();
 
 		private:
 
 			/**************************************************//*!
-			*	@brief	Reponsible for blocking data.
+			*	@brief	Stores the model, for changing
+			*			properties.
 			******************************************************/
-			QMutex _mutex;
+			Model::ResourceItemModel *_model;
 
 			/**************************************************//*!
-			*	@brief	Stores the serializer to be executed.
+			*	@brief	Contains the last selected item.
 			******************************************************/
-			Model::ResourceProjectItem *_item;
-
-			/**************************************************//*!
-			*	@brief	Stores the command to be executed to the
-			*			serializer.
-			******************************************************/
-			Command _command;
+			Model::ResourceBaseItem *_selected;
 		};
 	}
 }
 
-#endif // NGM__SERIALIZERTHREAD__HPP
+#endif // NGM__RESOURCETREEVIEW__HPP

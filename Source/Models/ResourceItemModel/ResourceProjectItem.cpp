@@ -20,13 +20,21 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ResourceProjectItem.hpp"
+#include "ResourceItemModel.hpp"
+#include <QStringBuilder>
 
 NGM::Model::ResourceProjectItem::ResourceProjectItem(
-		NGM::Resource::Resource *resource, NGM::Resource::Project *project,
-		const QString &filepath, ProjectSettings settings)  :
-	resource(resource), project(project), _settings(settings)
+		NGM::Resource::Content *resource, const NGM::Resource::Project *project,
+		const QString &filepath, ResourceItemFlags flags)  :
+	ResourceGroupItem(flags), resource(resource), _project(project)
 {
+	_projectItem = this;
 	setFilepath(filepath);
+}
+
+NGM::Model::ResourceProjectItem *NGM::Model::ResourceProjectItem::toProjectItem()
+{
+	return this;
 }
 
 void NGM::Model::ResourceProjectItem::setFilepath(const QString filepath)
@@ -34,10 +42,16 @@ void NGM::Model::ResourceProjectItem::setFilepath(const QString filepath)
 	int split = filepath.lastIndexOf('/') + 1;
 	_filename = filepath.right(filepath.size() - split);
 	_directory = filepath.left(split);
-	setText(_filename);
+	updateText();
 }
 
-NGM::Model::ResourceProjectItem *NGM::Model::ResourceProjectItem::toProjectItem()
+void NGM::Model::ResourceProjectItem::setModified(bool modified)
 {
-	return this;
+	_flags |= modified ? Modified : ~Modified;
+	updateText();
+}
+
+void NGM::Model::ResourceProjectItem::updateText()
+{
+	setText((_flags & Modified) ? _filename % QChar('*') : _filename);
 }

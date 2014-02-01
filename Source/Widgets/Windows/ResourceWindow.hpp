@@ -31,6 +31,7 @@ namespace NGM
 	}
 	namespace Widget
 	{
+		class StatusBar;
 		class HierarchyDockWidget;
 
 		/**************************************************//*!
@@ -54,6 +55,15 @@ namespace NGM
 			inline HierarchyDockWidget *hierarchyDock() const
 			{
 				return _hierarchyDock;
+			}
+
+			/**************************************************//*!
+			*	@brief	Returns the status bar. Helpful when
+			*			important messages need to be displayed.
+			******************************************************/
+			inline StatusBar *statusBar() const
+			{
+				return _statusBar;
 			}
 
 		protected:
@@ -82,6 +92,12 @@ namespace NGM
 			*			a list of resources.
 			******************************************************/
 			HierarchyDockWidget *_hierarchyDock;
+
+			/**************************************************//*!
+			*	@brief	Stores the status bar which manages the
+			*
+			******************************************************/
+			StatusBar *_statusBar;
 		};
 	}
 }

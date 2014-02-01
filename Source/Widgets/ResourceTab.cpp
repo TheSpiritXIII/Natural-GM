@@ -175,12 +175,12 @@ namespace NGM
 						case QMessageBox::Yes:
 							if (projectItem != nullptr)
 							{
-								projectItem->project->serializer->write(editor, projectItem->resource);
+								projectItem->project()->serializer->write(editor, projectItem->resource);
 							}
 							else
 							{
 								Model::ResourceContentItem *contentItem = item->toContentItem();
-								contentItem->root()->project->serializer->write(editor, contentItem->resource);
+								contentItem->projectItem()->project()->serializer->write(editor, contentItem->content);
 							}
 							break;
 						case QMessageBox::No:
@@ -204,18 +204,18 @@ namespace NGM
 		Resource::Editor *ResourceTab::resourceOpen(Model::ResourceBaseItem *item)
 		{
 			Model::ResourceProjectItem *project = item->toProjectItem();
-			Resource::Resource *resource = (project == nullptr ? item->toContentItem()->resource : project->resource);
+			Resource::Content *resource = (project == nullptr ? item->toContentItem()->content : project->resource);
 
 			if (project == nullptr)
 			{
-				project = item->toContentItem()->root();
+				project = item->toContentItem()->projectItem();
 			}
 
 			Resource::Editor *widget = resource->type->create(project, this);
 
 			if (widget != nullptr)
 			{
-				const Resource::Serializer *serializer = project->project->serializer;
+				const Resource::Serializer *serializer = project->project()->serializer;
 				if (serializer->settings & Resource::Serializer::SetWorkingDir)
 				{
 					QDir::setCurrent(project->directory());
@@ -242,11 +242,11 @@ namespace NGM
 					if (project == nullptr)
 					{
 						Model::ResourceContentItem *item = i.first->toContentItem();
-						item->root()->project->serializer->write(editor, item->resource);
+						item->projectItem()->project()->serializer->write(editor, item->content);
 					}
 					else
 					{
-						project->project->serializer->write(editor, project->resource);
+						project->project()->serializer->write(editor, project->resource);
 					}
 					break;
 				}

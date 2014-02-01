@@ -20,11 +20,15 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
+#include "ResourceItemModel.hpp"
 #include "AppManager.hpp"
 #include "ResourceWindow.hpp"
 #include <QToolBar>
 #include <QMenuBar>
 #include <QKeyEvent>
+
+#include "ProgressEvent.hpp"
+#include "StatusBar.hpp"
 
 namespace NGM
 {
@@ -62,6 +66,9 @@ namespace NGM
 			QMenu *fileMenu = new QMenu(tr("&File"), window);
 			fileMenu->addAction(_actions[IconManager::NewProject]);
 			fileMenu->addAction(_actions[IconManager::OpenProject]);
+			fileMenu->addAction(_actions[IconManager::SaveProject]);
+			fileMenu->addAction(_actions[IconManager::SaveProjectAs]);
+			fileMenu->addAction(_actions[IconManager::SaveProjectAll]);
 			fileMenu->addSeparator();
 			fileMenu->addAction(_actions[IconManager::Save]);
 			fileMenu->addAction(_actions[IconManager::SaveAll]);
@@ -135,6 +142,7 @@ namespace NGM
 
 			window->setIconSize(QSize(16, 16));
 			window->show();
+			_windows.append(window);
 			emit windowCreated(window);
 			return nullptr;
 		}
@@ -186,7 +194,83 @@ namespace NGM
 // REMOVE
 #include <QDebug>
 
-void NGM::Manager::AppManager::customEvent(QEvent *)
+void NGM::Manager::AppManager::customEvent(QEvent *event)
 {
-	qDebug() << "Obtained custom event.";
+	switch(static_cast<uint16_t>(event->type()))
+	{
+	case Event::ProgressMaxEvent::id:
+	{
+		Event::ProgressMaxEvent *progressEvent =
+				static_cast<Event::ProgressMaxEvent*>(event);
+		for (QList<Widget::ResourceWindow*>::iterator i = _windows.begin();
+			 i != _windows.end(); ++i)
+		{
+			(*i)->statusBar()->setProgressShow(progressEvent->value());
+		}
+		break;
+	}
+	case Event::ProgressValueEvent::id:
+	{
+		Event::ProgressValueEvent *progressEvent =
+				static_cast<Event::ProgressValueEvent*>(event);
+		for (QList<Widget::ResourceWindow*>::iterator i = _windows.begin();
+			 i != _windows.end(); ++i)
+		{
+			(*i)->statusBar()->setProgressValue(progressEvent->value());
+		}
+		break;
+	}
+	case Event::ProgressTextEvent::id:
+	{
+		Event::ProgressTextEvent *progressEvent =
+				static_cast<Event::ProgressTextEvent*>(event);
+		for (QList<Widget::ResourceWindow*>::iterator i = _windows.begin();
+			 i != _windows.end(); ++i)
+		{
+			(*i)->statusBar()->setProgressText(progressEvent->text());
+		}
+		break;
+	}
+	default:
+		qDebug() << "Unknown custom event.";
+		break;
+	}
+}
+
+void NGM::Manager::AppManager::enableProjectActions()
+{
+	_actions[IconManager::NewProject]->setEnabled(true);
+	_actions[IconManager::OpenProject]->setEnabled(true);
+	_actions[IconManager::Save]->setEnabled(true);
+	_actions[IconManager::SaveAs]->setEnabled(true);
+	_actions[IconManager::SaveAll]->setEnabled(true);
+	_actions[IconManager::SaveProject]->setEnabled(true);
+	_actions[IconManager::SaveProjectAs]->setEnabled(true);
+	_actions[IconManager::SaveProjectAll]->setEnabled(true);
+
+	_model->insert(_serializerThread.item());
+	removePostedEvents(this, Event::ProgressMaxEvent::id);
+	removePostedEvents(this, Event::ProgressTextEvent::id);
+	removePostedEvents(this, Event::ProgressValueEvent::id);
+	//removePostedEvents(this, Event::ProgressMaxEvent);
+	//removePostedEvents(this, Event::ProgressMaxEvent);
+	for (QList<Widget::ResourceWindow*>::iterator i = _windows.begin();
+		 i != _windows.end(); ++i)
+	{
+		(*i)->statusBar()->setReady();
+	}
+	emit serializerDone();
+}
+
+void NGM::Manager::AppManager::disableProjectActions()
+{
+	_actions[IconManager::NewProject]->setEnabled(false);
+	_actions[IconManager::OpenProject]->setEnabled(false);
+	_actions[IconManager::Save]->setEnabled(false);
+	_actions[IconManager::SaveAs]->setEnabled(false);
+	_actions[IconManager::SaveAll]->setEnabled(false);
+	_actions[IconManager::SaveProject]->setEnabled(false);
+	_actions[IconManager::SaveProjectAs]->setEnabled(false);
+	_actions[IconManager::SaveProjectAll]->setEnabled(false);
+	emit serializerStart();
 }

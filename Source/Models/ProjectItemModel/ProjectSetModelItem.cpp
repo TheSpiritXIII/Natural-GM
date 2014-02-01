@@ -22,12 +22,12 @@
 #include "ProjectSetModelItem.hpp"
 #include "Project.hpp"
 
+NGM::Model::ProjectSetModelItem::ProjectSetModelItem(const QString &text,
+	const QVector<Resource::Project *> &projects) :	_parent(nullptr),
+	_text(text), _projects(projects), _size(projects.size()) {}
+
 namespace NGM
 {
-	Model::ProjectSetModelItem::ProjectSetModelItem(const QString &text,
-		const QVector<Resource::Project *> &projects) : _text(text),
-		_projects(projects), _parent(nullptr), _size(projects.size()) {}
-
 	Model::ProjectSetModelItem::~ProjectSetModelItem()
 	{
 		for (QVector<ProjectSetModelItem*>::iterator i = _children.begin();

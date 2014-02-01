@@ -64,7 +64,6 @@ bool NGM::Resource::FileDetails::isfile(const QString &filename) const
 	for (QStringList::const_iterator i = extensions.begin();
 		 i != extensions.end(); ++i)
 	{
-		qDebug() << "I:" << *i;
 		if (match(filename, *i))
 		{
 			return true;

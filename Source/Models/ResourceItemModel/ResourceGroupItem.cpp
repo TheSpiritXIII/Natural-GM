@@ -22,15 +22,17 @@
 #include "ResourceGroupItem.hpp"
 #include "ResourceItemModel.hpp"
 #include "ResourceProjectItem.hpp"
-#include <cassert>
+#include "Serializer.hpp"
+#include "Project.hpp"
 #include <algorithm>
+#include <cassert>
 #include <stack>
 
-// REMOVE
-#include <QDebug>
+NGM::Model::ResourceGroupItem::ResourceGroupItem(const QString &name,
+	ResourceItemFlags flags) : ResourceBaseItem(name, flags) {}
 
-NGM::Model::ResourceGroupItem::ResourceGroupItem(const QString &name) :
-	ResourceBaseItem(name) {}
+NGM::Model::ResourceGroupItem::ResourceGroupItem(ResourceItemFlags flags) :
+	ResourceBaseItem(flags) {}
 
 NGM::Model::ResourceGroupItem::~ResourceGroupItem()
 {
@@ -42,22 +44,25 @@ NGM::Model::ResourceGroupItem::~ResourceGroupItem()
 
 void NGM::Model::ResourceGroupItem::sort()
 {
-	std::sort(_children.begin(), _children.end(),
-			  &ResourceBaseItem::lessThan);
-	for (ResourceItemIterator i = _children.begin();
-		 i != _children.end(); ++i)
+	if (_model)
 	{
-		if ((*i)->toGroupItem())
-		{
-			(*i)->toGroupItem()->sort();
-		}
+		QList<QPersistentModelIndex> list;
+		list << QPersistentModelIndex(index());
+		_model->layoutAboutToBeChanged(list,
+			QAbstractItemModel::VerticalSortHint);
+		sortChildren();
+		_model->layoutChanged(list, QAbstractItemModel::VerticalSortHint);
+	}
+	else
+	{
+		sortChildren();
 	}
 }
 
 int NGM::Model::ResourceGroupItem::childPosition(
 		const ResourceBaseItem *find) const
 {
-	if (_model && _model->sort())
+	if (_flags & IsSorted)
 	{
 		QList<NGM::Model::ResourceBaseItem*>::const_iterator i =
 			std::lower_bound(_children.begin(), _children.end(), find,
@@ -80,107 +85,195 @@ int NGM::Model::ResourceGroupItem::childPosition(
 	return -1;
 }
 
+void NGM::Model::ResourceGroupItem::insertSorted(ResourceBaseItem *item)
+{
+	assert(_flags & IsSorted);
+	assert(!(_flags & NoSort));
+	ResourceItemIterator i = std::lower_bound(_children.begin(),
+		_children.end(), item, &ResourceBaseItem::lessThan);
+	int position = i - _children.begin();
+	_model->beginInsert(index(), position, position);
+	_children.insert(position, item);
+	_model->endInsert();
+}
+
 void NGM::Model::ResourceGroupItem::insert(ResourceBaseItem *item)
 {
 	item->_parent = this;
+	if (item->_model != _model)
+	{
+		setModel(item, _model);
+	}
+	if (item->_projectItem != _projectItem &&
+			(_parent != nullptr || toProjectItem()))
+	{
+		setProjectItem(item, _projectItem);
+	}
 	if (_model)
 	{
-		setData(item, _model, _project);
-		if (_model->sort())
+		if (_model->sort() && item->toGroupItem())
 		{
-			ResourceItemIterator i = std::lower_bound(_children.begin(),
-				_children.end(), item, &ResourceBaseItem::lessThan);
-			int position = i - _children.begin();
+			item->toGroupItem()->sortChildren();
+		}
+		if (_model->sort() && !(_flags & NoSort))
+		{
+			insertSorted(item);
+		}
+		else
+		{
+			int position = count();
 			_model->beginInsert(index(), position, position);
-			_children.insert(i, item);
-			if (item->toGroupItem())
-			{
-				item->toGroupItem()->sort();
-			}
+			_children.append(item);
 			_model->endInsert();
-			return;
+			_flags &= ~IsSorted;
 		}
 	}
-	int position = count();
-	_model->beginInsert(index(), position, position);
-	_children.append(item);
-	_model->endInsert();
+	else
+	{
+		_children.append(item);
+		_flags &= ~IsSorted;
+	}
 }
 
 void NGM::Model::ResourceGroupItem::insert(ResourceBaseItem *item, int position)
 {
-	if (_model && !_model->sort() && item->root() == root())
+	if (_model)
 	{
-		setData(item, _model, _project);
+		assert(!_model->sort());
+		setModel(item, _model);
 		_model->beginInsert(index(), position, position);
 		item->_parent = this;
+		item->_model = _model;
 		_children.insert(_children.begin() + position, item);
 		_model->endInsert();
+	}
+	else
+	{
+		item->_parent = this;
+		item->_model = _model;
+		_children.insert(_children.begin() + position, item);
+	}
+	_flags &= ~IsSorted;
+	if (item->_model != _model)
+	{
+		setModel(item, _model);
+	}
+	if (item->_projectItem != _projectItem && _parent != nullptr)
+	{
+		setProjectItem(item, _projectItem);
 	}
 }
 
 void NGM::Model::ResourceGroupItem::move(int from, ResourceGroupItem *group)
 {
-	if (group->root() != root())
-	{
-		return;
-	}
 	ResourceBaseItem *item;
 	ResourceItemIterator i;
-	if (_model && _model->sort())
+	if (_model)
 	{
-		assert(group != this);
-		i = _children.begin() + from;
-		item = *i;
-		if (group->count() != 0)
+		if (_model->sort() && !(_flags & NoSort))
 		{
-			ResourceItemIterator to = std::lower_bound(
-				group->_children.begin(), group->_children.end(),
-				item, &ResourceBaseItem::lessThan);
-			_model->beginMove(index(), from, from, group->index(),
-									 to - group->_children.begin());
-			group->_children.insert(to, item);
+			assert(group != this);
+			i = _children.begin() + from;
+			item = *i;
+			if (group->count() != 0)
+			{
+				ResourceItemIterator to = std::lower_bound(
+					group->_children.begin(), group->_children.end(),
+					item, &ResourceBaseItem::lessThan);
+				_model->beginMove(index(), from, from, group->index(),
+										 to - group->_children.begin());
+				_children.erase(i);
+				group->_children.insert(to, item);
+			}
+			else
+			{
+				_children.erase(i);
+				_model->beginMove(index(), from, from, group->index(), 0);
+				group->_children.append(item);
+			}
 		}
 		else
 		{
-			_model->beginMove(index(), from, from, group->index(), 1);
-			group->_children.push_back(item);
+			_model->beginMove(index(), from, from,
+							  group->index(), group->count());
+			i = _children.begin() + from;
+			item = _children[from];
+			_children.erase(i);
+			group->_children.append(item);
+			_flags &= ~IsSorted;
 		}
+		item->_parent = group;
+		_model->endMove();
 	}
 	else
 	{
-		_model->beginMove(index(), from, from, group->index(), group->count());
 		i = _children.begin() + from;
 		item = *i;
 		group->_children.append(item);
+		_children.erase(i);
+		item->_parent = group;
+		_flags &= ~IsSorted;
 	}
-	_children.erase(i);
-	item->_parent = group;
-	_model->endMove();
+	if ((item->_model != group->_model ||
+		 item->_projectItem != group->_projectItem) &&
+		parent() != nullptr)
+	{
+		setModel(item, group->_model);
+	}
 }
 
 void NGM::Model::ResourceGroupItem::move(int from, ResourceGroupItem *group,
 										 int to)
 {
-	if (_model && !_model->sort())
+	ResourceBaseItem *item;
+	if (_model)
 	{
+		assert(!_model->sort());
 		_model->beginMove(index(), from, from, group->index(), to);
-		ResourceItemIterator i = _children.begin() + from;
-		ResourceBaseItem *item = *i;
-		// Insert first, in case group == this.
+		item = _children[from];
+		_children.erase(_children.begin() + from);
+		if (group == this && from < to)
+		{
+			--to;
+		}
 		group->_children.insert(group->_children.begin() + to, item);
-		_children.erase(i);
 		item->_parent = group;
 		_model->endMove();
+	}
+	else
+	{
+		item = _children[from];
+		_children.erase(_children.begin() + from);
+		group->_children.insert(group->_children.begin() + to, item);
+		item->_parent = group;
+	}
+	_flags &= ~IsSorted;
+	if ((item->_model != group->_model ||
+		 item->_projectItem != group->_projectItem) &&
+		parent() != nullptr)
+	{
+		setModel(item, group->_model);
 	}
 }
 
 void NGM::Model::ResourceGroupItem::remove(int position, int count)
 {
-	_model->beginRemove(index(), position, position + count - 1);
-	_children.erase(_children.begin() + position,
-					_children.begin() + position + count - 1);
-	_model->endRemove();
+	for (int i = 0; i != count; ++i)
+	{
+		delete _children[position + i];
+	}
+	if (_model)
+	{
+		_model->beginRemove(index(), position, position + count - 1);
+		_children.erase(_children.begin() + position,
+						_children.begin() + position + count - 1);
+		_model->endRemove();
+	}
+	else
+	{
+		_children.erase(_children.begin() + position,
+						_children.begin() + position + count - 1);
+	}
 }
 
 NGM::Model::ResourceGroupItem *NGM::Model::ResourceGroupItem::toGroupItem()
@@ -188,13 +281,30 @@ NGM::Model::ResourceGroupItem *NGM::Model::ResourceGroupItem::toGroupItem()
 	return this;
 }
 
-void NGM::Model::ResourceGroupItem::setData(ResourceBaseItem *item,
-	ResourceItemModel *model, ResourceProjectItem *project) const
+bool NGM::Model::ResourceGroupItem::canContain(ResourceBaseItem *other)
 {
+	if (other->_container == nullptr || other->_container == this)
+	{
+		return true;
+	}
+	ResourceGroupItem *parent = _parent;
+	while (parent != nullptr)
+	{
+		if (other->_container == parent)
+		{
+			return true;
+		}
+		parent = parent->_parent;
+	}
+	return false;
+}
+
+void NGM::Model::ResourceGroupItem::setModel(ResourceBaseItem *item,
+	ResourceItemModel *model) const
+{
+	item->_model = model;
 	if (!item->toGroupItem())
 	{
-		item->_model = model;
-		item->_project = project;
 		return;
 	}
 	std::stack<ResourceGroupItem*> stack;
@@ -203,8 +313,65 @@ void NGM::Model::ResourceGroupItem::setData(ResourceBaseItem *item,
 	while (!stack.empty())
 	{
 		group = stack.top();
-		group->_model = model;
-		group->_project = project;
+		stack.pop();
+
+		for (ResourceItemIterator i = group->_children.begin();
+			 i != group->_children.end(); ++i)
+		{
+			(*i)->_model = model;
+			if ((*i)->toGroupItem())
+			{
+				stack.push((*i)->toGroupItem());
+			}
+		}
+	}
+}
+
+void NGM::Model::ResourceGroupItem::setProjectItem(ResourceBaseItem *item,
+	ResourceProjectItem *projectItem) const
+{
+	item->_projectItem = projectItem;
+	if (!item->toGroupItem())
+	{
+		return;
+	}
+	std::stack<ResourceGroupItem*> stack;
+	stack.push(item->toGroupItem());
+	ResourceGroupItem *group;
+	while (!stack.empty())
+	{
+		group = stack.top();
+		stack.pop();
+
+		for (ResourceItemIterator i = group->_children.begin();
+			 i != group->_children.end(); ++i)
+		{
+			(*i)->_projectItem = projectItem;
+			if ((*i)->toGroupItem())
+			{
+				stack.push((*i)->toGroupItem());
+			}
+		}
+	}
+}
+
+void NGM::Model::ResourceGroupItem::sortChildren()
+{
+	std::stack<ResourceGroupItem*> stack;
+	ResourceGroupItem *group;
+	stack.push(this);
+	while (!stack.empty())
+	{
+		group = stack.top();
+		stack.pop();
+
+		if (!(group->_flags & (NoSort | IsSorted)))
+		{
+			std::sort(group->_children.begin(), group->_children.end(),
+					  &ResourceBaseItem::lessThan);
+			group->_flags |= IsSorted;
+		}
+
 		for (ResourceItemIterator i = group->_children.begin();
 			 i != group->_children.end(); ++i)
 		{
@@ -212,12 +379,6 @@ void NGM::Model::ResourceGroupItem::setData(ResourceBaseItem *item,
 			{
 				stack.push((*i)->toGroupItem());
 			}
-			else
-			{
-				(*i)->_model = model;
-				(*i)->_project = project;
-			}
 		}
-		stack.pop();
 	}
 }

@@ -93,11 +93,11 @@ namespace NGM
 				}
 			}
 			qDebug() << current;
-			Resource::Editor *editor = factory->create(item->root(), current);
+			Resource::Editor *editor = factory->create(item->projectItem(), current);
 			qDebug() << editor->getResourceTab();
-			qDebug() << "Setting new directory." << item->root()->directory();
-			QDir::setCurrent(item->root()->directory());
-			serializer->read(editor, item->toContentItem()->resource);
+			qDebug() << "Setting new directory." << item->projectItem()->directory();
+			QDir::setCurrent(item->projectItem()->directory());
+			serializer->read(editor, item->toContentItem()->content);
 
 			current->setCurrentIndex(current->addTab(editor, item->text()));
 			editor->initialize();

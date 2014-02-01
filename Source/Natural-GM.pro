@@ -46,10 +46,12 @@ INCLUDEPATH	+=	$$PWD/ \
 	Resources/Types \
 	Resources/Plugins \
 	Threads \
+	Widgets/Dialogs \
 	Widgets/Windows \
+	Widgets/TreeViews \
+	Widgets/StatusBars \
 	Widgets/Dock-Widgets \
 	Widgets/Widgets \
-	Widgets/Dialogs \
 	Windows
 #----------------------------------------------
 #   Header files.
@@ -79,7 +81,6 @@ HEADERS		+=	Windows/MainWindow.hpp \
 	Resources/Base/Project.hpp \
 	Defines.hpp \
 	Resources/Base/SerialData.hpp \
-	Resources/Base/Resource.hpp \
 	Resources/Base/Editor.hpp \
 	Resources/Editors/TextEditor.hpp \
 	Widgets/ResourceSplitterHandle.hpp \
@@ -123,7 +124,9 @@ HEADERS		+=	Windows/MainWindow.hpp \
     Widgets/StatusBars/StatusBar.hpp \
     Events/ProgressEvent.hpp \
     Threads/SerializerThread.hpp \
-    Events/ResourceModelEvent.hpp
+    Events/ResourceModelEvent.hpp \
+    Resources/Base/Content.hpp \
+	Widgets/TreeViews/ResourceTreeView.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -175,7 +178,8 @@ SOURCES		+= \
     Resources/Base/Serializer.cpp \
     Events/ProgressEvent.cpp \
     Threads/SerializerThread.cpp \
-    Events/ResourceModelEvent.cpp
+    Events/ResourceModelEvent.cpp \
+	Widgets/TreeViews/ResourceTreeView.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------

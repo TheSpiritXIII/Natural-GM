@@ -38,7 +38,7 @@
 #include <QStandardItemModel>
 #include <QPlainTextEdit>
 #include "Project.hpp"
-#include "Resource.hpp"
+#include "Content.hpp"
 #include "ResourceSplitter.hpp"
 
 namespace NGM

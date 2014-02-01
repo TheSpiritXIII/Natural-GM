@@ -20,7 +20,7 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "../Global.hpp"
-#include "Resource.hpp"
+#include "Content.hpp"
 #include "Project.hpp"
 #include "MainWindow.hpp"
 #include "ProjectDialog.hpp"
@@ -334,7 +334,7 @@ namespace NGM
 			}
 			Resource::Project *project = cache.find(projectList->currentItem()->text())->second;
 			QString location = dir.absolutePath()+QChar('/')+projectEdit->text();
-			Resource::Resource *resource = new Resource::Resource(project->type, location, Resource::Resource::IsFilename);
+			Resource::Content *resource = new Resource::Content(project->type, location, Resource::Content::IsSystemPath);
 			Model::ResourceProjectItem *item = new Model::ResourceProjectItem(resource, project, projectEdit->text(), 0);
 			windowManager->addProject(item);
 			close();

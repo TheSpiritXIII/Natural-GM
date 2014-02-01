@@ -34,15 +34,15 @@ namespace NGM
 			// Intentionally empty.
 		}
 
-		void TextSerializer::read(Editor *widget, Resource *resource, const SerializerOptions &options) const
+		void TextSerializer::read(Editor *widget, Content *resource, const SerializerOptions &options) const
 		{
 			qDebug() << "READ";
-			if (resource->status & Resource::IsFilename)
+			if (resource->settings & Content::IsSystemPath)
 			{
 				qDebug() << "READ2";
-				qDebug() << resource->location;
+				qDebug() << resource->filepath;
 				std::ifstream file;
-				file.open(resource->location.toLatin1(), std::ios::in);
+				file.open(resource->filepath.toLatin1(), std::ios::in);
 				std::string data;
 				file.seekg(0, std::ios::end);
 				data.resize(file.tellg());
@@ -66,12 +66,12 @@ namespace NGM
 			//resource->serialData->attributes.erase(i);
 		}
 
-		void TextSerializer::write(Editor *widget, Resource *resource, const SerializerOptions &options) const
+		void TextSerializer::write(Editor *widget, Content *resource, const SerializerOptions &options) const
 		{
 			qDebug() << "WRITE";
-			if (resource->status & Resource::IsFilename)
+			if (resource->settings & Content::IsSystemPath)
 			{
-				QFile file(resource->location);
+				QFile file(resource->filepath);
 				file.open(QIODevice::WriteOnly);
 				file.write(widget->property("text").getCharPtr());
 				file.close();
@@ -87,10 +87,10 @@ namespace NGM
 			const Manager::ProjectManager *projectManager,
 			QProgressBar *progressBar) const
 		{
-			qDebug() << "RESTRUCTURE" << item->resource->status;
-			if (!(item->resource->status & Resource::IsFilename))
+			qDebug() << "RESTRUCTURE" << item->resource->settings;
+			if (!(item->resource->settings & Content::IsSystemPath))
 			{
-				QFile file(item->resource->location);
+				QFile file(item->resource->filepath);
 				file.open(QIODevice::WriteOnly);
 				QByteArray text = file.readAll();
 				std::vector<int8_t> data;

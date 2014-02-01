@@ -24,10 +24,6 @@
 #include "ResourceBaseItem.hpp"
 #include <QList>
 
-// REMOVE
-#include <vector>
-#include <QVector>
-
 namespace NGM
 {
 	namespace Model
@@ -49,9 +45,11 @@ namespace NGM
 		public:
 
 			/**************************************************//*!
-			*	@brief Creates an item with the indicated name.
+			*	@brief	Creates an item with the indicated name
+			*			and flags.
 			******************************************************/
-			ResourceGroupItem(const QString &name = QString());
+			ResourceGroupItem(const QString &name,
+							  ResourceItemFlags flags = IsSorted);
 
 			/**************************************************//*!
 			*	@brief	Deallocates and removes all children.
@@ -91,17 +89,24 @@ namespace NGM
 			int childPosition(const ResourceBaseItem *find) const;
 
 			/**************************************************//*!
+			*	@beif	Inserts an item and automatically sorts
+			*			it into place. An assertion is made to
+			*			check that the item is already sorted,
+			******************************************************/
+			void insertSorted(ResourceBaseItem *item);
+
+			/**************************************************//*!
 			*	@beif	Inserts a child. If sorting is enabled,
 			*			the item is placed alphabetically. If
-			*			sorting is not enabled, this item is
+			*			sorting is not enabled, the item is
 			*			placed at the end.
 			******************************************************/
 			void insert(ResourceBaseItem *item);
 
 			/**************************************************//*!
 			*	@beif	Inserts a child into the indicated
-			*			position, provided sorting is not
-			*			enabled.
+			*			position. An assertion is made to check
+			*			that the model is not sorted.
 			******************************************************/
 			void insert(ResourceBaseItem *item, int position);
 
@@ -118,7 +123,9 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Removes the item at the indicated
 			*			position, and moves it to the indicated
-			*			position inside the indicated group.
+			*			position inside the indicated group. An
+			*			assertion is made to check that the model
+			*			is not sorted.
 			******************************************************/
 			void move(int from, ResourceGroupItem *group, int to);
 
@@ -129,25 +136,57 @@ namespace NGM
 			void remove(int position, int countOld = 1);
 
 			/**************************************************//*!
+			*	@brief	Returns whether or not this item can
+			*			contain the other item.
+			******************************************************/
+			bool canContain(ResourceBaseItem *other);
+
+			/**************************************************//*!
 			*	@brief	Returns a safe cast to this.
 			******************************************************/
 			ResourceGroupItem *toGroupItem();
 
+		protected:
+
+			/**************************************************//*!
+			*	@brief	Creates an item with only flags
+			******************************************************/
+			ResourceGroupItem(ResourceItemFlags flags = IsSorted);
+
+			/**************************************************//*!
+			*	@brief	Recursively sets the model on the item.
+			*			If the item is a group item, all its
+			*			children are set.
+			******************************************************/
+			void setModel(ResourceBaseItem *item,
+						  ResourceItemModel *model) const;
+
+			/**************************************************//*!
+			*	@brief	Recursively sets the model on the item.
+			*			If the item is a group item, all its
+			*			children are set.
+			******************************************************/
+			void setProjectItem(ResourceBaseItem *item,
+								ResourceProjectItem *projectItem) const;
+
+			/**************************************************//*!
+			*	@brief	Returns true if sorting is allowed for
+			*			the specified object. This checks project
+			*			flags for permissions.
+			******************************************************/
+			bool allowSort(ResourceBaseItem *item) const;
+
 		private:
+
+			/**************************************************//*!
+			*	@brief	Sorts all children recursively.
+			******************************************************/
+			void sortChildren();
 
 			/**************************************************//*!
 			*	@brief	Contains all of children.
 			******************************************************/
 			QList<ResourceBaseItem*> _children;
-
-			/**************************************************//*!
-			*	@brief	Recursively sets the model and project
-			*			on the indicated item. If the item is a
-			*			group item, all its children and their
-			*			children are set too.
-			******************************************************/
-			void setData(ResourceBaseItem *item, ResourceItemModel *model,
-						  ResourceProjectItem *project) const;
 		};
 	}
 }

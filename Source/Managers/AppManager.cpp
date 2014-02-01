@@ -147,6 +147,9 @@ namespace NGM
 			_actions[IconManager::Save] = new QAction(icons[IconManager::Save], tr("Save"), this);
 			_actions[IconManager::SaveAs] = new QAction(icons[IconManager::SaveAs], tr("Save As..."), this);
 			_actions[IconManager::SaveAll] = new QAction(icons[IconManager::SaveAll], tr("Save All"), this);
+			_actions[IconManager::SaveProject] = new QAction(icons[IconManager::SaveProject], tr("Save Project"), this);
+			_actions[IconManager::SaveProjectAs] = new QAction(icons[IconManager::SaveProjectAs], tr("Save Project As..."), this);
+			_actions[IconManager::SaveProjectAll] = new QAction(icons[IconManager::SaveProjectAll], tr("Save All Projects"), this);
 			_actions[IconManager::Close] = new QAction(icons[IconManager::Close], tr("Close"), this);
 			_actions[IconManager::CloseAll] = new QAction(icons[IconManager::CloseAll], tr("Close All"), this);
 			_actions[IconManager::PageSetup] = new QAction(icons[IconManager::PageSetup], tr("Page Setup"), this);
@@ -241,20 +244,20 @@ namespace NGM
 			connect(_actions[IconManager::Plugins], &QAction::triggered, this, &AppManager::showIncomplete);
 
 			_model = new Model::ResourceItemModel(nullptr);
-			//_model->setSort(true);
+			_model->setSort(true);
 
 			Resource::Project *project = _projectManager.findProject("GML Script");
 			qDebug() << project;
 			Model::ResourceProjectItem *item = new Model::ResourceProjectItem(nullptr, project, "C:/Intel/Poo.pee", 0);
-			_model->insert(item);
+
+			Model::ResourceGroupItem *group1 = new Model::ResourceGroupItem("Group 1",
+																			Model::ResourceBaseItem::CreateGroups);
+			item->insert(group1);
 
 			Model::ResourceGroupItem *group2 = new Model::ResourceGroupItem("Group 2");
 			item->insert(group2);
 
-			Model::ResourceGroupItem *group1 = new Model::ResourceGroupItem("Group 1");
-			item->insert(group1);
-
-			Model::ResourceContentItem *item1 = new Model::ResourceContentItem(nullptr, "Item 1");
+			Model::ResourceContentItem *item1 = new Model::ResourceContentItem(nullptr, "Item 1", 0, group1);
 			group1->insert(item1);
 
 			Model::ResourceContentItem *item2 = new Model::ResourceContentItem(nullptr, "Item 2");
@@ -265,6 +268,14 @@ namespace NGM
 
 			Model::ResourceContentItem *item3 = new Model::ResourceContentItem(nullptr, "Item 3");
 			group2->insert(item3);
+
+			Model::ResourceGroupItem *group3 = new Model::ResourceGroupItem("Group 3");
+			item->insert(group3);
+
+			Model::ResourceContentItem *item6 = new Model::ResourceContentItem(nullptr, "Item 6");
+			group3->insert(item6);
+
+			_model->insert(item);
 
 			createWindow();
 

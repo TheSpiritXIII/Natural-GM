@@ -39,31 +39,6 @@ namespace NGM
 	namespace Widget
 	{
 		/**************************************************//*!
-		*	@brief	Sends queued messages to StatusBar.
-		******************************************************/
-		class StatusBarMessenger : public QObject
-		{
-			Q_OBJECT
-
-		public:
-
-			StatusBarMessenger() {}
-
-		signals:
-
-			/**************************************************//*!
-			*	@brief	Sets the label text. This is added to the
-			*			slo
-			******************************************************/
-			void setText(const QString &text) const;
-
-			/**************************************************//*!
-			*	@brief	Sets the progress value.
-			******************************************************/
-			void setProgress(int value) const;
-		};
-
-		/**************************************************//*!
 		*	@brief	A status bar with an internal progress
 		*			bar and text label, visible when there is
 		*			an important message.
@@ -75,21 +50,42 @@ namespace NGM
 		public:
 
 			/**************************************************//*!
+			*	@brief	Creates a status bar with the indicated
+			*			parent by also setting a progress bar and
+			*			label.
+			******************************************************/
+			StatusBar(QWidget *parent = 0);
+
+			/**************************************************//*!
 			*	@brief	Sets the label and progress bar to
 			*			visible. All other widgets are removed.
-			*	@param	min The minimum value of progress.
 			*	@param	max The maximum value of progress.
 			******************************************************/
-			void setProgressLabel(int min, int max);
+			void setProgressShow(int max);
+
+			/**************************************************//*!
+			*	@brief	Sets the value of the progress bar.
+			******************************************************/
+			void setProgressValue(int value);
+
+			/**************************************************//*!
+			*	@brief	Sets the text of the progress label.
+			******************************************************/
+			void setProgressText(const QString &text);
+
+			/**************************************************//*!
+			*	@brief	Removes the progress bar and display text
+			*			denoting that the status bar is able to
+			*			set widgets.
+			******************************************************/
+			void setReady();
 
 			/**************************************************//*!
 			*	@brief	Adds the indicated widgets with stretches
 			*			to the status bar. If the progress bar is
 			*			visible, then this has no effect.
 			******************************************************/
-			//setWidgets(const WidgetStretchList &widgetStretchList);
-
-			StatusBarMessenger *messenger();
+			void setWidgets();//const WidgetStretchList &widgetStretchList);
 
 		private:
 
@@ -104,11 +100,6 @@ namespace NGM
 			*			the left of the label.
 			******************************************************/
 			QProgressBar *_progress;
-
-			/**************************************************//*!
-			*	@brief	Responsible for sending messages.
-			******************************************************/
-			StatusBarMessenger _messenger;
 		};
 	}
 }

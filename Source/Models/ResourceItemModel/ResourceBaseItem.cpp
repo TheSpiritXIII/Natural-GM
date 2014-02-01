@@ -24,8 +24,16 @@
 #include "ResourceItemModel.hpp"
 #include "ResourceProjectItem.hpp"
 
-NGM::Model::ResourceBaseItem::ResourceBaseItem(const QString &text) :
-	_parent(nullptr), _project(nullptr), _model(nullptr), _text(text) {}
+#include <QDebug>
+
+NGM::Model::ResourceBaseItem::ResourceBaseItem(ResourceItemFlags flags,
+	ResourceGroupItem *container) : _parent(nullptr), _projectItem(nullptr),
+	_container(container), _model(nullptr), _flags(flags) {}
+
+NGM::Model::ResourceBaseItem::ResourceBaseItem(const QString &text,
+	ResourceItemFlags flags, ResourceGroupItem *container) : _parent(nullptr),
+	_projectItem(nullptr), _container(container), _model(nullptr),
+	_flags(flags), _text(text) {}
 
 NGM::Model::ResourceBaseItem::~ResourceBaseItem() {}
 

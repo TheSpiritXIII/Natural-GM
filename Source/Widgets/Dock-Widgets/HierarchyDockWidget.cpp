@@ -22,9 +22,9 @@
 #include "HierarchyDockWidget.hpp"
 #include "ResourceItemModel.hpp"
 #include "SortRootProxyModel.hpp"
+#include "ResourceTreeView.hpp"
 #include "AppManager.hpp"
 #include <QVBoxLayout>
-#include <QTreeView>
 #include <QLineEdit>
 
 #include <queue>
@@ -46,13 +46,13 @@ NGM::Widget::HierarchyDockWidget::HierarchyDockWidget(
 	connect(_filterEdit, &QLineEdit::textChanged,
 			model, &Model::SortRootProxyModel::setFilterFixedString);
 
-	_treeView = new QTreeView(baseWidget);
+	_treeView = new ResourceTreeView(manager->model(), baseWidget);
 	_treeView->setAcceptDrops(true);
 	_treeView->setHeaderHidden(true);
 	_treeView->setUniformRowHeights(true);
 	_treeView->setDropIndicatorShown(true);
 	_treeView->setDragEnabled(true);
-	_treeView->setSelectionMode(QAbstractItemView::ContiguousSelection);
+	_treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	_treeView->setDragDropMode(QAbstractItemView::InternalMove);
 	model->setSourceModel(manager->model());
 	model->setDynamicSortFilter(true);

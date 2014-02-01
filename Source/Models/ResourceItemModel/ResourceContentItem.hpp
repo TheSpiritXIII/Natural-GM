@@ -22,7 +22,7 @@
 #ifndef NGM__RESOURCECONTENTITEM__HPP
 #define NGM__RESOURCECONTENTITEM__HPP
 #include "ResourceBaseItem.hpp"
-#include "Resource.hpp"
+#include "Content.hpp"
 
 namespace NGM
 {
@@ -36,62 +36,48 @@ namespace NGM
 		/**************************************************//*!
 		*	@brief	An item that stores a resource and an
 		*			optional file path.
-		*
-		* The file path is optional because there may not be
-		* a file path or the file path is not a system path.
-		* A system path might be helpful to a serializer. For
-		* example, a zip path can be stored that way (because
-		* zip files are not exactly system paths). For this
-		* reason, a boolean exists to test whether or not
-		* the file path was meant to be a system path.
 		******************************************************/
 		class ResourceContentItem : public ResourceBaseItem
 		{
 		public:
 
 			/**************************************************//*!
-			*	@brief	Hints for how the user interacts with
-			*			this item.
+			*	@brief	Creates an item. The item text is updated
+			*			to match the resource filename
 			******************************************************/
-			enum Setting
-			{
-				IsSystemPath	=	0x1,	/*!< Hints that the file path
-												should be a real path. */
-				NoExtension		=	0x2		/*!< Omits the extension when
-												setting a file path. */
-			};
+			ResourceContentItem(NGM::Resource::Content *content,
+								ResourceItemFlags = IsSorted,
+								ResourceGroupItem *container = nullptr);
 
 			/**************************************************//*!
-			*	@brief	Creates an item with the indicated name.
+			*	@brief	Creates an item with the indicated item
+			*			text and settings.
 			******************************************************/
-			ResourceContentItem(NGM::Resource::Resource *resource,
-				const QString &filepath, ResourceSettings settings = 0);
-
-			/**************************************************//*!
-			*	@brief	Sets the internal filepath and updates
-			*			the item display text.
-			******************************************************/
-			void setFilepath(const QString &filepath);
-
-			/// INCOMPLETE
-			NGM::Resource::Resource *resource;
+			ResourceContentItem(NGM::Resource::Content *content,
+				const QString &text, ResourceItemFlags = IsSorted,
+				ResourceGroupItem *container = nullptr);
 
 			/**************************************************//*!
 			*	@brief	A safe cast to this.
 			******************************************************/
 			ResourceContentItem *toContentItem();
 
-		private:
+			/**************************************************//*!
+			*	@brief	Sets the resource filepath and updates
+			*			the item display text.
+			******************************************************/
+			void setFilepath(const QString &filepath);
 
 			/**************************************************//*!
-			*	@brief	Stores a filepath.
+			*	@brief	Updates the items text based on the
+			*			resource filename.
 			******************************************************/
-			QString _filepath;
+			void updateText();
 
 			/**************************************************//*!
-			*	@brief	Resource display hints.
+			*	@brief	Stores the actual content data.
 			******************************************************/
-			ResourceSettings _settings;
+			NGM::Resource::Content *content;
 		};
 	}
 }

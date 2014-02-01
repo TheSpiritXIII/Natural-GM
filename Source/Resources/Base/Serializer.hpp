@@ -27,6 +27,13 @@
 #include <QString>
 #include <cstdint>
 
+/*
+- For creating new resources:
+Resource name type.
+Resource display name.
+Insert group to.
+*/
+
 namespace NGM
 {
 	namespace Manager
@@ -38,7 +45,6 @@ namespace NGM
 		class Editor;
 
 		typedef uint8_t SerializerOptions;
-		typedef uint8_t SerializerSettings;
 
 		/**************************************************//*!
 		*	@brief	Loads, creates and saves projects and
@@ -51,7 +57,9 @@ namespace NGM
 		* and setProgressValue(). These functions push
 		* to an event queue in the main application, so
 		* their data might not show up right away. Old
-		* messages may even be discarded.
+		* messages may even be discarded. If the functions
+		* are fast enough (like layoutCreate() will probably
+		* be), then showing messages is not necessary.
 		******************************************************/
 		struct Serializer
 		{
@@ -59,38 +67,34 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Flags for serializer settings.
 			******************************************************/
-			enum Settings
+			enum Option
 			{
-				// Requests the serializer to call save after write.
-				ResaveAll	=	0x01,
-				// Allows the user to move and rename root structures.
-				CanModifyRoots	=	0x02,
-				// Sorts items except roots automatically. They cannot be moved.
-				AutoSortItems	=	0x04,
-				// Does not let the user move items, even if not sorted.
-				NonMovableItems	=	0x08,
-				// Requests the serializer to set the working directory before read.
-				SetWorkingDir	=	0x10
-			};
-
-			/**************************************************//*!
-			*	@brief	Options for reading and writing data.
-			******************************************************/
-			enum Options
-			{
-				DynamicIcons	=	0x01
+				ResaveAll		=	0x01,	/*!< Resave the whole project
+												whenever a resource save is
+												requested. */
+				NoDuplicates	=	0x02,	/*!< Disallows duplicate naming when
+												an item is renamed. All items
+												are checked against
+												duplicates. */
+				NoSortSubItems	=	0x04,	/*!< Sets the NoSort flag on the
+												project item, making sub items
+												not sorted. */
+				SetWorkingDir	=	0x08	/*!< Hints that the working
+												directory should be set to the
+												project directory before saving
+												resources. */
 			};
 
 			/**************************************************//*!
 			*	@brief	Sets the indicated settings.
 			******************************************************/
-			Serializer(const SerializerSettings &settings = 0);
+			Serializer(const SerializerOptions &settings = 0);
 
 			/// DEPRECATED
-			virtual void read(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const = 0;
+			virtual void read(Editor *editor, Content *resource, const SerializerOptions &options = 0) const = 0;
 
 			/// DEPRECATED
-			virtual void write(Editor *editor, Resource *resource, const SerializerOptions &options = 0) const = 0;
+			virtual void write(Editor *editor, Content *resource, const SerializerOptions &options = 0) const = 0;
 
 			/// DEPRECATED
 			virtual bool structure(Model::ResourceProjectItem *item,
@@ -104,7 +108,28 @@ namespace NGM
 			*	@brief	Determines how the project is structured.
 			*	@see	Settings
 			******************************************************/
-			const SerializerSettings settings;
+			const SerializerOptions settings;
+
+			/// TODO
+			virtual void layoutCreate(Model::ResourceProjectItem *item) const;
+
+			/// TODO
+			virtual void layoutLoad(Model::ResourceProjectItem *item) const;
+
+			/// TODO
+			virtual void layoutSave(Model::ResourceProjectItem *item) const;
+
+			/// TODO
+			virtual void layoutReload(
+					const Model::ResourceProjectItem *item) const;
+
+			/// TODO
+			//virtual void resourceRenamed() const;
+
+			/// TODO
+			//virtual void resourceCreate() const;
+
+			//virtual void resource
 
 		protected:
 
@@ -124,8 +149,9 @@ namespace NGM
 
 			/**************************************************//*!
 			*	@brief	Sets the max value of the progress bar
-			*			that shows up in the status bar. Ideally,
-			*			this is called first.
+			*			that shows up in the status bar. This
+			*			must be called first if you intend to use
+			*			the other progress functions.
 			*	@see	setProgressValue()
 			******************************************************/
 			void setProgressMax(int value) const;
@@ -150,19 +176,6 @@ namespace NGM
 			void insertItem(Model::ResourceBaseItem *item,
 				const Model::ResourceGroupItem *parent, int row,
 				int count = 1) const;
-
-			/// TODO
-			virtual void layoutCreate(Model::ResourceProjectItem *item) const;
-
-			/// TODO
-			virtual void layoutLoad(Model::ResourceProjectItem *item) const;
-
-			/// TODO
-			virtual void layoutSave(Model::ResourceProjectItem *item) const;
-
-			/// TODO
-			virtual void layoutReload(
-					const Model::ResourceProjectItem *item) const;
 
 			/*resourceOpen();
 			resourceSave();

@@ -22,29 +22,39 @@
 #include "ResourceContentItem.hpp"
 
 NGM::Model::ResourceContentItem::ResourceContentItem(
-	NGM::Resource::Resource *resource, const QString &filepath,
-	NGM::Model::ResourceSettings settings) : resource(resource),
-	_settings(settings)
+	NGM::Resource::Content *content, ResourceItemFlags flags,
+	ResourceGroupItem *container) : ResourceBaseItem(flags, container),
+	content(content)
 {
-	setFilepath(filepath);
+	updateText();
 }
+
+NGM::Model::ResourceContentItem::ResourceContentItem(
+	NGM::Resource::Content *content, const QString &text,
+	ResourceItemFlags flags, ResourceGroupItem *container) :
+	ResourceBaseItem(text, flags, container), content(content) {}
 
 void NGM::Model::ResourceContentItem::setFilepath(const QString &filepath)
 {
-	_filepath = filepath;
-	int position = filepath.lastIndexOf('/') + 1;
-	if (_settings & NoExtension)
-	{
-		setText(filepath.mid(filepath.size() - position,
-							 filepath.indexOf(QChar('.'), position)));
-	}
-	else
-	{
-		setText(filepath.right(filepath.size() - position));
-	}
+	content->filepath = filepath;
+	updateText();
 }
 
 NGM::Model::ResourceContentItem *NGM::Model::ResourceContentItem::toContentItem()
 {
 	return this;
+}
+
+void NGM::Model::ResourceContentItem::updateText()
+{
+	int position = content->filepath.lastIndexOf('/') + 1;
+	if (content->settings & Resource::Content::NoExtension)
+	{
+		setText(content->filepath.mid(content->filepath.size() - position,
+			content->filepath.indexOf(QChar('.'), position)));
+	}
+	else
+	{
+		setText(content->filepath.right(content->filepath.size() - position));
+	}
 }

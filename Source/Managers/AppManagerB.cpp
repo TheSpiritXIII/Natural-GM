@@ -27,6 +27,34 @@
 
 #include <QDebug>
 
+
+void NGM::Manager::AppManager::showNewProjectDialog()
+{
+	ProjectPointer project;
+	QString location, templater;
+	Manager::ProjectPreferences preferences;
+	Dialog::ProjectDialog2 d(this, &project, &location, &templater,
+							 &preferences);
+	d.setWindowIcon(*_iconManager.applicationIcon());
+	if (d.exec() == QDialog::Accepted)
+	{
+		qDebug() << project.data->name;
+		// createProject(type, location);
+		// Needs to pass project item pointer.
+		Model::ResourceProjectItem *item = new Model::ResourceProjectItem(
+			nullptr, const_cast<Resource::Project*>(project.data), location,
+			(project.data->serializer->settings & Resource::Serializer::NoSortSubItems)
+			? Model::ResourceBaseItem::NoSort : 0);
+		qDebug() << item->project()->name;
+		_serializerThread.setSerializer(item,
+			Thread::SerializerThread::Command::Create);
+		disableProjectActions();
+		connect(&_serializerThread, &QThread::finished,
+				this, &AppManager::enableProjectActions);
+		_serializerThread.start();
+	}
+}
+
 namespace NGM
 {
 	namespace Manager
@@ -41,22 +69,6 @@ namespace NGM
 		{
 			Dialog::AboutDialog d;
 			d.exec();
-		}
-
-		void AppManager::showNewProjectDialog()
-		{
-			ProjectPointer project;
-			QString location, templater;
-			Manager::ProjectPreferences preferences;
-			Dialog::ProjectDialog2 d(this, &project, &location, &templater,
-									 &preferences);
-			d.setWindowIcon(*_iconManager.applicationIcon());
-			if (d.exec() == QDialog::Accepted)
-			{
-				showIncomplete();
-				qDebug() << project.data->name;
-				// createProject(type, location);
-			}
 		}
 	}
 }

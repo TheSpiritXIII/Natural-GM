@@ -38,15 +38,52 @@
 #include <QFile>
 #include <QDir>
 
+NGM::Resource::GMXSerializer::GMXSerializer() :
+	Serializer(NoDuplicates | NoSortSubItems | SetWorkingDir) {}
+
+void NGM::Resource::GMXSerializer::layoutCreate(
+	Model::ResourceProjectItem *item) const
+{
+	item->insert(new Model::ResourceGroupItem("Sprites",
+					NGM::Model::ResourceBaseItem::IsStatic));
+	qDebug() << "FLAG:" << item->child(0)->flags();
+	item->insert(new Model::ResourceGroupItem("Sounds",
+					NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Backgrounds",
+					NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Paths",
+					NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Scripts",
+					NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Shaders",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Fonts",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Timelines",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Objects",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Rooms",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Datafiles",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Extensions",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceGroupItem("Constants",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceContentItem(nullptr, "Information",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+	item->insert(new Model::ResourceContentItem(nullptr, "Settings",
+				 NGM::Model::ResourceBaseItem::IsStatic));
+}
+
 namespace NGM
 {
 	namespace Resource
 	{
 		using namespace rapidxml;
 
-		GMXSerializer::GMXSerializer() : Serializer(SetWorkingDir) {}
-
-		void GMXSerializer::read(Editor *editor, Resource *resource, const SerializerOptions &options) const
+		void GMXSerializer::read(Editor *editor, Content *resource, const SerializerOptions &options) const
 		{
 			if (resource->type->name == QStringLiteral("image"))
 			{
@@ -62,7 +99,7 @@ namespace NGM
 			}
 		}
 
-		void GMXSerializer::write(Editor *editor, Resource *resource, const SerializerOptions &options) const
+		void GMXSerializer::write(Editor *editor, Content *resource, const SerializerOptions &options) const
 		{
 
 		}
@@ -467,14 +504,14 @@ namespace NGM
 						path = QString::fromUtf8(&node->value()[0], node->value_size());
 						path.append(".sprite.gmx");
 						qDebug() << path;
-						Resource *resource = new Resource(type, path, Resource::IsFilename);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[8]));
+						Content *resource = new Content(type, path, Content::IsSystemPath);
+						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource);
 						item->insert(content);
 
 						SerialObject *imageData = new SerialObject;
 						resource->serialData = imageData;
 
-						QString filepath = content->root()->directory();
+						QString filepath = content->projectItem()->directory();
 						filepath.append(node->value());
 
 						QVector<QPixmap*> *imagesVector = new QVector<QPixmap*>;
@@ -521,14 +558,14 @@ namespace NGM
 				{
 					if (node->name()[10] != 's')
 					{
-						Resource *resource = new Resource(0, 0, 0);
-						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource, QString(&node->value()[11]));
+						Content *resource = new Content(0, 0, 0);
+						Model::ResourceContentItem *content = new Model::ResourceContentItem(resource);
 						item->insert(content);
 
 						SerialObject *imageData = new SerialObject;
 						resource->serialData = imageData;
 
-						QString filepath = content->root()->directory();
+						QString filepath = content->projectItem()->directory();
 						filepath.append(node->value());
 
 						SerialVariant *imagesVariant = new SerialVariant();
@@ -570,10 +607,10 @@ namespace NGM
 		bool GMXSerializer::addResourceM(Model::ResourceGroupItem *item,
 			xml_node<> *node, const Type *type, const char *literal,
 			const size_t &len, const QString &extension,
-			Map<String, Resource*> &map) const
+			Map<String, Content*> &map) const
 		{
 			QString name;
-			Resource *resource;
+			Content *resource;
 			Model::ResourceGroupItem *group;
 			Model::ResourceContentItem *content;
 			xml_attribute<> *attr;
@@ -596,10 +633,10 @@ namespace NGM
 						if (node->name()[strlen(literal)] != 's' && node->name_size() == len)
 						{
 							name = QString::fromUtf8(&node->value()[0], node->value_size());
-							resource = new Resource(type, name+extension, Resource::IsFilename);
+							resource = new Content(type, name+extension, Content::IsSystemPath);
 							name = name.right(len+1);
-							content = new Model::ResourceContentItem(resource, name);
-							map.insert(Pair<String, Resource*>(String(&node->value()[len+1],
+							content = new Model::ResourceContentItem(resource);
+							map.insert(Pair<String, Content*>(String(&node->value()[len+1],
 								node->value_size()-len-1), resource));
 
 							serialObject = new SerialObject();
@@ -608,7 +645,7 @@ namespace NGM
 							if (literal == (char*)"sprite")
 							{
 								QString projectDir = QDir::currentPath();
-								QFile file(resource->location);
+								QFile file(resource->filepath);
 								file.open(QFile::ReadOnly);
 								QByteArray data = file.readAll();
 								document.parse<0>(&data.data()[0]);
@@ -617,7 +654,7 @@ namespace NGM
 								sprite = sprite->first_node("frames");
 								sprite = sprite->first_node();
 
-								name = QDir::cleanPath(resource->location);
+								name = QDir::cleanPath(resource->filepath);
 								QDir::setCurrent(name.left(name.lastIndexOf('/')));
 								qDebug() << QDir::currentPath();
 								QPixmap *pixmap = new QPixmap(QString::fromUtf8(&sprite->value()[0], sprite->value_size()));
@@ -640,7 +677,7 @@ namespace NGM
 							else if (literal == "background")
 							{
 								QString projectDir = QDir::currentPath();
-								QFile file(resource->location);
+								QFile file(resource->filepath);
 								file.open(QFile::ReadOnly);
 								QByteArray data = file.readAll();
 								document.parse<0>(&data.data()[0]);
@@ -648,7 +685,7 @@ namespace NGM
 								xml_node<> *image = document.first_node("background");
 								image = image->first_node("data");
 
-								name = QDir::cleanPath(resource->location);
+								name = QDir::cleanPath(resource->filepath);
 								QDir::setCurrent(name.left(name.lastIndexOf('/')));
 								QPixmap *pixmap = new QPixmap(QString::fromUtf8(&image->value()[0], image->value_size()));
 
@@ -747,7 +784,7 @@ namespace NGM
 			size_t position	= (literal != "sound" ? 1 : 2);
 			size_t len = strlen(literal);
 			QString name;
-			Resource *resource;
+			Content *resource;
 			Model::ResourceGroupItem *group;
 			Model::ResourceContentItem *content;
 			xml_attribute<> *attr;
@@ -768,21 +805,21 @@ namespace NGM
 						if (node->name()[strlen(literal)] != 's' && node->name_size() == len)
 						{
 							name = QString::fromUtf8(&node->value()[0], node->value_size());
-							resource = new Resource(type, name+extension, Resource::IsFilename);
+							resource = new Content(type, name+extension, Content::IsSystemPath);
 							if (literal == "script")
 							{
-								content = new Model::ResourceContentItem(resource, name.mid(len+2, name.size()-len-6));
+								content = new Model::ResourceContentItem(resource);
 							}
 							else if (literal == "shader")
 							{
-								content = new Model::ResourceContentItem(resource, name.mid(len+2, name.size()-len-9));
+								content = new Model::ResourceContentItem(resource);
 								SerialObject *serialData = new SerialObject();
 								serialData->attributes.insert(QLatin1String("type"), QLatin1String("GLSL"));
 								resource->serialData = serialData;
 							}
 							else
 							{
-								content = new Model::ResourceContentItem(resource, name.right(len+position));
+								content = new Model::ResourceContentItem(resource);
 							}
 							item->insert(content);
 						}
@@ -865,14 +902,14 @@ namespace NGM
 			{
 				if (item->child(i)->toContentItem() != nullptr)
 				{
-					if (item->child(i)->toContentItem()->resource->location == 0)
+					if (item->child(i)->toContentItem()->content->filepath == 0)
 					{
 						location = "sprites/";
 						location += item->text().toLatin1().data();
 					}
 					else
 					{
-						location = item->child(i)->toContentItem()->resource->location.toLatin1().data();
+						location = item->child(i)->toContentItem()->content->filepath.toLatin1().data();
 					}
 					xml_node<> *resource = document->allocate_node(node_element, typeName, location.c_str());
 					node->append_node(resource);

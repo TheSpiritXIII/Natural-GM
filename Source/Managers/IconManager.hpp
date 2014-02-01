@@ -55,6 +55,9 @@ namespace NGM
 				Save			=	2,
 				SaveAs			=	3,
 				SaveAll			=	4,
+				SaveProject		=	37,
+				SaveProjectAs	=	38,
+				SaveProjectAll	=	39,
 				Close			=	5,
 				CloseAll		=	6,
 				PageSetup		=	7,
@@ -87,7 +90,7 @@ namespace NGM
 				Preferences		=	34,
 				About			=	35,
 				Plugins			=	36,
-				ActionSize		=	37
+				ActionSize		=	40
 			};
 
 			/**************************************************//*!

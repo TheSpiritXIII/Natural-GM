@@ -290,6 +290,7 @@ namespace NGM
 				server->removeServer(NGM_APPLICATION_KEY);
 			}
 #endif
+			_serializerThread.terminate();
 			QMap<QString, QAction*>::iterator i = _pluginActions.begin();
 			while (i != _pluginActions.end())
 			{

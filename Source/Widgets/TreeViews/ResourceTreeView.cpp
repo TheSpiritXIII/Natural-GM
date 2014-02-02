@@ -32,7 +32,10 @@
 
 NGM::Widget::ResourceTreeView::ResourceTreeView(
 	NGM::Model::ResourceItemModel *model, QWidget *parent) :
-	QTreeView(parent), _model(model) {}
+	QTreeView(parent), _model(model)
+{
+	setEditTriggers(EditKeyPressed);
+}
 
 void NGM::Widget::ResourceTreeView::contextMenuEvent(
 	QContextMenuEvent *event)
@@ -42,7 +45,7 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 
 	Model::ResourceBaseItem *item;
 	QModelIndexList selected = selectedIndexes();
-	bool isContent = selected.size() != 0, isGroup = true;
+	bool isContent = selected.size() != 0, isGroup = true, isRenamable = true;
 	for (int i = 0; i != selected.size(); ++i)
 	{
 		item = static_cast<Model::ResourceBaseItem*>(
@@ -55,6 +58,10 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 		else
 		{
 			isGroup = false;
+		}
+		if (item->flags() & Model::ResourceBaseItem::NotRenamable)
+		{
+			isRenamable = false;
 		}
 	}
 
@@ -78,8 +85,9 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 	if (selected.size() != 0)
 	{
 		action = menu.addAction(tr("Rename"));
-		action->setEnabled(false);
-		if (!isContent)
+		connect(action, &QAction::triggered,
+				 this, &ResourceTreeView::renameSelected);
+		if (isContent || !isRenamable)
 		{
 			action->setEnabled(false);
 		}
@@ -100,14 +108,14 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 											tr("Add Existing..."));
 		action->setEnabled(false);
 
-		if (item->toGroupItem() && item->toGroupItem()->flags() &
-				Model::ResourceBaseItem::CreateGroups)
+		if ((item->toGroupItem() && item->toGroupItem()->flags() &
+				Model::ResourceBaseItem::CreateGroups) ||
+			item->parent()->flags() & Model::ResourceBaseItem::CreateGroups)
 		{
 			action = menu.addAction(isContent ? tr("Insert Group...") :
 												tr("Add Group..."));
 			connect(action, &QAction::triggered,
-					 this, &ResourceTreeView::addGroupSelected);
-			action->setEnabled(false);
+					 this, &ResourceTreeView::addGroupToSelected);
 		}
 
 		menu.addSeparator();
@@ -252,13 +260,29 @@ void NGM::Widget::ResourceTreeView::collapseSelected()
 	}
 }
 
-void NGM::Widget::ResourceTreeView::addGroupSelected()
+void NGM::Widget::ResourceTreeView::addGroupToSelected()
 {
-	Model::ResourceGroupItem *group = static_cast<Model::ResourceGroupItem*>(
+	Model::ResourceBaseItem *selected = static_cast<Model::ResourceBaseItem*>(
 		static_cast<QAbstractProxyModel*>(model())->mapToSource(currentIndex()).
-				internalPointer())->toGroupItem();
-	Model::ResourceGroupItem *item = new Model::ResourceGroupItem("Group");
-	group->insert(item);
+				internalPointer());
+	Model::ResourceGroupItem *group = selected->toGroupItem() ?
+				selected->toGroupItem() : selected->parent();
+	Model::ResourceGroupItem *item = new Model::ResourceGroupItem("Group",
+		Model::ResourceBaseItem::CreateGroups,
+		!group->container() ? group : group->container());
+	if (!selected->toGroupItem() && !_model->sort())
+	{
+		group->insert(item, selected->childNumber());
+	}
+	else
+	{
+		group->insert(item);
+	}
 	edit(static_cast<QAbstractProxyModel*>(model())->
 		 mapFromSource(item->index()));
+}
+
+void NGM::Widget::ResourceTreeView::renameSelected()
+{
+	edit(currentIndex());
 }

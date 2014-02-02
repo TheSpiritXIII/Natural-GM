@@ -73,5 +73,12 @@ NGM::Model::ResourceGroupItem *NGM::Model::ResourceBaseItem::toGroupItem()
 bool NGM::Model::ResourceBaseItem::lessThan(const ResourceBaseItem *lhs,
 											const ResourceBaseItem *rhs)
 {
-	return lhs->text() < rhs->text();
+	return lhs->text().compare(rhs->text(), Qt::CaseInsensitive) < 0;
 }
+
+bool NGM::Model::ResourceBaseItem::lessThanText(const ResourceBaseItem *lhs,
+												const QString &rhs)
+{
+	return lhs->text().compare(rhs, Qt::CaseInsensitive) < 0;
+}
+

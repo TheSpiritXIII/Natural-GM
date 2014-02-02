@@ -85,7 +85,12 @@ namespace NGM
 			*			The new group is queued for renaming
 			*			right away.
 			******************************************************/
-			void addGroupSelected();
+			void addGroupToSelected();
+
+			/**************************************************//*!
+			*	@brief	Opens an editor for the selected items.
+			******************************************************/
+			void renameSelected();
 
 		private:
 

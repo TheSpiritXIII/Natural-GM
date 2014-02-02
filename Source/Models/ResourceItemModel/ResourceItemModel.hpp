@@ -115,6 +115,13 @@ namespace NGM
 			QModelIndex parent(const QModelIndex &index) const;
 
 			/**************************************************//*!
+			*	@brief	Sets the item data. Only the EditRole can
+			*			be modified.
+			******************************************************/
+			bool setData(const QModelIndex & index, const QVariant & value,
+						 int role = Qt::EditRole);
+
+			/**************************************************//*!
 			*	@brief	Returns the child count of the indicated
 			*			parent.
 			******************************************************/

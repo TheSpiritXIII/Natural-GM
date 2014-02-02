@@ -79,9 +79,16 @@ namespace NGM
 
 			/**************************************************//*!
 			*	@brief	Changes the internal filepath and updates
-			*			the item display text.
+			*			the item display text. The existance of
+			*			the file is not checked for.
 			******************************************************/
-			void setFilepath(const QString filepath);
+			void setFilepath(const QString &filepath);
+
+			/**************************************************//*!
+			*	@brief	Updates the file and display text. The
+			*			existance of the file is not checked for.
+			******************************************************/
+			void setFilename(const QString &filename);
 
 			/**************************************************//*!
 			*	@brief	Sets the item's modification flag. If the

@@ -28,8 +28,11 @@
 #include <cassert>
 #include <stack>
 
+#include <QDebug>
+
 NGM::Model::ResourceGroupItem::ResourceGroupItem(const QString &name,
-	ResourceItemFlags flags) : ResourceBaseItem(name, flags) {}
+	ResourceItemFlags flags, ResourceGroupItem *container) :
+	ResourceBaseItem(name, flags, container) {}
 
 NGM::Model::ResourceGroupItem::ResourceGroupItem(ResourceItemFlags flags) :
 	ResourceBaseItem(flags) {}
@@ -62,7 +65,7 @@ void NGM::Model::ResourceGroupItem::sort()
 int NGM::Model::ResourceGroupItem::childPosition(
 		const ResourceBaseItem *find) const
 {
-	if (_flags & IsSorted)
+	/*if (_flags & IsSorted)
 	{
 		QList<NGM::Model::ResourceBaseItem*>::const_iterator i =
 			std::lower_bound(_children.begin(), _children.end(), find,
@@ -72,7 +75,7 @@ int NGM::Model::ResourceGroupItem::childPosition(
 			return i - _children.begin();
 		}
 	}
-	else
+	else*/
 	{
 		for(int i = 0; i != _children.size(); ++i)
 		{
@@ -187,8 +190,11 @@ void NGM::Model::ResourceGroupItem::move(int from, ResourceGroupItem *group)
 			}
 			else
 			{
-				_children.erase(i);
+				qDebug() << "Append insert.";
+				qDebug() << "From:" << from;
+				qDebug() << "To:" << group->text();
 				_model->beginMove(index(), from, from, group->index(), 0);
+				_children.erase(i);
 				group->_children.append(item);
 			}
 		}
@@ -281,22 +287,40 @@ NGM::Model::ResourceGroupItem *NGM::Model::ResourceGroupItem::toGroupItem()
 	return this;
 }
 
+void NGM::Model::ResourceGroupItem::updatePosition(ResourceBaseItem *item,
+												   const QString &oldName)
+{
+	assert(_model != nullptr);
+
+	 // Change to old name temporarily to find old position.
+	QString name = item->text();
+	item->setText(oldName);
+	int from = item->childNumber();
+
+	QModelIndex modelIndex = index();
+	int to = std::lower_bound(_children.begin(), _children.end(),
+		name, &ResourceBaseItem::lessThanText) - _children.begin();
+
+	item->setText(name);
+
+	// Don't change if before or after index (where it'd be same).
+	if (from == to - 1 || from == to)
+	{
+		return;
+	}
+
+	_model->beginMove(modelIndex, from, from, modelIndex, to);
+
+	// Possible optimization can be made here.
+	_children.erase(_children.begin() + from);
+	_children.insert(from < to ? --to : to, item);
+
+	_model->endMove();
+}
+
 bool NGM::Model::ResourceGroupItem::canContain(ResourceBaseItem *other)
 {
-	if (other->_container == nullptr || other->_container == this)
-	{
-		return true;
-	}
-	ResourceGroupItem *parent = _parent;
-	while (parent != nullptr)
-	{
-		if (other->_container == parent)
-		{
-			return true;
-		}
-		parent = parent->_parent;
-	}
-	return false;
+	return other->_container == this || other->container() == this->container();
 }
 
 void NGM::Model::ResourceGroupItem::setModel(ResourceBaseItem *item,

@@ -38,6 +38,12 @@
 
 #include "Serializer.hpp"
 
+#include <QFile>
+
+//#include "ResourceProjectItem.hpp"
+
+#include <QStringBuilder>
+
 QMimeData *NGM::Model::ResourceItemModel::internalMime = nullptr;
 
 NGM::Model::ResourceItemModel::ResourceItemModel(
@@ -126,7 +132,8 @@ Qt::ItemFlags NGM::Model::ResourceItemModel::flags(
 		}
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
 			   Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled |
-			   Qt::ItemIsEditable;
+			   ((item->flags() & ResourceBaseItem::NotRenamable) == 0 ?
+					Qt::ItemIsEditable : Qt::ItemIsEnabled);
 	}
 	return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
 }
@@ -185,6 +192,50 @@ QModelIndex NGM::Model::ResourceItemModel::parent(
 	}
 
 	return createIndex(_parent->childNumber(), 0, _parent);
+}
+
+bool NGM::Model::ResourceItemModel::setData(const QModelIndex &index,
+											const QVariant &value, int role)
+{
+	if (!index.isValid() || role != Qt::EditRole)
+	{
+		return false;
+	}
+	ResourceBaseItem *item = static_cast<ResourceBaseItem*>(
+				index.internalPointer());
+	QString oldName = item->text();
+	QString input = value.toString();
+	if (oldName == input)
+	{
+		return false;
+	}
+	if (item->toProjectItem())
+	{
+		ResourceProjectItem *project = item->toProjectItem();
+		const Resource::FileDetails extensions = project->project()->extensions;
+		if (!extensions.isfile(input))
+		{
+			input = extensions.makefile(input);
+		}
+		//project->project()->serializer->projectRenamed(input);
+		// TODO: Notify serializer for changes.
+		QFile file(project->directory() % project->filename());
+		file.rename(input);
+		project->setFilename(input);
+	}
+	else if (item->toContentItem())
+	{
+		// TODO: Get serializer verification.
+	}
+	else
+	{
+		item->setText(value.toString());
+	}
+	if (_sort)
+	{
+		item->parent()->updatePosition(item, oldName);
+	}
+	return true;
 }
 
 int NGM::Model::ResourceItemModel::rowCount(const QModelIndex &parent) const
@@ -289,10 +340,6 @@ bool NGM::Model::ResourceItemModel::dropMimeData(const QMimeData *data,
 					}
 					_root->move(number, _root, row);
 					++row;
-				}
-				else if (group != item->parent())
-				{
-					item->parent()->move(item->childNumber(), group);
 				}
 			}
 			else if (item->parent() != _root && group != nullptr &&

@@ -49,7 +49,8 @@ namespace NGM
 			*			and flags.
 			******************************************************/
 			ResourceGroupItem(const QString &name,
-							  ResourceItemFlags flags = IsSorted);
+							  ResourceItemFlags flags = IsSorted,
+							  ResourceGroupItem *container = nullptr);
 
 			/**************************************************//*!
 			*	@brief	Deallocates and removes all children.
@@ -134,6 +135,13 @@ namespace NGM
 			*			position, but does not delete it.
 			******************************************************/
 			void remove(int position, int countOld = 1);
+
+			/**************************************************//*!
+			*	@brief	Updates the position of the indicated
+			*			item if the model is sorting. Useful for
+			*			when the item is renamed.
+			******************************************************/
+			void updatePosition(ResourceBaseItem *item, const QString &oldName);
 
 			/**************************************************//*!
 			*	@brief	Returns whether or not this item can

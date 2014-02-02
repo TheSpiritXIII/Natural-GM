@@ -37,11 +37,17 @@ NGM::Model::ResourceProjectItem *NGM::Model::ResourceProjectItem::toProjectItem(
 	return this;
 }
 
-void NGM::Model::ResourceProjectItem::setFilepath(const QString filepath)
+void NGM::Model::ResourceProjectItem::setFilepath(const QString &filepath)
 {
 	int split = filepath.lastIndexOf('/') + 1;
 	_filename = filepath.right(filepath.size() - split);
 	_directory = filepath.left(split);
+	updateText();
+}
+
+void NGM::Model::ResourceProjectItem::setFilename(const QString &filename)
+{
+	_filename = filename;
 	updateText();
 }
 

@@ -130,6 +130,16 @@ namespace NGM
 			}
 
 			/**************************************************//*!
+			*	@brief	Returns the container item. If there is
+			*			a container item, then this item must
+			*			have that item as a parent somewhere.
+			******************************************************/
+			inline ResourceGroupItem *container() const
+			{
+				return _container;
+			}
+
+			/**************************************************//*!
 			*	@brief	Returns the root project item.
 			******************************************************/
 			inline ResourceProjectItem *projectItem() const
@@ -154,10 +164,19 @@ namespace NGM
 
 			/**************************************************//*!
 			*	@brief	Returns whether or not the left item is
-			*			less than the right one.
+			*			less than the right item. This is done
+			*			case insensitive.
 			******************************************************/
 			static bool lessThan(const ResourceBaseItem *lhs,
 								 const ResourceBaseItem *rhs);
+
+			/**************************************************//*!
+			*	@brief	Returns whether or not the left item is
+			*			less than the right string. This is done
+			*			case insensitive.
+			******************************************************/
+			static bool lessThanText(const ResourceBaseItem *lhs,
+									 const QString &rhs);
 
 		protected:
 

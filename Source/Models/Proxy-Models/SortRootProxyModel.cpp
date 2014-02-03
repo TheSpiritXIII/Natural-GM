@@ -31,19 +31,23 @@ void NGM::Model::SortRootProxyModel::setSourceModel(QAbstractItemModel *source)
 {
 	if (sourceModel())
 	{
+		disconnect(source, &QAbstractItemModel::rowsAboutToBeMoved,
+				   this, &SortRootProxyModel::priorityRowMoved);
 		disconnect(sourceModel(), &QAbstractItemModel::rowsRemoved,
-				   this, &SortRootProxyModel::updatePriority);
+				   this, &SortRootProxyModel::priorityRowRemoved);
 	}
 	QSortFilterProxyModel::setSourceModel(source);
-	connect(source, &QAbstractItemModel::rowsRemoved,
-			this, &SortRootProxyModel::updatePriority);
+	connect(source, &QAbstractItemModel::rowsAboutToBeMoved,
+			this, &SortRootProxyModel::priorityRowMoved);
+	connect(source, &QAbstractItemModel::rowsAboutToBeRemoved,
+			this, &SortRootProxyModel::priorityRowRemoved);
 }
 
 QVariant NGM::Model::SortRootProxyModel::data(const QModelIndex &index,
 											  int role) const
 {
 	if (role == Qt::FontRole && !index.parent().isValid() &&
-			index.row() == _priority)
+			mapToSource(index).row() == _priority)
 	{
 		QFont font;
 		font.setBold(true);
@@ -72,11 +76,11 @@ void NGM::Model::SortRootProxyModel::setSourceView(QTreeView *sourceView)
 
 void NGM::Model::SortRootProxyModel::setPriority(int index)
 {
-	if (rowCount() < index && index > 0)
+	_priority = index;
+	if (index > rowCount()  || index < 0)
 	{
-		_priority = index;
+		_priority = 0;
 	}
-	_updatePriority();
 }
 
 bool NGM::Model::SortRootProxyModel::filterAcceptsRow(int row,
@@ -85,8 +89,41 @@ bool NGM::Model::SortRootProxyModel::filterAcceptsRow(int row,
 	return SortGroupProxyModel::filterAcceptsRow(row, parent);
 }
 
-void NGM::Model::SortRootProxyModel::updatePriority(const QModelIndex &,
-													int, int)
+void NGM::Model::SortRootProxyModel::priorityRowRemoved(
+	const QModelIndex &parent, int start, int end)
 {
-	_updatePriority();
+	if (parent == QModelIndex())
+	{
+		if (_priority >= start)
+		{
+			if (_priority < end)
+			{
+				_priority = start - 1;
+			}
+			else
+			{
+				--_priority;
+			}
+		}
+	}
+}
+
+void NGM::Model::SortRootProxyModel::priorityRowMoved(const QModelIndex &parent,
+	int start, int end, const QModelIndex &, int row)
+{
+	if (parent == QModelIndex())
+	{
+		if (start >= _priority && end <= _priority)
+		{
+			_priority = end - _priority + (row > _priority ? --row : row);
+		}
+		else if (_priority >= row && _priority < start)
+		{
+			_priority += (end - start) + 1;
+		}
+		else if (_priority > start && _priority < row)
+		{
+			_priority -= (end - start) + 1;
+		}
+	}
 }

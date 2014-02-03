@@ -126,7 +126,9 @@ HEADERS		+=	Windows/MainWindow.hpp \
     Threads/SerializerThread.hpp \
     Events/ResourceModelEvent.hpp \
     Resources/Base/Content.hpp \
-	Widgets/TreeViews/ResourceTreeView.hpp
+	Widgets/TreeViews/ResourceTreeView.hpp \
+    Resources/Base/Serializer2.hpp \
+    Dialogs/SaveResourceDialog.hpp
 #----------------------------------------------
 #   Source files.
 #----------------------------------------------
@@ -179,7 +181,8 @@ SOURCES		+= \
     Events/ProgressEvent.cpp \
     Threads/SerializerThread.cpp \
     Events/ResourceModelEvent.cpp \
-	Widgets/TreeViews/ResourceTreeView.cpp
+	Widgets/TreeViews/ResourceTreeView.cpp \
+    Dialogs/SaveResourceDialog.cpp
 #----------------------------------------------
 #   Application Icons.
 #----------------------------------------------

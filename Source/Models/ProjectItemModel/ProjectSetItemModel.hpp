@@ -64,6 +64,8 @@ namespace NGM
 			ProjectSetItemModel(QObject *parent = 0, QVector<Resource::Project*>
 				recent = QVector<Resource::Project*>());
 
+			~ProjectSetItemModel();
+
 			/**************************************************//*!
 			*	@brief	Returns the item index at the indicated
 			*			row and parent.

@@ -485,7 +485,6 @@ void NGM::Dialog::ProjectDialog2::choosePressed()
 		}
 	}
 	*_location += _projectEdit->text();
-	qDebug() << "YOLO1:" << *_location;
 
 	if (!(*_location).count('.') &&
 		!_project->data->extensions.isfile(*_location))
@@ -498,6 +497,18 @@ void NGM::Dialog::ProjectDialog2::choosePressed()
 			return;
 		}
 	}
+
+	// TODO: Check whether the file is already opened.
+	/*for (int i = 0; i != )
+	{
+		if (QMessageBox::warning(this, tr("Warning"), tr("The selected file "
+			"already exists. Overwrite?"), QMessageBox::Yes, QMessageBox::No) ==
+				QMessageBox::No)
+		{
+			return;
+		}
+	}*/
+
 	if (QFile::exists(*_location))
 	{
 		if (QMessageBox::warning(this, tr("Warning"), tr("The selected file "

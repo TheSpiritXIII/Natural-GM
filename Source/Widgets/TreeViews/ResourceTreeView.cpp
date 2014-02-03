@@ -28,6 +28,8 @@
 #include <cassert>
 #include <queue>
 
+#include "SortRootProxyModel.hpp"
+
 #include <QDebug>
 
 NGM::Widget::ResourceTreeView::ResourceTreeView(
@@ -45,7 +47,8 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 
 	Model::ResourceBaseItem *item;
 	QModelIndexList selected = selectedIndexes();
-	bool isContent = selected.size() != 0, isGroup = true, isRenamable = true;
+	bool isContent = selected.size() != 0, isGroup = true,
+			isRenamable = true, isProject = true;
 	for (int i = 0; i != selected.size(); ++i)
 	{
 		item = static_cast<Model::ResourceBaseItem*>(
@@ -55,7 +58,11 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 		{
 			isContent = false;
 		}
-		else
+		if (!item->toProjectItem())
+		{
+			isProject = false;
+		}
+		if (!item->toGroupItem())
 		{
 			isGroup = false;
 		}
@@ -84,7 +91,14 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 
 	if (selected.size() != 0)
 	{
-		action = menu.addAction(tr("Rename"));
+		if (isProject)
+		{
+			action = menu.addAction(tr("Set as Active Project"));
+			action->setEnabled(false);
+		}
+
+		action = menu.addAction(isProject ? tr("Rename Project") :
+											tr("Rename"));
 		connect(action, &QAction::triggered,
 				 this, &ResourceTreeView::renameSelected);
 		if (isContent || !isRenamable)
@@ -92,8 +106,17 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 			action->setEnabled(false);
 		}
 
-		action = menu.addAction(tr("Delete"));
-		action->setEnabled(false);
+		if (isProject)
+		{
+			action = menu.addAction(tr("Close Project"));
+			action->setEnabled(false);
+		}
+
+		if (!isProject)
+		{
+			action = menu.addAction(tr("Delete"));
+			action->setEnabled(false);
+		}
 
 		menu.addSeparator();
 	}
@@ -121,18 +144,21 @@ void NGM::Widget::ResourceTreeView::contextMenuEvent(
 		menu.addSeparator();
 	}
 
-	if (selected.size() != 0)
+	if (!isProject)
 	{
-		action = menu.addAction(tr("Cut"));
-		action->setEnabled(false);
+		if (selected.size() != 0)
+		{
+			action = menu.addAction(tr("Cut"));
+			action->setEnabled(false);
 
-		action = menu.addAction(tr("Copy"));
-		action->setEnabled(false);
+			action = menu.addAction(tr("Copy"));
+			action->setEnabled(false);
 
-		action = menu.addAction(tr("Paste"));
-		action->setEnabled(false);
+			action = menu.addAction(tr("Paste"));
+			action->setEnabled(false);
 
-		menu.addSeparator();
+			menu.addSeparator();
+		}
 	}
 
 	if (isGroup && !_model->sort())
@@ -285,4 +311,16 @@ void NGM::Widget::ResourceTreeView::addGroupToSelected()
 void NGM::Widget::ResourceTreeView::renameSelected()
 {
 	edit(currentIndex());
+}
+
+void NGM::Widget::ResourceTreeView::closeSelectedProject()
+{
+	currentIndex();
+}
+
+void NGM::Widget::ResourceTreeView::setActiveSelectedProject()
+{
+	Model::SortRootProxyModel *m = static_cast<Model::SortRootProxyModel*>(
+				model());
+	m->setPriority(m->mapToSource(currentIndex()).row());
 }

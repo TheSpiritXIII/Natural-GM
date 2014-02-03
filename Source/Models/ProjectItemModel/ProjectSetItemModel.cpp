@@ -37,6 +37,12 @@ namespace NGM
 		_recent = new ProjectSetModelItem(tr("Recent"), recent);
 	}
 
+	Model::ProjectSetItemModel::~ProjectSetItemModel()
+	{
+		delete _root;
+		delete _recent;
+	}
+
 	QModelIndex Model::ProjectSetItemModel::index(int row, int,
 		const QModelIndex &parent) const
 	{

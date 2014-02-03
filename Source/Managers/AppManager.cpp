@@ -276,6 +276,8 @@ namespace NGM
 			group3->insert(item6);
 
 			_model->insert(item);
+			_model->insert(new Model::ResourceProjectItem(nullptr, project, "C:/Intel/Poo4442.pee", 0));
+			_model->insert(new Model::ResourceProjectItem(nullptr, project, "C:/Intel/Pooq32q2q2.pee", 0));
 
 			createWindow();
 
@@ -302,6 +304,8 @@ namespace NGM
 			{
 				delete _actions[i];
 			}
+
+			delete _model;
 		}
 
 		void AppManager::getProcessMessage()
@@ -318,7 +322,31 @@ namespace NGM
 #ifdef Q_OS_UNIX
 		void AppManager::serverDisconnected()
 		{
-
+			while (1) // This is a race among processes.
+			{
+				if (server == nullptr)
+				{
+					server = new QLocalServer(this);
+				}
+				if (server->listen(NGM_APPLICATION_KEY))
+				{
+					connect(server, &QLocalServer::newConnection,
+							this, &AppManager::getProcessMessage);
+					break;
+				}
+				else
+				{
+					delete server;
+					QLocalSocket *socket = new QLocalSocket(this);
+					socket->connectToServer(NGM_APPLICATION_KEY);
+					if (socket->waitForConnected(1000))
+					{
+						connect(socket, &QLocalSocket::disconnected,
+								this, &AppManager::serverDisconnected);
+						break;
+					}
+				}
+			}
 		}
 #endif
 

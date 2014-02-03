@@ -92,6 +92,19 @@ namespace NGM
 			******************************************************/
 			void renameSelected();
 
+			/**************************************************//*!
+			*	@brief	Closes the selected project. A
+			*			confirmation is asked by the user if
+			*			changes were made.
+			******************************************************/
+			void closeSelectedProject();
+
+			/**************************************************//*!
+			*	@brief	Sets the current active project to the
+			*			selected project.
+			******************************************************/
+			void setActiveSelectedProject();
+
 		private:
 
 			/**************************************************//*!

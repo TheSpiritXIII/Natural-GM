@@ -47,6 +47,11 @@ NGM::Manager::ProjectManager::~ProjectManager()
 	{
 		delete (*i);
 	}
+	for (QList<Resource::Type*>::iterator i = _types.begin();
+		 i != _types.end(); ++i)
+	{
+		delete (*i);
+	}
 }
 
 namespace NGM

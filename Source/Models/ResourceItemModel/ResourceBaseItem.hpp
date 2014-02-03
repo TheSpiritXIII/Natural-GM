@@ -58,7 +58,7 @@ namespace NGM
 				NotRenamable	=	0x02,	/*!< For groups and content items:
 												Whether or not the item can be
 												renamed by the user. */
-				NoAdd			=	0x04,	/*!< For groups: Whether or not the
+				CanAdd			=	0x04,	/*!< For groups: Whether or not the
 												users can create new content
 												items. */
 				NoSort			=	0x08,	/*!< For groups: If true, then this

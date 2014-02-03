@@ -81,6 +81,7 @@ int NGM::Model::ResourceGroupItem::childPosition(
 		{
 			if (_children[i] == find)
 			{
+				qDebug() << "POSITION:" << i;
 				return i;
 			}
 		}

@@ -362,10 +362,12 @@ bool NGM::Model::ResourceItemModel::dropMimeData(const QMimeData *data,
 					}
 					item->parent()->move(number, group, row);
 					++row;
+					item->projectItem()->setModified(true);
 				}
 				else if (group != item->parent())
 				{
 					item->parent()->move(item->childNumber(), group);
+					item->projectItem()->setModified(true);
 				}
 			}
 		}

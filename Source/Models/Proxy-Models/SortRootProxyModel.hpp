@@ -43,7 +43,7 @@ namespace NGM
 		*
 		* The class requests different roles from the source
 		* model. If an item is expanded, it requests a
-		* Natural::DecorationExpandRole, otherwise, it
+		* NGM::Model::DecorationExpandRole, otherwise, it
 		* requests a Qt::DecorationRole.
 		*
 		* In addition, if the priority row is deleted, then
@@ -90,7 +90,7 @@ namespace NGM
 			/**************************************************//*!
 			*	@brief	Set the priority index (it is bolded).
 			*			Setting this to any value outside the
-			*			children range will not work.
+			*			child range will reset the priority to 0.
 			******************************************************/
 			void setPriority(int index);
 
@@ -115,9 +115,15 @@ namespace NGM
 
 			/**************************************************//*!
 			*	@brief	Checks if the priority row was deleted.
-			*			Does not check arguments.
 			******************************************************/
-			void updatePriority(const QModelIndex &, int, int);
+			void priorityRowRemoved(const QModelIndex &parent,
+									int start, int end);
+
+			/**************************************************//*!
+			*	@brief	Checks if the priority row was moved.
+			******************************************************/
+			void priorityRowMoved(const QModelIndex &parent, int start, int end,
+								  const QModelIndex &, int row);
 
 		private:
 
@@ -130,19 +136,6 @@ namespace NGM
 			*	@brief	Stores the priority root index.
 			******************************************************/
 			int _priority;
-
-			/**************************************************//*!
-			*	@brief	Verifies that the priority is in the
-			*			correct range.
-			******************************************************/
-			inline void _updatePriority()
-			{
-				assert(_priority >= 0);
-				while (_priority > sourceModel()->rowCount())
-				{
-					--_priority;
-				}
-			}
 		};
 	}
 }

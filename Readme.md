@@ -19,6 +19,9 @@ PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 
 Compiling
 ---------
-Qt 5.x is required to compile NGM. To compile, simple run qmake on the provided
+Qt 5.x is required to compile NGM. To compile, simply run qmake on the provided
 .pro files in the Source directory. Natural-GM.pro creates the whole
 application, while Natural-GM-DLL.pro creates a dynamic link library.
+
+After the compilation is completed, copy the content of the Resources directory
+into the build directory. The Resources directory contains icon and skin sets.

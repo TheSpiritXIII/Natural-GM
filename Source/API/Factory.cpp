@@ -48,6 +48,12 @@ NGM::API::EditorTools *NGM::API::Factory::createTools(
 	return nullptr;
 }
 
+QWidget *NGM::API::Factory::duplicateWidget(QWidget *,
+  const Manager::GlobalManager *) const
+{
+	return nullptr;
+}
+
 void NGM::API::Factory::connect(const QWidget*, EditorTools*,
   Context::EditContext*) const
 {
@@ -58,4 +64,10 @@ void NGM::API::Factory::disconnect(const QWidget*, EditorTools*,
   Context::EditContext*) const
 {
 	// Intentionally empty.
+}
+
+NGM::API::SerialData *NGM::API::Factory::execute(QWidget *, const char *,
+  SerialData *) const
+{
+	return nullptr;
 }

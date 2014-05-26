@@ -41,6 +41,30 @@ void NGM::API::Editor::disconnect(Context::EditContext *context,
 	_factory->disconnect(_widget, _factory->editorTools(location), context);
 }
 
+NGM::API::Editor *NGM::API::Editor::duplicate(
+  const Manager::GlobalManager *manager)
+{
+	if (!_factory->clonable)
+	{
+		return nullptr;
+	}
+	QWidget *cloneWidget = _factory->duplicateWidget(_widget, manager);
+	if (cloneWidget == nullptr)
+	{
+		return nullptr;
+	}
+	return new Editor(_factory, cloneWidget);
+}
+
+NGM::API::SerialData *NGM::API::Editor::execute(const char *command,
+  SerialData *params)
+{
+	return _factory->execute(_widget, command, params);
+}
+
 NGM::API::Editor::Editor(Factory *factory,
   const Manager::GlobalManager *manager) : _factory(factory),
   _widget(factory->createWidget(this, manager)) {}
+
+NGM::API::Editor::Editor(Factory *factory, QWidget *widget) :
+  _factory(factory), _widget(widget) {}

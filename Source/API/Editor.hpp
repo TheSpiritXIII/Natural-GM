@@ -13,6 +13,7 @@
 **/
 #pragma once
 #include <cstdint>
+#include "SerialData.hpp"
 
 class QWidget;
 
@@ -89,10 +90,23 @@ namespace NGM
 			void disconnect(Context::EditContext *context,
 			  const QWidget *location);
 
+			/**************************************************//*!
+			*  @brief  Returns an editor that is cloned from the
+			*          given editor, or nullptr if this editor
+			*          is not clonable.
+			******************************************************/
+			Editor *duplicate(const Manager::GlobalManager *manager);
+
+			/**************************************************//*!
+			*  @brief  Executes the given command.
+			******************************************************/
+			SerialData *execute(const char *command, SerialData *params);
+
 		protected:
 			Editor(Factory *factory, const Manager::GlobalManager *manager);
 			friend class Factory;
 		private:
+			Editor(Factory *factory, QWidget *widget);
 			Factory *_factory;
 			QWidget * const _widget;
 		};

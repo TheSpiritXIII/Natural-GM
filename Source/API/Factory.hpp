@@ -101,6 +101,19 @@ namespace NGM
 				const Manager::GlobalManager *manager) const = 0;
 
 			/**************************************************//*!
+			*  @brief  Returns a clone of the indicated widget.
+			*
+			* The returned clone should update when the original
+			* widget is updated and vice-versa. The widget should
+			* be the same type as the one created in
+			* createWidget(). By default, this function returns a
+			* nullptr, so it must be reimplemented if clonable is
+			* true.
+			******************************************************/
+			virtual QWidget *duplicateWidget(QWidget *widget,
+				const Manager::GlobalManager *manager) const;
+
+			/**************************************************//*!
 			*  @brief  Allocates and returns a collection of
 			*          editor compatible tools, or nullotr, if
 			*          the editor does not support tools.
@@ -137,6 +150,17 @@ namespace NGM
 			******************************************************/
 			virtual void disconnect(const QWidget *widget,
 			  EditorTools *editorTool, Context::EditContext *context) const;
+
+			/**************************************************//*!
+			*  @brief  Executes the given command to the
+			*          indicated widget.
+			*
+			* Plugins may use this for extending, or modifying
+			* the capabilities of editors. It is recommended to
+			* implement, but not needed.
+			******************************************************/
+			virtual SerialData *execute(QWidget *editor, const char *command,
+			  SerialData *params) const;
 
 			friend class Editor;
 

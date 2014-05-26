@@ -28,7 +28,10 @@ SOURCES += \
     API/Factory.cpp \
     Widget/PluginDialog.cpp \
     API/SerialData.cpp \
-    API/Serializer.cpp
+    API/Serializer.cpp \
+    Widget/SDIEditorWindow.cpp \
+    API/EditorTools.cpp \
+    API/Loader.cpp
 #----------------------------------------------
 #   Header Files.
 #----------------------------------------------
@@ -43,4 +46,6 @@ HEADERS += \
 	Widget/EditorWindow.hpp \
     Widget/PluginDialog.hpp \
     Manager/GlobalManager.hpp \
-    API/EditorTools.hpp
+    API/EditorTools.hpp \
+    API/Loader.hpp \
+    API/Variant.hpp

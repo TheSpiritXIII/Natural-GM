@@ -34,7 +34,7 @@ namespace NGM
 			/**************************************************//*!
 			*  @brief  Creates a window with the given parent.
 			******************************************************/
-			SDIEditorWindow(QObject *parent = 0);
+			SDIEditorWindow(QWidget *parent = 0);
 		};
 	}
 }

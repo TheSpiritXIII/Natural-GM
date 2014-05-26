@@ -13,8 +13,11 @@
 **/
 #pragma once
 #include <QMap>
+#include <QIcon>
 #include <QImage>
 #include <QVector>
+#include <QPixmap>
+#include "Variant.hpp"
 
 namespace NGM
 {
@@ -24,6 +27,9 @@ namespace NGM
 		struct SerialImage;
 		struct SerialAnimation;
 		struct SerialBlob;
+		struct SerialPixmap;
+		struct SerialIcon;
+		struct SerialVariant;
 
 		/**************************************************//*!
 		*  @brief  An abstract data type.
@@ -39,6 +45,41 @@ namespace NGM
 			*  @brief  Returns the identifier id of this class.
 			******************************************************/
 			uint32_t identifier() const;
+
+			/**************************************************//*!
+			*  @brief  Provides a safe cast to a SerialObject.
+			******************************************************/
+			virtual SerialObject *toObject();
+
+			/**************************************************//*!
+			*  @brief  Provides a safe cast to a SerialImage.
+			******************************************************/
+			virtual SerialImage *toImage();
+
+			/**************************************************//*!
+			*  @brief  Provides a safe cast to a SerialAnimation.
+			******************************************************/
+			virtual SerialAnimation *toAnimation();
+
+			/**************************************************//*!
+			*  @brief  Provides a safe cast to a SerialBlob.
+			******************************************************/
+			virtual SerialBlob *toBlob();
+
+			/**************************************************//*!
+			*  @brief  Provides a safe cast to a SerialPixmap.
+			******************************************************/
+			virtual SerialPixmap *toPixmap();
+
+			/**************************************************//*!
+			*  @brief  Provides a safe cast to a SerialIcon.
+			******************************************************/
+			virtual SerialIcon *toIcon();
+
+			/**************************************************//*!
+			*  @brief  Provides a safe cast to a SerialVariant.
+			******************************************************/
+			virtual SerialVariant *toVariant();
 
 		protected:
 
@@ -70,6 +111,11 @@ namespace NGM
 			SerialObject();
 
 			/**************************************************//*!
+			*  @brief  Returns this.
+			******************************************************/
+			SerialObject *toObject();
+
+			/**************************************************//*!
 			*  @brief  Maps data to attribute names.
 			******************************************************/
 			QMap<QString, SerialData*> children;
@@ -89,6 +135,11 @@ namespace NGM
 			*  @brief  Creates an empty object.
 			******************************************************/
 			SerialImage();
+
+			/**************************************************//*!
+			*  @brief  Returns this.
+			******************************************************/
+			SerialImage *toImage();
 
 			/**************************************************//*!
 			*  @brief  Contains an image.
@@ -112,6 +163,11 @@ namespace NGM
 			SerialAnimation();
 
 			/**************************************************//*!
+			*  @brief  Returns this.
+			******************************************************/
+			SerialAnimation *toAnimation();
+
+			/**************************************************//*!
 			*  @brief  Contains images.
 			******************************************************/
 			QVector<QImage> images;
@@ -133,9 +189,92 @@ namespace NGM
 			SerialBlob();
 
 			/**************************************************//*!
+			*  @brief  Returns this.
+			******************************************************/
+			SerialBlob *toBlob();
+
+			/**************************************************//*!
 			*  @brief  Contains data.
 			******************************************************/
 			char *data;
+
+			/**************************************************//*!
+			*  @brief  Returns the data identifier.
+			******************************************************/
+			static uint32_t id();
+		};
+
+		/**************************************************//*!
+		*  @brief  Stores a pixmap.
+		******************************************************/
+		struct SerialPixmap : SerialData
+		{
+			/**************************************************//*!
+			*  @brief  Creates an empty object.
+			******************************************************/
+			SerialPixmap();
+
+			/**************************************************//*!
+			*  @brief  Returns this.
+			******************************************************/
+			SerialPixmap *toPixmap();
+
+			/**************************************************//*!
+			*  @brief  Contains a pixmap.
+			******************************************************/
+			QPixmap pixmap;
+
+			/**************************************************//*!
+			*  @brief  Returns the data identifier.
+			******************************************************/
+			static uint32_t id();
+		};
+
+		/**************************************************//*!
+		*  @brief  Stores an icon.
+		******************************************************/
+		struct SerialIcon : SerialData
+		{
+			/**************************************************//*!
+			*  @brief  Creates an empty object.
+			******************************************************/
+			SerialIcon();
+
+			/**************************************************//*!
+			*  @brief  Returns this.
+			******************************************************/
+			SerialIcon *toIcon();
+
+			/**************************************************//*!
+			*  @brief  Contains an icon.
+			******************************************************/
+			QIcon icon;
+
+			/**************************************************//*!
+			*  @brief  Returns the data identifier.
+			******************************************************/
+			static uint32_t id();
+		};
+
+		/**************************************************//*!
+		*  @brief  Stores a variant..
+		******************************************************/
+		struct SerialVariant : SerialData
+		{
+			/**************************************************//*!
+			*  @brief  Creates an empty object.
+			******************************************************/
+			SerialVariant();
+
+			/**************************************************//*!
+			*  @brief  Returns this.
+			******************************************************/
+			SerialVariant *toVariant();
+
+			/**************************************************//*!
+			*  @brief  Contains a variant.
+			******************************************************/
+			Variant variant;
 
 			/**************************************************//*!
 			*  @brief  Returns the data identifier.

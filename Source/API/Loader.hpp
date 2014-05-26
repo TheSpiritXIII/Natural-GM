@@ -1,5 +1,5 @@
 /*-
- *  Copyright (c) 2013 - 2014 Daniel Hrabovcak
+ *  Copyright (c) 2014 Daniel Hrabovcak
  *
  *  This program is free software: you can redistribute it and/or modify it
  *  under the terms of the GNU Lesser General Public License as published by the
@@ -12,7 +12,8 @@
  *  for more details.
 **/
 #pragma once
-#include <QString>
+#include <QVector>
+#include "Serializer.hpp"
 
 namespace NGM
 {
@@ -24,114 +25,98 @@ namespace NGM
 	}
 	namespace API
 	{
-		struct TypeDisplay
-		{
-			QString typeName;
-			QString displayName;
-		};
+		struct Serializer;
 
 		/**************************************************//*!
-		*  @brief  Handles the loading of projects.
+		*  @brief  Loads projects using serializers.
 		******************************************************/
-		struct Serializer
+		struct Loader
 		{
+			/**************************************************//*!
+			*  @brief  Creates a loader with a serializer.
+			******************************************************/
+			Loader(Serializer *serializer);
+
+			/**************************************************//*!
+			*  @brief  Adds another serializer to the loader.
+			******************************************************/
+			void addSerializer(Serializer *serializer);
+
 			/**************************************************//*!
 			*  @brief  Creates the project file structure.
 			******************************************************/
-			virtual void projectCreate(
-			  Model::ResourceProjectItem *item) const = 0;
+			void projectCreate(Model::ResourceProjectItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Saves the given project item.
 			******************************************************/
-			virtual void projectSave(
-			  Model::ResourceProjectItem *item) const = 0;
+			void projectSave(Model::ResourceProjectItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Loads the given project item.
 			******************************************************/
-			virtual void projectLoad(
-			  Model::ResourceProjectItem *item) const = 0;
+			void projectLoad(Model::ResourceProjectItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Performs an optimized project load.
-			*
-			* Ideally, this function should be optimized by
-			* keeping resources that have already loaded, but
-			* have not changed. By default, this function does
-			* a call to projectCreate(), followed by a call to
-			* projectLoad().
 			******************************************************/
-			virtual void projectReload(Model::ResourceProjectItem *item) const;
+			void projectReload(Model::ResourceProjectItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Returns true if the indicated filename
 			*          is allowed to be dropped in the given
 			*          item, false otherwise.
-			*
-			* By default, this function always returns false.
 			******************************************************/
-			virtual bool fileAllowed(const QString &filename,
+			bool fileAllowed(const QString &filename,
 			  const Model::ResourceBaseItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Adds the indicated file to the given item.
 			*
-			* This function is guaranteed to be called after a
-			* validation using fileAllowed().
+			* This function should only be called after
+			* validating the file with fileAllowed().
 			******************************************************/
-			virtual void fileDropped(const QString &filename,
+			void fileDropped(const QString &filename,
 			  Model::ResourceBaseItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Returns true if the indicated item from
 			*          is allowed to be dropped into the given
 			*          item to, false otherwise.
-			*
-			* By default, this function always returns false.
 			******************************************************/
-			virtual bool itemAllowed(const Model::ResourceBaseItem *from,
+			bool itemAllowed(const Model::ResourceBaseItem *from,
 			  const Model::ResourceGroupItem *to) const;
 
 			/**************************************************//*!
 			*  @brief  Adds the item from into the item to.
 			*
-			* This function is guaranteed to be called after a
-			* validation using itemAllowed().
+			* This function should only be called after
+			* validating the file with itemAllowed().
 			******************************************************/
-			virtual void itemDropped(const Model::ResourceBaseItem *from,
+			void itemDropped(const Model::ResourceBaseItem *from,
 			  Model::ResourceGroupItem *to) const;
 
 			/**************************************************//*!
 			*  @brief  Called after an item is renamed.
-			*
-			* This function is mainly intended for project types
-			* that are required to change references, or require
-			* other actions after a resource is renamed.
 			******************************************************/
-			virtual void itemRenamed(const QString &oldName,
+			void itemRenamed(const QString &oldName,
 			  const Model::ResourceBaseItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Called after an item is deleted.
-			*
-			* This function is mainly intended for project types
-			* that are required to change references, or require
-			* other actions after a resource is deleted.
 			******************************************************/
-			virtual void itemDeleted(const Model::ResourceBaseItem *item) const;
+			void itemDeleted(const Model::ResourceBaseItem *item) const;
 
 			/**************************************************//*!
 			*  @brief  Adds resource types to the given list,
 			*          that can be added by the user to the given
 			*          item.
-			*
-			* This function is mainly intended for project types
-			* that are required to change references, or require
-			* other actions after a resource is deleted.
 			******************************************************/
-			virtual void itemAddRequested(QList<TypeDisplay> *typeList,
-			  const Model::ResourceGroupItem *item) const = 0;
+			void itemAddRequested(QList<TypeDisplay> *typeList,
+			  const Model::ResourceGroupItem *item) const;
+
+		private:
+			QVector<Serializer*> _serializers;
 		};
 	}
 }

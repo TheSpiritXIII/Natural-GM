@@ -11,13 +11,7 @@
  *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
  *  for more details.
 **/
-#include <QApplication>
 #include "SDIEditorWindow.hpp"
 
-int main(int argc, char *argv[])
-{
-	QApplication app(argc, argv);
-	NGM::Widget::SDIEditorWindow window;
-	window.show();
-	return app.exec();
-}
+NGM::Widget::SDIEditorWindow::SDIEditorWindow(QWidget *parent) :
+  QMainWindow(parent) {}

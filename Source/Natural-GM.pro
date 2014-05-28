@@ -31,7 +31,8 @@ SOURCES += \
     API/Serializer.cpp \
     Widget/SDIEditorWindow.cpp \
     API/EditorTools.cpp \
-    API/Loader.cpp
+    API/Loader.cpp \
+    Widget/TabDisplayWidget.cpp
 #----------------------------------------------
 #   Header Files.
 #----------------------------------------------
@@ -48,4 +49,5 @@ HEADERS += \
     Manager/GlobalManager.hpp \
     API/EditorTools.hpp \
     API/Loader.hpp \
-    API/Variant.hpp
+    API/Variant.hpp \
+    Widget/TabDisplayWidget.hpp

@@ -35,11 +35,14 @@ namespace NGM
 			******************************************************/
 			PluginDialog(QWidget *parent = 0);
 
+		private slots:
+			void tabChanged(int index);
 		private:
-			QLabel *nameLabel;
-			QLabel *authorsLabel;
-			QLabel *descriptionLabel;
-			QLabel *versionLabel;
+			QLabel *_titleLabel;
+			QLabel *_nameLabel;
+			QLabel *_authorsLabel;
+			QLabel *_versionLabel;
+			QLabel *_iconLabel;
 		};
 	}
 }

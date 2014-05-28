@@ -13,11 +13,14 @@
 **/
 #include <QApplication>
 #include "SDIEditorWindow.hpp"
+#include "PluginDialog.hpp"
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 	NGM::Widget::SDIEditorWindow window;
 	window.show();
+	NGM::Widget::PluginDialog dialog;
+	dialog.show();
 	return app.exec();
 }

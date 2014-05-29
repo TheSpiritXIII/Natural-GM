@@ -50,4 +50,9 @@ HEADERS += \
     API/EditorTools.hpp \
     API/Loader.hpp \
     API/Variant.hpp \
-    Widget/TabDisplayWidget.hpp
+    Widget/TabDisplayWidget.hpp \
+    Manager/ApplicationManager.hpp \
+    Manager/IconManager.hpp \
+    Manager/PluginManager.hpp \
+    API/Extension.hpp \
+    API/Project.hpp

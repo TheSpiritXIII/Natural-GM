@@ -13,6 +13,7 @@
 **/
 #pragma once
 #include <cstdint>
+#include <QVector>
 
 class QMenu;
 class QToolBar;
@@ -29,16 +30,6 @@ namespace NGM
 		struct EditorTools
 		{
 			/**************************************************//*!
-			*  @brief  Sets all tool objects.
-			*
-			* All objects must be valid throughout the entire
-			* lifetime. Otherwise, there is a risk of a buffer
-			* overflow or other errors.
-			******************************************************/
-			EditorTools(QMenu **menus, uint8_t menuCount, QToolBar ** toolBars,
-			  uint8_t toolBarCount, QStatusBar *statusBar);
-
-			/**************************************************//*!
 			*  @brief  Deallocates all stored tool objects.
 			******************************************************/
 			~EditorTools();
@@ -48,7 +39,7 @@ namespace NGM
 			*          there are no menus.
 			*  @see    menuCount();
 			******************************************************/
-			QMenu **menus() const;
+			QMenu *menus();
 
 			/**************************************************//*!
 			*  @brief  Returns the number of menus, or 0 if there
@@ -61,7 +52,7 @@ namespace NGM
 			*          if there are no tool-bars.
 			*  @see    toolbarCount();
 			******************************************************/
-			QToolBar **toolBars() const;
+			QToolBar *toolBars();
 
 			/**************************************************//*!
 			*  @brief  Returns the number of tool-bars, or 0 if
@@ -75,11 +66,33 @@ namespace NGM
 			******************************************************/
 			QStatusBar *statusBar() const;
 
-		private:
-			QMenu ** const _menus;
-			const uint8_t _menuCount;
-			QToolBar ** const _toolBars;
-			const uint8_t _toolBarCount;
+		protected:
+
+			/**************************************************//*!
+			* Subclasses should create their own their own
+			* constructor, where they create widgets. All widgets
+			* must be valid throughout the entire lifetime, and
+			* should be created only here. All memory is deleted
+			* automatically by the default destructor.
+			******************************************************/
+			EditorTools();
+
+			/**************************************************//*!
+			*  @brief  Contains menus, or is empty if menus are
+			*          not supported by the editor.
+			******************************************************/
+			QVector<QMenu*> _menus;
+
+			/**************************************************//*!
+			*  @brief  Contains tool-bars, or is empty if
+			*          tool-bars are not supported by the editor.
+			******************************************************/
+			QVector<QToolBar*> _tools;
+
+			/**************************************************//*!
+			*  @brief  Contains the status-bar, or nullptr if a
+			*          status-bar is not supported by the editor.
+			******************************************************/
 			QStatusBar *_statusBar;
 		};
 	}

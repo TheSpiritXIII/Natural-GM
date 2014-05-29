@@ -17,6 +17,10 @@ namespace NGM
 {
 	namespace API
 	{
+		struct Factory;
+		struct Project;
+		struct Extension;
+
 		/**************************************************//*!
 		*  @brief  Stores major, minor and revision numbers.
 		******************************************************/
@@ -55,14 +59,64 @@ namespace NGM
 			/**************************************************//*!
 			*  @brief  The priority number of this plugin.
 			*
-			* This number is used by the plugin loader.
+			* This number is used by the plugin loader. By
+			* default, most plugins have a priority of 50, and
+			* typically range between 0 and 100. Anything above
+			* or below these values should be purely independent
+			* or dependent, respectively, by other plugins.
 			******************************************************/
 			const float priority;
 
 			/**************************************************//*!
 			*  @brief  A unique identifier for this plugin.
+			*
+			* Other plugins may use this value for obtaining a
+			* certain plugin. For this reason, it is important
+			* that this value is unique.
 			******************************************************/
 			const uint32_t uuid;
+
+			/**************************************************//*!
+			*  @brief  Executes the given command with the given
+			*          parameters.
+			*
+			* Other plugins may use this for accessing this
+			* plugin's functionality.
+			******************************************************/
+			virtual SerialData *execute(const char *command,
+			  SerialData *params) const;
+
+		protected:
+
+			/**************************************************//*!
+			*  @brief  Creates a plugin with meta-data.
+			*
+			* Subclasses should write their own constructors,
+			* where they add their data. Data should only be
+			* added in the constructor, and should be valid
+			* throughout the lifetime of the application.
+			******************************************************/
+			Plugin(const QString &name, const QString &authors,
+			  const QString &description, Version version, uint32_t uuid,
+			  float priority = 50.0f);
+
+			/**************************************************//*!
+			*  @brief  Contains all factories, or is empty if the
+			*          plugin does not suport factories.
+			******************************************************/
+			QVector<Factory*> _factories;
+
+			/**************************************************//*!
+			*  @brief  Contains all projects, or is empty if the
+			*          plugin does not suport projects.
+			******************************************************/
+			QVector<Project*> _projects;
+
+			/**************************************************//*!
+			*  @brief  Contains all extensions, or is empty if
+			*          the plugin does not suport extensions.
+			******************************************************/
+			QVector<Extension*> _extensions;
 		};
 	}
 }

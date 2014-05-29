@@ -13,37 +13,42 @@
 **/
 #include "EditorTools.hpp"
 #include <QStatusBar>
+#include <QToolBar>
+#include <QMenu>
 
-NGM::API::EditorTools::EditorTools(QMenu **menus, uint8_t menuCount,
-  QToolBar **toolBars, uint8_t toolBarCount, QStatusBar *statusBar) :
-  _menus(menus), _menuCount(menuCount), _toolBars(toolBars),
-  _toolBarCount(toolBarCount), _statusBar(statusBar) {}
+NGM::API::EditorTools::EditorTools() : _statusBar(nullptr) {}
 
 NGM::API::EditorTools::~EditorTools()
 {
-	delete [] _menus;
-	delete [] _toolBars;
+	for (auto &i : _menus)
+	{
+		delete i;
+	}
+	for (auto &i : _tools)
+	{
+		delete i;
+	}
 	delete _statusBar;
 }
 
-QMenu **NGM::API::EditorTools::menus() const
+QMenu *NGM::API::EditorTools::menus()
 {
-	return _menus;
+	return _menus[0];
 }
 
 uint8_t NGM::API::EditorTools::menuCount() const
 {
-	return _menuCount;
+	return _menus.count();
 }
 
-QToolBar **NGM::API::EditorTools::toolBars() const
+QToolBar *NGM::API::EditorTools::toolBars()
 {
-	return _toolBars;
+	return _tools[0];
 }
 
 uint8_t NGM::API::EditorTools::toolBarCount() const
 {
-	return _toolBarCount;
+	return _tools.count();
 }
 
 QStatusBar *NGM::API::EditorTools::statusBar() const

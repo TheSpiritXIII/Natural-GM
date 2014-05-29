@@ -156,8 +156,7 @@ namespace NGM
 			*          indicated widget.
 			*
 			* Plugins may use this for extending, or modifying
-			* the capabilities of editors. It is recommended to
-			* implement, but not needed.
+			* the capabilities of editors.
 			******************************************************/
 			virtual SerialData *execute(QWidget *editor, const char *command,
 			  SerialData *params) const;

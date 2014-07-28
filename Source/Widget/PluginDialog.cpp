@@ -13,6 +13,9 @@
 **/
 #include "PluginDialog.hpp"
 #include "TabDisplayWidget.hpp"
+#include "Library.hpp"
+#include "PluginDepr.hpp"
+#include <QStringBuilder>
 #include <QPlainTextEdit>
 #include <QProgressBar>
 #include <QTableWidget>
@@ -21,26 +24,24 @@
 #include <QFormLayout>
 #include <QTabWidget>
 #include <QSplitter>
-#include <QTabBar>
 #include <QLabel>
 
-NGM::Widget::PluginDialog::PluginDialog(QWidget *parent) :
-  QDialog(parent, Qt::Window)
+NGM::Widget::PluginDialog::PluginDialog(QSet<Core::Library *> *plugins,
+	QWidget *parent) : QDialog(parent, Qt::Window), _plugins(plugins)
 {
-	_nameLabel = new QLabel();
-	_nameLabel->setTextFormat(Qt::PlainText);
 	_authorsLabel = new QLabel();
 	_authorsLabel->setTextFormat(Qt::PlainText);
 	_versionLabel = new QLabel();
 	_versionLabel->setTextFormat(Qt::PlainText);
 
 	QVBoxLayout *layout = new QVBoxLayout(this);
+	layout->setMargin(0);
 
-	//TabDisplayWidget *tabWidget = new TabDisplayWidget();
-	QTabBar *tabBar = new QTabBar();//tabWidget->tabBar();
-	tabBar->setExpanding(false);
+	QTabBar *tabBar = new QTabBar();
 	tabBar->addTab(tr("Installed"));
 	tabBar->addTab(tr("Available"));
+	tabBar->setExpanding(false);
+	tabBar->setDocumentMode(true);
 
 	QSplitter *contentSplitter = new QSplitter();
 	QTabWidget *contentWidget = new QTabWidget();
@@ -58,13 +59,9 @@ NGM::Widget::PluginDialog::PluginDialog(QWidget *parent) :
 	font.setBold(true);
 	_titleLabel->setFont(font);
 	infoForm->addRow(_titleLabel);
-	QLabel *label = new QLabel(tr("Name:"));
-	label->setTextFormat(Qt::PlainText);
-	font = _nameLabel->font();
+	QLabel *label = new QLabel(tr("Version:"));
+	font = _versionLabel->font();
 	font.setBold(true);
-	label->setFont(font);
-	infoForm->addRow(label, _nameLabel);
-	label = new QLabel(tr("Version:"));
 	label->setTextFormat(Qt::PlainText);
 	label->setFont(font);
 	infoForm->addRow(label, _versionLabel);
@@ -79,18 +76,21 @@ NGM::Widget::PluginDialog::PluginDialog(QWidget *parent) :
 
 	QHBoxLayout *pluginButtonLayout = new QHBoxLayout();
 	pluginButtonLayout->addWidget(new QPushButton(tr("Settings")));
-	pluginButtonLayout->addWidget(new QPushButton(tr("Check for Updates")));
+	_updateButton = new QPushButton(tr("Check for Updates"));
+	_updateButton->setEnabled(false);
+	pluginButtonLayout->addWidget(_updateButton);
 	pluginButtonLayout->addStretch(1);
-	QPushButton *button = new QPushButton(tr("Uninstall"));
-	connect(button, &QPushButton::clicked, this, &PluginDialog::close);
-	pluginButtonLayout->addWidget(button);
+	_uninstallButton = new QPushButton(tr("Uninstall"));
+	pluginButtonLayout->addWidget(_uninstallButton);
 
 	infoLayout->addLayout(detailsLayout);
 	label = new QLabel(tr("Plugin Description:"));
 	label->setTextFormat(Qt::PlainText);
 	label->setFont(font);
 	infoLayout->addWidget(label);
-	infoLayout->addWidget(new QPlainTextEdit());
+	_descriptionEdit = new QPlainTextEdit();
+	_descriptionEdit->setReadOnly(true);
+	infoLayout->addWidget(_descriptionEdit);
 	infoLayout->addLayout(pluginButtonLayout);
 
 	contentWidget->addTab(infoWidget, tr("Information"));
@@ -102,8 +102,17 @@ NGM::Widget::PluginDialog::PluginDialog(QWidget *parent) :
 	contentSplitter->addWidget(tableWidget);
 	contentSplitter->addWidget(contentWidget);
 	contentSplitter->setCollapsible(0, false);
+	contentSplitter->setContentsMargins(
+		style()->pixelMetric(QStyle::PM_LayoutLeftMargin),
+		style()->pixelMetric(QStyle::PM_LayoutTopMargin),
+		style()->pixelMetric(QStyle::PM_LayoutRightMargin), 0);
 
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
+	buttonLayout->setContentsMargins(
+		style()->pixelMetric(QStyle::PM_LayoutLeftMargin),
+		style()->pixelMetric(QStyle::PM_LayoutTopMargin),
+		style()->pixelMetric(QStyle::PM_LayoutRightMargin),
+		style()->pixelMetric(QStyle::PM_LayoutBottomMargin));
 	buttonLayout->addWidget(new QPushButton(tr("Install Plugin")));
 	buttonLayout->addWidget(new QPushButton(tr("Open Plugin Folder")));
 	QProgressBar *downloadProgress = new QProgressBar();
@@ -112,13 +121,30 @@ NGM::Widget::PluginDialog::PluginDialog(QWidget *parent) :
 	downloadProgress->setVisible(false);
 	buttonLayout->addWidget(downloadProgress, 1);
 	buttonLayout->addStretch();
-	buttonLayout->addWidget(new QPushButton(tr("Close")));
+
+	QPushButton *button = new QPushButton(tr("Close"));
+	buttonLayout->addWidget(button);
+	connect(button, &QPushButton::clicked, this, &PluginDialog::close);
 
 	layout->addWidget(tabBar);
 	layout->addWidget(contentSplitter);
-	//layout->addWidget(tabWidget);
-	//tabWidget->setWidget(contentSplitter);
 	layout->addLayout(buttonLayout);
+
+	if (_plugins->size() != 0)
+	{
+		const API::Plugin *plugin = (*_plugins->begin())->plugin;
+		_titleLabel->setText(plugin->name);
+		_authorsLabel->setText(plugin->authors);
+		API::Version version = plugin->version;
+		_versionLabel->setText(QString::number(version.major) % QChar('.') %
+			QString::number(version.minor) % QChar('.') %
+			QString::number(version.revision));
+		_descriptionEdit->setPlainText(plugin->description);
+		if ((*_plugins->begin())->library == nullptr)
+		{
+			_uninstallButton->setEnabled(false);
+		}
+	}
 }
 
 void NGM::Widget::PluginDialog::tabChanged(int index)

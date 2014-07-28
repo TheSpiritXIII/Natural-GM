@@ -139,3 +139,48 @@ uint32_t NGM::API::SerialVariant::id()
 {
 	return 0x4E07;
 }
+
+NGM::API::SerialContent::SerialContent() : SerialData(id()) {}
+
+void NGM::API::SerialContent::remove(int index)
+{
+	_data.remove(index);
+}
+
+void NGM::API::SerialContent::remove(const QString &name)
+{
+	_data.remove(_locations.remove(name));
+}
+
+int NGM::API::SerialContent::insert(const QString &name, SerialData *data)
+{
+	_data.push_back(data);
+	return _locations.insert(name, _data.size()).value();
+}
+
+int NGM::API::SerialContent::insert(SerialData *data)
+{
+	_data.push_back(data);
+	return _data.size();
+}
+
+int NGM::API::SerialContent::find(const QString &name) const
+{
+	return _locations.find(name).value();
+}
+
+NGM::API::SerialData *NGM::API::SerialContent::operator[](
+	const QString &name) const
+{
+	return _data[_locations.find(name).value()];
+}
+
+NGM::API::SerialData *NGM::API::SerialContent::operator[](int index) const
+{
+	return _data[index];
+}
+
+uint32_t NGM::API::SerialContent::id()
+{
+	return 0x4E07;
+}

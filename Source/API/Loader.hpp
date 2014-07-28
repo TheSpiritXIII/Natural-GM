@@ -33,7 +33,8 @@ namespace NGM
 		struct Loader
 		{
 			/**************************************************//*!
-			*  @brief  Creates a loader with a serializer.
+			*  @brief  Creates a loader with a default
+			*          serializer.
 			******************************************************/
 			Loader(Serializer *serializer);
 

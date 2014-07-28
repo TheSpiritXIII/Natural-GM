@@ -11,22 +11,6 @@
  *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
  *  for more details.
 **/
-#include <QApplication>
-#include "SDIEditorWindow.hpp"
-#include "PluginManager.hpp"
+#include "Directory.hpp"
 
-#include <QOpenGLFunctions>
-#include <QDebug>
-
-int main(int argc, char *argv[])
-{
-	QApplication app(argc, argv);
-	NGM::Widget::SDIEditorWindow window;
-	window.show();
-	NGM::Manager::PluginManager pluginManager;
-	QWidget *dialog = pluginManager.dialog();
-	dialog->show();
-	int ret = app.exec();
-	delete dialog;
-	return ret;
-}
+const QString NGM::Core::directory = QString();

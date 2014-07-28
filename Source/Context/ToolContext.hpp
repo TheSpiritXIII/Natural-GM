@@ -27,12 +27,12 @@ namespace NGM
 		*  @brief  Stores tool objects that are used by
 		*          editors.
 		******************************************************/
-		struct EditorTools
+		struct ToolContext
 		{
 			/**************************************************//*!
 			*  @brief  Deallocates all stored tool objects.
 			******************************************************/
-			~EditorTools();
+			~ToolContext();
 
 			/**************************************************//*!
 			*  @brief  Returns an array of menus, or nullptr if
@@ -75,7 +75,7 @@ namespace NGM
 			* should be created only here. All memory is deleted
 			* automatically by the default destructor.
 			******************************************************/
-			EditorTools();
+			ToolContext();
 
 			/**************************************************//*!
 			*  @brief  Contains menus, or is empty if menus are

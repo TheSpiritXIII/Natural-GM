@@ -11,14 +11,14 @@
  *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
  *  for more details.
 **/
-#include "EditorTools.hpp"
+#include "ToolContext.hpp"
 #include <QStatusBar>
 #include <QToolBar>
 #include <QMenu>
 
-NGM::API::EditorTools::EditorTools() : _statusBar(nullptr) {}
+NGM::API::ToolContext::ToolContext() : _statusBar(nullptr) {}
 
-NGM::API::EditorTools::~EditorTools()
+NGM::API::ToolContext::~ToolContext()
 {
 	for (auto &i : _menus)
 	{
@@ -31,27 +31,27 @@ NGM::API::EditorTools::~EditorTools()
 	delete _statusBar;
 }
 
-QMenu *NGM::API::EditorTools::menus()
+QMenu *NGM::API::ToolContext::menus()
 {
 	return _menus[0];
 }
 
-uint8_t NGM::API::EditorTools::menuCount() const
+uint8_t NGM::API::ToolContext::menuCount() const
 {
 	return _menus.count();
 }
 
-QToolBar *NGM::API::EditorTools::toolBars()
+QToolBar *NGM::API::ToolContext::toolBars()
 {
 	return _tools[0];
 }
 
-uint8_t NGM::API::EditorTools::toolBarCount() const
+uint8_t NGM::API::ToolContext::toolBarCount() const
 {
 	return _tools.count();
 }
 
-QStatusBar *NGM::API::EditorTools::statusBar() const
+QStatusBar *NGM::API::ToolContext::statusBar() const
 {
 	return _statusBar;
 }

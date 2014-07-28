@@ -6,5 +6,5 @@ following command:
 
     doxygen Doxyfile
 
-After building, open Index.html in a web browser, and you should redirect to the
-generated HTML documentation.
+After building, open Index.html in a web browser, and you should be redirected
+to the generated HTML documentation.

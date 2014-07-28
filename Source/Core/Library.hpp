@@ -12,36 +12,46 @@
  *  for more details.
 **/
 #pragma once
+#include <QLibrary>
 
 namespace NGM
 {
 	namespace API
 	{
-		struct Serializer;
-
+		struct Plugin;
+	}
+	namespace Core
+	{
 		/**************************************************//*!
-		*  @brief  Stores project serializer properties.
-		*
-		* St
+		*  @brief  Contains a library and its plugin data.
 		******************************************************/
-		struct Extension
+		struct Library
 		{
 			/**************************************************//*!
-			*  @brief  The name of the project that the
-			*          serializer is part of.
+			*  @brief  Creates the library.
 			******************************************************/
-			const QString project;
+			Library(API::Plugin *plugin, QLibrary *library);
 
 			/**************************************************//*!
-			*  @brief  The cateogry of the project that the
-			*          serializer is part of.
+			*  @brief  Deallocates all data.
 			******************************************************/
-			const QString category;
+			~Library();
 
 			/**************************************************//*!
-			*  @brief  Contains the project serializer.
+			*  @brief  Stores the plugin.
 			******************************************************/
-			const Serializer *serializer;
+			const API::Plugin * const plugin;
+
+			/**************************************************//*!
+			*  @brief  Contains the library.
+			******************************************************/
+			QLibrary * const library;
+
+			/**************************************************//*!
+			*  @brief  Returns true if the other library has a
+			*          lower priority value.
+			******************************************************/
+			bool operator<(const Library &other);
 		};
 	}
 }

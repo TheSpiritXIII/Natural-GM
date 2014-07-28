@@ -38,6 +38,10 @@ namespace NGM
 		* inherited class should be cast from this class and
 		* used instead, using the identifier to confirm that
 		* the cast is valid.
+		*
+		* Each subclass must have a static uint32_t id()
+		* function, in order to use the built-in to<T>() cast
+		* function.
 		******************************************************/
 		struct SerialData
 		{
@@ -80,6 +84,15 @@ namespace NGM
 			*  @brief  Provides a safe cast to a SerialVariant.
 			******************************************************/
 			virtual SerialVariant *toVariant();
+
+			/**************************************************//*!
+			*  @brief  Casts this type to the indicated type, if
+			*          possible. Returns nullptr for failure.
+			******************************************************/
+			template <typename T> T *to()
+			{
+				return T::id() == identifier() ? static_cast<T>(this) : nullptr;
+			}
 
 		protected:
 
@@ -280,6 +293,66 @@ namespace NGM
 			*  @brief  Returns the data identifier.
 			******************************************************/
 			static uint32_t id();
+		};
+
+		/**************************************************//*!
+		*  @brief  Stores children data.
+		******************************************************/
+		struct SerialContent : SerialData
+		{
+			/**************************************************//*!
+			*  @brief  Creates an empty object.
+			******************************************************/
+			SerialContent();
+
+			/**************************************************//*!
+			*  @brief  Removes the indicated index.
+			*  @note   If the item is named, then the
+			*          corresponding name is _not_ deleted.
+			******************************************************/
+			void remove(int index);
+
+			/**************************************************//*!
+			*  @brief  Removes the item and associated name.
+			******************************************************/
+			void remove(const QString &name);
+
+			/**************************************************//*!
+			*  @brief  Appends a new item with the given name. If
+			*          the name already exists, it is replaced.
+			*  @return The index of the new item.
+			******************************************************/
+			int insert(const QString &name, SerialData *data);
+
+			/**************************************************//*!
+			*  @brief  Removes the item and associated name.
+			******************************************************/
+			int insert(SerialData *data);
+
+			/**************************************************//*!
+			*  @brief  Returns the index with the associated
+			*          name.
+			******************************************************/
+			int find(const QString &name) const;
+
+			/**************************************************//*!
+			*  @brief  Returns the item with the associated name.
+			******************************************************/
+			SerialData *operator[](const QString &name) const;
+
+			/**************************************************//*!
+			*  @brief  Removes the item at the given index.
+			******************************************************/
+			SerialData *operator[](int index) const;
+
+			/**************************************************//*!
+			*  @brief  Returns the data identifier.
+			******************************************************/
+			static uint32_t id();
+
+		private:
+			QMap<QString, int> _locations;
+			QVector<SerialData*> _data;
 		};
 	}
 }

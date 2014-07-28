@@ -27,13 +27,15 @@ namespace NGM
 			/**************************************************//*!
 			*  @brief  The type of project. It either contains
 			*          multiple files and is a Group, or it is a
-			*          standalone file and is a Single.
+			*          standalone File type.
 			******************************************************/
 			enum Type
 			{
-				Group	= 0,
-				Single	= 1
+				Group,
+				File
 			};
+
+			//Project(const QString &name, const QString category,)
 
 			/**************************************************//*!
 			*  @brief  Contains the name of the project.

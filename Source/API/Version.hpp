@@ -1,5 +1,5 @@
 /*-
- *  Copyright (c) 2014 Daniel Hrabovcak
+ *  Copyright (c) 2013 - 2014 Daniel Hrabovcak
  *
  *  This program is free software: you can redistribute it and/or modify it
  *  under the terms of the GNU Lesser General Public License as published by the
@@ -15,27 +15,27 @@
 
 namespace NGM
 {
-	namespace Manager
+	namespace API
 	{
-		struct IconManager;
-
 		/**************************************************//*!
-		*  @brief  Interacts with other managers.
+		*  @brief  Stores major, minor and revision numbers.
 		******************************************************/
-		class GlobalManager
+		struct Version
 		{
-		public:
-
-			/**************************************************//*!
-			*  @brief  Returns the icon manager.
-			******************************************************/
-			IconManager *iconManager() const;
-
-			/**************************************************//*!
-			*  @brief  Finds and returns the plugin with the
-			*          given name.
-			******************************************************/
-			Plugin *plugin(uin32_t uuid);
+			Version(uint8_t major, uint8_t minor, uint8_t revision = 0);
+			uint8_t major, minor, revision;
+			static Version version();
 		};
 	}
 }
+
+#define NGM_VERSION_MAJOR 0
+#define NGM_VERSION_MINOR 0
+#define NGM_VERSION_PATCH 0
+#define NGM__PLUGIN_ENTRY pluginPWXuwR9s
+#define NGM_PLUGIN_MAIN extern "C" NGM::API::Version NGM__version() \
+{ \
+	return NGM::API::Version(NGM_VERSION_MAJOR, NGM_VERSION_MINOR, \
+		NGM_VERSION_PATCH); \
+} \
+extern "C" NGM::API::Plugin *NGM__PLUGIN_ENTRY()

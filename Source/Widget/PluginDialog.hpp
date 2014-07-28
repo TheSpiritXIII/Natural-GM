@@ -15,9 +15,15 @@
 #include <QDialog>
 
 class QLabel;
+class QPushButton;
+class QPlainTextEdit;
 
 namespace NGM
 {
+	namespace Core
+	{
+		struct Library;
+	}
 	namespace Widget
 	{
 		/**************************************************//*!
@@ -33,16 +39,19 @@ namespace NGM
 			/**************************************************//*!
 			*  @brief  Creates a dialog with the given parent.
 			******************************************************/
-			PluginDialog(QWidget *parent = 0);
+			PluginDialog(QSet<Core::Library*> *plugins, QWidget *parent = 0);
 
 		private slots:
 			void tabChanged(int index);
 		private:
 			QLabel *_titleLabel;
-			QLabel *_nameLabel;
-			QLabel *_authorsLabel;
 			QLabel *_versionLabel;
+			QLabel *_authorsLabel;
 			QLabel *_iconLabel;
+			QPlainTextEdit *_descriptionEdit;
+			QPushButton *_uninstallButton;
+			QPushButton *_updateButton;
+			QSet<Core::Library*> *_plugins;
 		};
 	}
 }

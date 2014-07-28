@@ -11,22 +11,10 @@
  *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
  *  for more details.
 **/
-#include <QApplication>
-#include "SDIEditorWindow.hpp"
-#include "PluginManager.hpp"
+#pragma once
+#include "Plugin.hpp"
 
-#include <QOpenGLFunctions>
-#include <QDebug>
-
-int main(int argc, char *argv[])
+struct TextEditorPlugin : NGM::API::Plugin
 {
-	QApplication app(argc, argv);
-	NGM::Widget::SDIEditorWindow window;
-	window.show();
-	NGM::Manager::PluginManager pluginManager;
-	QWidget *dialog = pluginManager.dialog();
-	dialog->show();
-	int ret = app.exec();
-	delete dialog;
-	return ret;
-}
+	TextEditorPlugin() : Plugin(NGM::API::Version(0, 1, 2), 101) {}
+};

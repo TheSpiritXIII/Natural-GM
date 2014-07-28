@@ -11,22 +11,17 @@
  *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
  *  for more details.
 **/
-#include <QApplication>
-#include "SDIEditorWindow.hpp"
-#include "PluginManager.hpp"
+#pragma once
+#include <QString>
 
-#include <QOpenGLFunctions>
-#include <QDebug>
-
-int main(int argc, char *argv[])
+namespace NGM
 {
-	QApplication app(argc, argv);
-	NGM::Widget::SDIEditorWindow window;
-	window.show();
-	NGM::Manager::PluginManager pluginManager;
-	QWidget *dialog = pluginManager.dialog();
-	dialog->show();
-	int ret = app.exec();
-	delete dialog;
-	return ret;
+	namespace Core
+	{
+		/**************************************************//*!
+		*  @brief  Contains the default application data
+		*          directory.
+		******************************************************/
+		extern const QString directory;
+	}
 }

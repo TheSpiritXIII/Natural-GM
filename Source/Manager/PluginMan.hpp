@@ -11,22 +11,15 @@
  *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
  *  for more details.
 **/
-#include <QApplication>
-#include "SDIEditorWindow.hpp"
-#include "PluginManager.hpp"
+#pragma once
 
-#include <QOpenGLFunctions>
-#include <QDebug>
-
-int main(int argc, char *argv[])
+namespace
 {
-	QApplication app(argc, argv);
-	NGM::Widget::SDIEditorWindow window;
-	window.show();
-	NGM::Manager::PluginManager pluginManager;
-	QWidget *dialog = pluginManager.dialog();
-	dialog->show();
-	int ret = app.exec();
-	delete dialog;
-	return ret;
+	namespace Manager
+	{
+		struct PluginMan
+		{
+
+		}
+	}
 }

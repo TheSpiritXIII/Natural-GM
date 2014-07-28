@@ -11,22 +11,23 @@
  *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
  *  for more details.
 **/
-#include <QApplication>
-#include "SDIEditorWindow.hpp"
-#include "PluginManager.hpp"
+#include "Library.hpp"
+#include "PluginDepr.hpp"
 
-#include <QOpenGLFunctions>
-#include <QDebug>
+NGM::Core::Library::Library(API::Plugin *plugin, QLibrary *library) :
+  plugin(plugin), library(library) {}
 
-int main(int argc, char *argv[])
+NGM::Core::Library::~Library()
 {
-	QApplication app(argc, argv);
-	NGM::Widget::SDIEditorWindow window;
-	window.show();
-	NGM::Manager::PluginManager pluginManager;
-	QWidget *dialog = pluginManager.dialog();
-	dialog->show();
-	int ret = app.exec();
-	delete dialog;
-	return ret;
+	delete plugin;
+	if (library != nullptr)
+	{
+		library->unload();
+		delete library;
+	}
+}
+
+bool NGM::Core::Library::operator<(const Library &other)
+{
+	return plugin < other.plugin;
 }

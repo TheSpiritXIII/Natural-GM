@@ -22,10 +22,10 @@ NGM::API::Editor *NGM::API::Factory::createEditor(
 	return new Editor(this, manager);
 }
 
-NGM::API::EditorTools *NGM::API::Factory::editorTools(const QWidget *location,
+NGM::API::ToolContext *NGM::API::Factory::editorTools(const QWidget *location,
   Manager::GlobalManager *manager)
 {
-	QMap<const QWidget*, EditorTools*>::iterator i = _tools.find(location);
+	QMap<const QWidget*, ToolContext*>::iterator i = _tools.find(location);
 	if (i != _tools.end())
 	{
 		return i.value();
@@ -34,7 +34,7 @@ NGM::API::EditorTools *NGM::API::Factory::editorTools(const QWidget *location,
 	{
 		return nullptr;
 	}
-	EditorTools *subWidgets = createTools(manager);
+	ToolContext *subWidgets = createTools(manager);
 	if (subWidgets == nullptr)
 	{
 		return nullptr;
@@ -42,7 +42,7 @@ NGM::API::EditorTools *NGM::API::Factory::editorTools(const QWidget *location,
 	return _tools.insert(location, subWidgets).value();
 }
 
-NGM::API::EditorTools *NGM::API::Factory::createTools(
+NGM::API::ToolContext *NGM::API::Factory::createTools(
   const Manager::GlobalManager *) const
 {
 	return nullptr;
@@ -54,13 +54,13 @@ QWidget *NGM::API::Factory::duplicateWidget(QWidget *,
 	return nullptr;
 }
 
-void NGM::API::Factory::connect(const QWidget*, EditorTools*,
+void NGM::API::Factory::connect(const QWidget*, ToolContext*,
   Context::EditContext*) const
 {
 	// Intentionally empty.
 }
 
-void NGM::API::Factory::disconnect(const QWidget*, EditorTools*,
+void NGM::API::Factory::disconnect(const QWidget*, ToolContext*,
   Context::EditContext*) const
 {
 	// Intentionally empty.

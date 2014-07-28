@@ -20,7 +20,7 @@ namespace NGM
 {
 	namespace API
 	{
-		struct EditorTools;
+		struct ToolContext;
 
 		/**************************************************//*!
 		*  @brief  A factory for editor widgets and their
@@ -60,7 +60,7 @@ namespace NGM
 			* does not already exist in the given location,
 			* otherwise nullptr is returned.
 			******************************************************/
-			EditorTools *editorTools(const QWidget *location,
+			ToolContext *editorTools(const QWidget *location,
 			  Manager::GlobalManager *manager = nullptr);
 
 			/**************************************************//*!
@@ -81,7 +81,6 @@ namespace NGM
 			* important that the type is named accordingly.
 			******************************************************/
 			const QString type;
-
 
 			/**************************************************//*!
 			*  @brief  Determines whether the editor is capable
@@ -118,7 +117,7 @@ namespace NGM
 			*          editor compatible tools, or nullotr, if
 			*          the editor does not support tools.
 			******************************************************/
-			virtual EditorTools *createTools(
+			virtual ToolContext *createTools(
 			  const Manager::GlobalManager *manager) const;
 
 			/**************************************************//*!
@@ -139,7 +138,7 @@ namespace NGM
 			* read only widgets that do not support any tools.
 			******************************************************/
 			virtual void connect(const QWidget *widget,
-			  EditorTools *editorTool, Context::EditContext *context) const;
+			  ToolContext *editorTool, Context::EditContext *context) const;
 
 			/**************************************************//*!
 			*  @brief  Disconnectis signals and slots with the
@@ -149,7 +148,7 @@ namespace NGM
 			* read only widgets that do not support any tools.
 			******************************************************/
 			virtual void disconnect(const QWidget *widget,
-			  EditorTools *editorTool, Context::EditContext *context) const;
+			  ToolContext *editorTool, Context::EditContext *context) const;
 
 			/**************************************************//*!
 			*  @brief  Executes the given command to the
@@ -164,7 +163,7 @@ namespace NGM
 			friend class Editor;
 
 		private:
-			QMap<const QWidget*, EditorTools*> _tools;
+			QMap<const QWidget*, ToolContext*> _tools;
 		};
 	}
 }
